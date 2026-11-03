@@ -1244,6 +1244,14 @@ class PlayerNotificationService : MediaBrowserServiceCompat() {
   }
 
   fun closePlayback(calledOnError: Boolean? = false) {
+    // ExoPlayer may only be touched on the main thread, and this is reached from OkHttp's
+    // callback thread too: a direct-play error whose transcode fallback request also failed
+    // closed playback from there and crashed in getPlayerError (seen in Play vitals). Hopping
+    // here rather than at that call site covers every caller, present and future.
+    if (Looper.myLooper() != Looper.getMainLooper()) {
+      Handler(Looper.getMainLooper()).post { closePlayback(calledOnError) }
+      return
+    }
     Log.d(tag, "closePlayback")
     val config = DeviceManager.serverConnectionConfig
 
