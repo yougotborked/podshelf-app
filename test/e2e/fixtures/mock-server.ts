@@ -269,7 +269,9 @@ export type MockServerHandle = {
 export function mockResponseFor(pathname: string): unknown | undefined {
   if (pathname === '/api/authorize') {
     return {
-      user: MOCK_USER,
+      // With progress, as the real server sends it: the app reads it from here at sign-in and
+      // never shows a progress bar or "remaining" anywhere without it.
+      user: { ...MOCK_USER, mediaProgress: allProgress() },
       userDefaultLibraryId: MOCK_LIBRARY_ID,
       serverSettings: MOCK_SERVER_SETTINGS,
       ereaderDevices: []

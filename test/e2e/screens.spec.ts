@@ -1,5 +1,5 @@
 import { test } from '@playwright/test'
-import { bootApp, expectAppRendered, settle, VIEWPORTS, type ViewportName } from './fixtures/app'
+import { bootApp, expectAppRendered, navigateInApp, settle, VIEWPORTS, type ViewportName } from './fixtures/app'
 
 /**
  * Screenshots of the app's main screens, for looking at design changes.
@@ -21,7 +21,10 @@ const SCREENS = [
   { name: 'settings', path: '/settings' },
   { name: 'downloads', path: '/downloads' },
   { name: 'stats', path: '/stats' },
-  { name: 'minimal', path: '/minimal' }
+  { name: 'minimal', path: '/minimal' },
+  // Partly played, so the progress bar and remaining time are on screen. Reached from home, as
+  // in the app: see navigateInApp.
+  { name: 'episode', path: '/bookshelf', then: '/item/li_hardcore/ep_h1' }
 ] as const
 
 const OUT = 'docs/screenshots'
@@ -31,6 +34,10 @@ for (const screen of SCREENS) {
     const booted = await bootApp(page, screen.path, 'phone')
     await expectAppRendered(page, booted)
     await settle(page)
+    if ('then' in screen) {
+      await navigateInApp(page, screen.then)
+      await settle(page)
+    }
     await page.screenshot({ path: `${OUT}/phone/${screen.name}.png` })
   })
 }
@@ -63,11 +70,16 @@ for (const theme of ['dark', 'black', 'light']) {
     // tones of it, and the theme-token check cannot judge a token's *value* - only that one was
     // used. A bronze tuned for the dark theme turning to mud on the light one is invisible to
     // every check there is except looking.
-    { name: 'stats', path: '/stats' }
-  ]) {
+    { name: 'stats', path: '/stats' },
+    { name: 'episode', path: '/bookshelf', then: '/item/li_hardcore/ep_h1' }
+  ] as { name: string; path: string; then?: string }[]) {
     test(`${screen.name} @ ${theme} theme`, async ({ page }) => {
       const booted = await bootApp(page, screen.path, 'phone')
       await expectAppRendered(page, booted)
+      if (screen.then) {
+        await settle(page)
+        await navigateInApp(page, screen.then)
+      }
       await page.evaluate((t) => {
         document.documentElement.dataset.theme = t
       }, theme)

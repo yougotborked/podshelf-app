@@ -73,7 +73,7 @@
 
           <div v-if="!isPodcast && progressPercent > 0" class="px-4 py-2 bg-md-surface-2 text-md-body-m rounded-md-md text-md-on-surface mt-4 text-center">
             <p>{{ $strings.LabelYourProgress }}: {{ Math.round(progressPercent * 100) }}%</p>
-            <p v-if="!useEBookProgress && !userIsFinished" class="text-md-on-surface-variant text-xs">{{ $getString('LabelTimeRemaining', [$elapsedPretty(userTimeRemaining)]) }}</p>
+            <p v-if="!useEBookProgress && !userIsFinished" class="text-md-on-surface-variant text-xs">{{ timeRemainingText(userTimeRemaining, playbackRate) }}</p>
             <p v-else-if="userIsFinished" class="text-md-on-surface-variant text-xs">{{ $strings.LabelFinished }} {{ $formatDate(userProgressFinishedAt) }}</p>
           </div>
         </div>
@@ -300,10 +300,12 @@ const serverItemProgress = computed(() => {
   return userStore.getUserMediaProgress(serverLibraryItemId.value)
 })
 const userIsFinished = computed(() => !!userItemProgress.value?.isFinished)
+const playbackRate = computed(() => Number(userStore.getUserSetting('playbackRate')) || 1)
+const timeRemainingText = useTimeRemainingText()
 const userTimeRemaining = computed(() => {
   if (!userItemProgress.value) return 0
   const dur = userItemProgress.value.duration || duration.value
-  return dur - userItemProgress.value.currentTime
+  return Math.max(0, Number(dur) - Number(userItemProgress.value.currentTime))
 })
 const useEBookProgress = computed(() => {
   if (!userItemProgress.value || userItemProgress.value.progress) return false

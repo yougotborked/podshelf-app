@@ -294,6 +294,7 @@
   "LabelThemeBlack": "Black",
   "LabelThemeDark": "Dark",
   "LabelThemeLight": "Light",
+  "LabelTimeAtSpeed": "{0} at {1}x",
   "LabelTimeRemaining": "{0} remaining",
   "LabelTitle": "Title",
   "LabelTotalSize": "Total Size",
