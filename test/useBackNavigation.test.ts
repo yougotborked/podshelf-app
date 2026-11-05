@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { resolveBackAction } from '~/composables/useBackNavigation'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { resolveBackAction, unloadablePageExit } from '~/composables/useBackNavigation'
 
 const open = { isModalOpen: false, showReader: false, playerIsFullscreen: false, hasPageOverlay: false, hasInAppHistory: true }
 
@@ -65,5 +67,33 @@ describe('resolveBackAction', () => {
     expect(resolveBackAction({ ...open, hasPageOverlay: true, isModalOpen: true })).toBe('close-modal')
     expect(resolveBackAction({ ...open, hasPageOverlay: true, showReader: true })).toBe('close-ebook')
     expect(resolveBackAction({ ...open, hasPageOverlay: true, playerIsFullscreen: true })).toBe('minimize-player')
+  })
+})
+
+describe('unloadablePageExit', () => {
+  it('goes back to where the person came from', () => {
+    expect(unloadablePageExit('/bookshelf')).toBe('history-back')
+  })
+
+  it('replaces itself when there is nowhere to go back to', () => {
+    expect(unloadablePageExit(null)).toBe('replace')
+    expect(unloadablePageExit(undefined)).toBe('replace')
+    expect(unloadablePageExit('')).toBe('replace')
+  })
+})
+
+describe('pages that redirect never leave themselves in history', () => {
+  // The trap: the episode page pushed '/', and '/' pushed '/bookshelf' after re-initialising the
+  // app, so Back always landed on a page that sent the person straight forward again.
+  const read = (p: string) => readFileSync(resolve(__dirname, '..', p), 'utf8').replace(/\/\/.*$/gm, '')
+
+  it("'/' replaces itself with wherever the app starts", () => {
+    expect(read('pages/index.vue')).not.toMatch(/router\.push\(/)
+  })
+
+  it.each(['pages/item/[id]/index.vue', 'pages/item/[id]/[episode]/index.vue'])('%s never pushes a redirect', (page) => {
+    // Covers the local-to-server hop too: pushed, Back landed on the local page, which hopped again.
+    const pushes = read(page).match(/navigateTo\(.*$/gm)?.filter((call) => !call.includes('replace: true')) ?? []
+    expect(pushes).toEqual([])
   })
 })

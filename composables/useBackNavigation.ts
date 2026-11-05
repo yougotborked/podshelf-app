@@ -49,3 +49,23 @@ export function resolveBackAction({ isModalOpen, showReader, playerIsFullscreen,
   // back to, back means leaving the app, which is worth confirming rather than doing silently.
   return hasInAppHistory ? 'history-back' : 'confirm-exit'
 }
+
+/**
+ * Where a page goes when it cannot load what it was opened for.
+ *
+ * Back, if the app has somewhere to go back to - that is where the person came from, and the
+ * page they tapped will fail the same way again. Otherwise the page *replaces* itself with the
+ * fallback, never pushes: a failing page left in history is a trap, because Back lands on it, it
+ * fails again, and it sends the person forward to the same place. The episode page did exactly
+ * that by pushing '/', and '/' in turn pushed '/bookshelf' after re-initialising the app, so
+ * every Back looked like a refresh and none of them went anywhere.
+ */
+export function unloadablePageExit(historyBack: unknown): 'history-back' | 'replace' {
+  return typeof historyBack === 'string' && historyBack.length > 0 ? 'history-back' : 'replace'
+}
+
+export function leaveUnloadablePage(router: { back: () => void; replace: (to: string) => unknown }, fallback: string) {
+  const historyBack = typeof window !== 'undefined' ? window.history.state?.back : null
+  if (unloadablePageExit(historyBack) === 'history-back') return router.back()
+  return router.replace(fallback)
+}

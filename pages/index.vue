@@ -14,6 +14,9 @@ const librariesStore = useLibrariesStore()
 const userStore = useUserStore()
 const router = useRouter()
 
+// Replace, never push: '/' only decides where the app starts. Left in history it is a trap -
+// Back lands here, the app re-initialises and pushes forward to the same page, and the person
+// can never get further back than that.
 async function init() {
   await appStore.setupNetworkListener()
   const db = useDb()
@@ -25,12 +28,12 @@ async function init() {
     // Minimal mode is a whole-app mode, so it has to be honoured here rather than by redirecting
     // out of the bookshelf - otherwise the app someone asked not to see flashes up on every start
     if (await useLocalStore().getMinimalModeOnLaunch()) {
-      router.push('/minimal')
+      router.replace('/minimal')
     } else {
-      router.push('/bookshelf')
+      router.replace('/bookshelf')
     }
   } else {
-    router.push('/connect')
+    router.replace('/connect')
   }
 }
 

@@ -172,7 +172,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Dialog } from '@capacitor/dialog'
-import { AbsFileSystem, AbsDownloader } from '@/plugins/capacitor'
+import { AbsFileSystem, AbsDownloader, AbsLogger } from '@/plugins/capacitor'
 import { useCellularPermission } from '~/composables/useCellularPermission'
 
 const route = useRoute()
@@ -674,6 +674,7 @@ async function loadServerLibraryItem() {
   if (!appStore.isOffline && userStore.serverConnectionConfig) {
     fetchedItem = await nativeHttp.get(`/api/items/${libraryItemId}?expanded=1&include=rssfeed`, { connectTimeout: 10000 }).catch((error: any) => {
       console.error('Failed to fetch library item', error)
+      AbsLogger.error({ tag: 'ItemPage', message: `Failed to fetch library item ${libraryItemId}: ${error?.message || error}` })
       return null
     })
 
@@ -703,7 +704,7 @@ async function loadServerLibraryItem() {
 
   if (!fetchedItem) {
     toast.error('Failed to get library item from server')
-    return router.replace('/bookshelf')
+    return leaveUnloadablePage(router, '/bookshelf')
   }
 
   try {
@@ -725,7 +726,7 @@ onMounted(async () => {
   if (libItemId.startsWith('local')) {
     const localItem = (await db.getLocalLibraryItem(libItemId)) as any
     if (!localItem) {
-      await navigateTo('/?error=Failed to get downloaded library item')
+      await navigateTo('/?error=Failed to get downloaded library item', { replace: true })
       return
     }
 
@@ -737,7 +738,7 @@ onMounted(async () => {
       if (localItem.mediaType === 'podcast') {
         queryParams.set('episodefilter', 'downloaded')
       }
-      await navigateTo(`/item/${localItem.libraryItemId}?${queryParams.toString()}`)
+      await navigateTo(`/item/${localItem.libraryItemId}?${queryParams.toString()}`, { replace: true })
       return
     }
 
@@ -759,7 +760,7 @@ onMounted(async () => {
         cachedItem = fallbackLocal
         loadedFromCache.value = true
       } else {
-        await navigateTo('/?error=No server connection to get library item')
+        await navigateTo('/?error=No server connection to get library item', { replace: true })
         return
       }
     }

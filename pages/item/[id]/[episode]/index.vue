@@ -59,7 +59,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { Dialog } from '@capacitor/dialog'
-import { AbsFileSystem, AbsDownloader } from '@/plugins/capacitor'
+import { AbsFileSystem, AbsDownloader, AbsLogger } from '@/plugins/capacitor'
 import { useCellularPermission } from '~/composables/useCellularPermission'
 
 const route = useRoute()
@@ -570,6 +570,7 @@ onMounted(async () => {
     if (canRequest) {
       fetchedLibraryItem = await nativeHttp.get(`/api/items/${libItemId}?expanded=1`, { connectTimeout: 10000 }).catch((error: any) => {
         console.error('Failed', error)
+        AbsLogger.error({ tag: 'EpisodePage', message: `Failed to fetch library item ${libItemId}: ${error?.message || error}` })
         return null
       })
 
@@ -600,7 +601,8 @@ onMounted(async () => {
 
   if (!fetchedLibraryItem) {
     console.error('No item...', libItemId)
-    await navigateTo('/')
+    toast.error('Failed to get library item from server')
+    await leaveUnloadablePage(router, '/bookshelf')
     return
   }
 
@@ -611,7 +613,7 @@ onMounted(async () => {
 
   if (!fetchedEpisode) {
     console.error('No episode...', epId)
-    await navigateTo(`/item/${libItemId}`)
+    await navigateTo(`/item/${libItemId}`, { replace: true })
     return
   }
 
