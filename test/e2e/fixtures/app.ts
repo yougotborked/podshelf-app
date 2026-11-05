@@ -93,3 +93,14 @@ export async function settle(page: Page): Promise<void> {
   await page.evaluate(() => document.fonts?.ready)
   await page.waitForTimeout(400)
 }
+
+/**
+ * Go to a page the way the app itself does, by its router, after booting somewhere else.
+ *
+ * For a page that needs the server connection: loaded cold from the URL bar it mounts before
+ * the connection has been read from storage, fails to load its item, and leaves - which is
+ * what a cold deep link does, and not what someone tapping through the app sees.
+ */
+export async function navigateInApp(page: Page, path: string): Promise<void> {
+  await page.evaluate((to) => (document.querySelector('#__nuxt') as any).__vue_app__.config.globalProperties.$router.push(to), path)
+}

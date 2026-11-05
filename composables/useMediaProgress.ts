@@ -29,3 +29,18 @@ export function isProgressFinished(progress: MaybeProgress | null | undefined): 
   const value = progress.progress
   return typeof value === 'number' && value >= FINISHED_PROGRESS_THRESHOLD
 }
+
+/**
+ * How long the rest will take to listen to at the current speed.
+ *
+ * The player shows its remaining time this way, divided by the playback rate; a details page
+ * shows minutes of audio. At 1.7x the same position read "-41:00" in the player and "69 min
+ * remaining" on the page, which looked impossible rather than differently measured. The page
+ * keeps the real figure and adds this one beside it, labelled with the speed.
+ */
+export function listeningTimeRemaining(duration: number | null | undefined, currentTime: number | null | undefined, playbackRate: number | null | undefined): number {
+  const remaining = (Number(duration) || 0) - (Number(currentTime) || 0)
+  if (remaining <= 0) return 0
+  const rate = typeof playbackRate === 'number' && playbackRate > 0 ? playbackRate : 1
+  return remaining / rate
+}
