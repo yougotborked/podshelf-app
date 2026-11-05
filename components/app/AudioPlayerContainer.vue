@@ -13,6 +13,7 @@
 import { AbsAudioPlayer, AbsLogger } from '@/plugins/capacitor'
 import { Dialog } from '@capacitor/dialog'
 import { useCellularPermission } from '@/composables/useCellularPermission'
+import { resolvePlaybackTarget } from '@/composables/usePlaybackTarget'
 
 const MAX_LOG_LENGTH = 2000
 // Long enough for the native player's closing progress sync to finish and start the next item
@@ -212,52 +213,9 @@ export default {
       return safeFallback
     },
     resolvePlaybackTarget({ ids, preferServerIds, forceLocal }) {
-      const hasServerTarget = !!ids.serverLibraryItemId && !this.isLocalId(ids.serverLibraryItemId)
-      const hasLocalTarget = !!ids.localLibraryItemId
-      const isOffline = this.appStore.isOffline
-
-      if (forceLocal && hasLocalTarget) {
-        return {
-          libraryItemId: ids.localLibraryItemId,
-          episodeId: ids.localEpisodeId ?? ids.serverEpisodeId ?? ids.fallbackEpisodeId,
-          usingLocalFallback: hasServerTarget,
-          blockedByOffline: false
-        }
-      }
-
-      if (preferServerIds && hasServerTarget && !isOffline) {
-        return {
-          libraryItemId: ids.serverLibraryItemId,
-          episodeId: ids.serverEpisodeId ?? null,
-          usingLocalFallback: false,
-          blockedByOffline: false
-        }
-      }
-
-      if (hasLocalTarget && (isOffline || forceLocal || !hasServerTarget)) {
-        return {
-          libraryItemId: ids.localLibraryItemId,
-          episodeId: ids.localEpisodeId ?? ids.serverEpisodeId ?? ids.fallbackEpisodeId,
-          usingLocalFallback: hasServerTarget,
-          blockedByOffline: false
-        }
-      }
-
-      if (hasServerTarget) {
-        return {
-          libraryItemId: ids.serverLibraryItemId,
-          episodeId: ids.serverEpisodeId ?? null,
-          usingLocalFallback: false,
-          blockedByOffline: isOffline
-        }
-      }
-
-      return {
-        libraryItemId: ids.fallbackLibraryItemId,
-        episodeId: ids.fallbackEpisodeId,
-        usingLocalFallback: false,
-        blockedByOffline: isOffline
-      }
+      // forceLocal is now what happens anyway whenever a download exists; it still overrides
+      // preferring the server, which is how a cast session is told to play a download locally.
+      return resolvePlaybackTarget({ ids, preferServerIds: preferServerIds && !forceLocal, isOffline: this.appStore.isOffline })
     },
     showBookmarks() {
       this.showBookmarksModal = true
