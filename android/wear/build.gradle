@@ -129,7 +129,7 @@ dependencies {
     // Renders the watch's own composables to PNG without a device. There is no Wear emulator
     // here - no KVM, so one would be software-rendered - and the web screenshot harness cannot
     // help: it drives the Nuxt app in a browser, and this module is native Compose.
-    testImplementation "org.robolectric:robolectric:4.13"
+    testImplementation "org.robolectric:robolectric:4.16"
     testImplementation "io.github.takahirom.roborazzi:roborazzi:1.77.0"
     testImplementation "io.github.takahirom.roborazzi:roborazzi-compose:1.77.0"
     testImplementation "androidx.compose.ui:ui-test-junit4"
