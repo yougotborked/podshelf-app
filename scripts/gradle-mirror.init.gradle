@@ -48,3 +48,12 @@ beforeProject { project ->
     }
   }
 }
+
+// Robolectric fetches each Android version's runtime (android-all-instrumented) itself, at test
+// time and straight from Maven Central - not through Gradle, so the mirror above never sees it.
+// Through a throttling proxy the fetch fails and every test on that SDK errors before running.
+allprojects {
+  tasks.withType(Test).configureEach {
+    systemProperty 'robolectric.dependency.repo.url', mirrorUrl
+  }
+}
