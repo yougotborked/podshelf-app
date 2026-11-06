@@ -58,6 +58,45 @@ def window() -> dict:
     return params
 
 
+def post(path: str, auth: str, body: dict) -> dict:
+    r = requests.post(f'{BASE}/{path}', json=body, headers={'Authorization': f'Bearer {auth}'}, timeout=60)
+    if r.status_code != 200:
+        print(f'::warning::{path} -> HTTP {r.status_code}')
+        print(r.text)
+        return {}
+    return r.json()
+
+
+def per_version(auth: str, metric_set: str, metrics: list) -> None:
+    """Users and the metric per version code, so the watch can be seen at all.
+
+    An empty crash list is ambiguous on its own: no crashes, or a device that never reports.
+    A watch version code that shows distinct users answers it - that watch is reporting, so
+    zero crashes from it means it is not crashing.
+    """
+    end = datetime.now(timezone.utc) - timedelta(days=1)
+    start = end - timedelta(days=WINDOW_DAYS - 2)
+    day = lambda d: {'year': d.year, 'month': d.month, 'day': d.day, 'timeZone': {'id': 'America/Los_Angeles'}}
+    body = {
+        'timelineSpec': {'aggregationPeriod': 'DAILY', 'startTime': day(start), 'endTime': day(end)},
+        'dimensions': ['versionCode'],
+        'metrics': metrics,
+    }
+    rows = post(f'{metric_set}:query', auth, body).get('rows', [])
+    totals = {}
+    for row in rows:
+        code = next((d.get('stringValue') or d.get('int64Value') for d in row.get('dimensions', [])
+                     if d.get('dimension') == 'versionCode'), '?')
+        for m in row.get('metrics', []):
+            value = m.get('decimalValue', {}).get('value')
+            if value is not None:
+                totals.setdefault(code, {}).setdefault(m['metric'], []).append(float(value))
+    print(f'\n=== {metric_set} by version code ({len(rows)} daily rows) ===')
+    for code in sorted(totals, key=lambda c: int(c) if str(c).isdigit() else 0):
+        summary = ', '.join(f'{k} max={max(v):g}' for k, v in totals[code].items())
+        print(f"- {'WATCH' if is_watch(code) else 'phone'} {code}: {summary}")
+
+
 def is_watch(version_code) -> bool:
     try:
         return int(version_code) >= WEAR_OFFSET
@@ -80,6 +119,9 @@ def main() -> None:
         print(f"- {i.get('type')} | {i.get('cause', '?')} | at {i.get('location', '?')}"
               f" | reports {i.get('errorReportCount')} | users {i.get('distinctUsers')}"
               f" | versions {i.get('firstAppVersion', {}).get('versionCode')}..{i.get('lastAppVersion', {}).get('versionCode')}")
+
+    per_version(auth, 'crashRateMetricSet', ['distinctUsers', 'crashRate'])
+    per_version(auth, 'anrRateMetricSet', ['distinctUsers', 'anrRate'])
 
     reports = get('errorReports:search', auth, pageSize=100, **window()).get('errorReports', [])
     watch = [r for r in reports if is_watch(r.get('appVersion', {}).get('versionCode'))]
