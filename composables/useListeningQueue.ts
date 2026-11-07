@@ -39,12 +39,12 @@ export interface LocalEpisode {
  */
 export interface ProgressLookup {
   /** Progress as the server knows it. */
-  server?: (libraryItemId: string, episodeId: string) => QueueProgress | null | undefined
+  server?: (libraryItemId: string, episodeId: string | null) => QueueProgress | null | undefined
   /**
    * Progress as the device knows it. The native layer writes this the moment an episode finishes,
    * before the server socket confirms, so without it a just-finished episode stays in the queue.
    */
-  local?: (libraryItemId: string, episodeId: string) => QueueProgress | null | undefined
+  local?: (libraryItemId: string, episodeId: string | null) => QueueProgress | null | undefined
 }
 
 export interface PlayQueueItem {
@@ -104,10 +104,21 @@ export function episodeProgress(episode: ListeningEpisode | null | undefined, lo
     const local = lookup.local?.(libraryItemId, episodeId)
     if (local) records.push(local)
   }
-  if (!records.length) return null
+  return mergeProgress(records)
+}
+
+/**
+ * Several records of the same progress - the server's, this device's - read as one.
+ *
+ * Each field comes from the most recently updated record that has it, except that finished
+ * anywhere is finished.
+ */
+export function mergeProgress(records: (QueueProgress | null | undefined)[]): QueueProgress | null {
+  const present = records.filter((r): r is QueueProgress => !!r)
+  if (!present.length) return null
   // Latest first, so a `reduce` that keeps the first defined value of each field prefers it
-  records.sort((a, b) => (b.lastUpdate || 0) - (a.lastUpdate || 0))
-  return records.reduce<QueueProgress>((merged, record) => {
+  present.sort((a, b) => (b.lastUpdate || 0) - (a.lastUpdate || 0))
+  return present.reduce<QueueProgress>((merged, record) => {
     if (merged.isFinished == null && record.isFinished != null) merged.isFinished = record.isFinished
     if (merged.progress == null && record.progress != null) merged.progress = record.progress
     if (merged.currentTime == null && record.currentTime != null) merged.currentTime = record.currentTime
@@ -117,6 +128,30 @@ export function episodeProgress(episode: ListeningEpisode | null | undefined, lo
     if (record.isFinished) merged.isFinished = true
     return merged
   }, {})
+}
+
+/** Where to pick an item up, and when that position was recorded. */
+export interface ResumePoint {
+  startTime: number
+  lastUpdate: number
+}
+
+/**
+ * Where to resume an item, by the newest record of it - the server's or this device's.
+ *
+ * A download plays from the device's own record unless told otherwise, and that record only
+ * hears about listening the server saw while the app was open to receive it. So an episode
+ * half-heard by streaming - which is how every downloaded episode played while online, until
+ * downloads started winning - came back from the beginning when the queue advanced to its
+ * download. Null for an item never started or already finished: start it from the top.
+ */
+export function resumePoint(serverLibraryItemId: string | null | undefined, serverEpisodeId: string | null | undefined, lookup: ProgressLookup = {}): ResumePoint | null {
+  if (!serverLibraryItemId) return null
+  const episodeId = serverEpisodeId || null
+  const merged = mergeProgress([lookup.server?.(serverLibraryItemId, episodeId), lookup.local?.(serverLibraryItemId, episodeId)])
+  const currentTime = merged?.currentTime
+  if (!merged || isProgressFinished(merged) || typeof currentTime !== 'number' || currentTime <= 0) return null
+  return { startTime: currentTime, lastUpdate: merged.lastUpdate || 0 }
 }
 
 /** Whether an episode should be kept out of the queue because it has been heard to the end. */

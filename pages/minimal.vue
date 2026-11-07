@@ -142,8 +142,8 @@ const localEpisodeMap = computed(() => {
 })
 
 const progressLookup = computed<ProgressLookup>(() => ({
-  server: (libraryItemId: string, episodeId: string) => userStore.getUserMediaProgress(libraryItemId, episodeId) as QueueProgress | null,
-  local: (libraryItemId: string, episodeId: string) => globalsStore.getLocalMediaProgressByServerItemId(libraryItemId, episodeId) as QueueProgress | null
+  server: (libraryItemId: string, episodeId: string | null) => userStore.getUserMediaProgress(libraryItemId, episodeId) as QueueProgress | null,
+  local: (libraryItemId: string, episodeId: string | null) => globalsStore.getLocalMediaProgressByServerItemId(libraryItemId, episodeId) as QueueProgress | null
 }))
 
 /** The queue, resume-first: an episode already started is finished before anything new begins. */

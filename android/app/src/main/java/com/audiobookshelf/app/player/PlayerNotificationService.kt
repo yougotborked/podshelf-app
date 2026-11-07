@@ -1211,6 +1211,17 @@ class PlayerNotificationService : MediaBrowserServiceCompat() {
           mediaProgressSyncer.reset()
           Handler(Looper.getMainLooper()).post {
             val playbackSession = localItem.getPlaybackSession(episode, getDeviceInfo())
+            val progressId =
+                    if (episode == null) localItem.id else "${localItem.id}-${episode.id}"
+            val localProgress = DeviceManager.dbManager.getLocalMediaProgress(progressId)
+            playbackSession.currentTime =
+                    queuedResumeTime(
+                            localProgress?.currentTime,
+                            localProgress?.isFinished == true,
+                            localProgress?.lastUpdate,
+                            item.startTime,
+                            item.progressLastUpdate
+                    )
             preparePlayer(playbackSession, true, playbackRate)
           }
         }
