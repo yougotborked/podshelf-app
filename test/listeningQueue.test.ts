@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { episodeProgress, episodePublishedAt, isEpisodeFinished, isEpisodeStarted, localEpisodesAsQueueCandidates, orderListeningQueue, queueItemStartTime, restrictToDownloaded, toPlayQueueItems, type ListeningEpisode, type ProgressLookup } from '~/composables/useListeningQueue'
+import { episodeProgress, episodePublishedAt, isEpisodeFinished, isEpisodeStarted, localEpisodesAsQueueCandidates, orderListeningQueue, queueItemStartTime, restrictToDownloaded, resumePoint, toPlayQueueItems, type ListeningEpisode, type ProgressLookup } from '~/composables/useListeningQueue'
 
 // The rules these cover used to live in a computed property inside PodcastCatchUpFeed.vue, where
 // the only way to check "what plays next" was to open the app and look at the list. Minimal mode
@@ -293,5 +293,36 @@ describe('restrictToDownloaded', () => {
 
   it('returns nothing when nothing is downloaded, rather than offering doomed streams', () => {
     expect(restrictToDownloaded([episode('a-1', DAY)], () => false)).toEqual([])
+  })
+})
+
+describe('resumePoint', () => {
+  const at = (currentTime: number, lastUpdate: number, isFinished = false) => ({ currentTime, lastUpdate, isFinished, progress: 0.5 })
+
+  it('resumes from the server when the download has no record of its own', () => {
+    // The report: an episode half-heard by streaming, then reached by the queue as a download.
+    const lookup = { server: () => at(1500, 1000), local: () => undefined }
+    expect(resumePoint('li-1', 'ep-1', lookup)).toEqual({ startTime: 1500, lastUpdate: 1000 })
+  })
+
+  it('takes whichever record is newer', () => {
+    expect(resumePoint('li-1', 'ep-1', { server: () => at(1500, 1000), local: () => at(120, 500) })?.startTime).toBe(1500)
+    expect(resumePoint('li-1', 'ep-1', { server: () => at(1500, 1000), local: () => at(1800, 2000) })?.startTime).toBe(1800)
+  })
+
+  it('starts a finished or unstarted item from the top', () => {
+    expect(resumePoint('li-1', 'ep-1', { server: () => at(3600, 1000, true) })).toBeNull()
+    expect(resumePoint('li-1', 'ep-1', { server: () => at(0, 1000) })).toBeNull()
+    expect(resumePoint('li-1', 'ep-1', {})).toBeNull()
+  })
+
+  it('needs a server item to look anything up', () => {
+    expect(resumePoint(null, 'ep-1', { server: () => at(1500, 1000) })).toBeNull()
+  })
+
+  it('looks a book up with no episode id', () => {
+    const seen: (string | null)[] = []
+    resumePoint('li-book', null, { server: (_li, ep) => (seen.push(ep), at(60, 1)) })
+    expect(seen).toEqual([null])
   })
 })

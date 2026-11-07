@@ -14,6 +14,7 @@ import { AbsAudioPlayer, AbsLogger } from '@/plugins/capacitor'
 import { Dialog } from '@capacitor/dialog'
 import { useCellularPermission } from '@/composables/useCellularPermission'
 import { resolvePlaybackTarget } from '@/composables/usePlaybackTarget'
+import { resumePoint } from '@/composables/useListeningQueue'
 
 const MAX_LOG_LENGTH = 2000
 // Long enough for the native player's closing progress sync to finish and start the next item
@@ -80,6 +81,12 @@ export default {
     return { checkCellularPermission, appStore, userStore, globalsStore, eventBus, toast, nativeHttp, platform, db }
   },
   computed: {
+    progressLookup() {
+      return {
+        server: (libraryItemId, episodeId) => this.userStore.getUserMediaProgress(libraryItemId, episodeId),
+        local: (libraryItemId, episodeId) => this.globalsStore.getLocalMediaProgressByServerItemId(libraryItemId, episodeId)
+      }
+    },
     bookmarks() {
       if (!this.serverLibraryItemId) return []
       return this.userStore.getUserBookmarksForItem(this.serverLibraryItemId)
@@ -196,6 +203,13 @@ export default {
 
           const payload = { libraryItemId }
           if (episodeId) payload.episodeId = episodeId
+          // The native player advances the queue itself, from the downloaded copy's own record
+          // unless it is told a newer position - see resumePoint and queuedResumeTime.
+          const resume = resumePoint(ids.serverLibraryItemId, ids.serverEpisodeId, this.progressLookup)
+          if (resume) {
+            payload.startTime = resume.startTime
+            payload.progressLastUpdate = resume.lastUpdate
+          }
           return payload
         })
         .filter(Boolean)
@@ -492,10 +506,10 @@ export default {
         })
       }
       const useServerQueueIds = !this.isLocalId(libraryItemId)
-      const startTime = payload.startTime
       const startWhenReady = !payload.paused
 
       const isLocal = this.isLocalId(libraryItemId)
+      let startTime = payload.startTime
       if (!isLocal) {
         const hasPermission = await this.checkCellularPermission('streaming')
         if (!hasPermission) {
@@ -620,6 +634,13 @@ export default {
         preparePayload.queue = queuePayload
         const fallbackIndex = this.appStore.queueIndex ?? 0
         preparePayload.queueIndex = this.resolveQueueIndex(queuePayload, libraryItemId, episodeId || null, fallbackIndex)
+      }
+      // A download prepared without a start time plays from the device's own record, which misses
+      // listening the server saw while the app was closed. Every skip, queue pick and item-page
+      // play of a download arrives without one, so ask the newest record instead. Only here, for
+      // a session being prepared: an item already loaded keeps its live position.
+      if ((startTime === undefined || startTime === null) && isLocal) {
+        startTime = resumePoint(ids.serverLibraryItemId, ids.serverEpisodeId, this.progressLookup)?.startTime
       }
       if (startTime !== undefined && startTime !== null) preparePayload.startTime = startTime
       AbsLogger.info({

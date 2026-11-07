@@ -114,7 +114,7 @@ describe('toWearQueueEntries', () => {
   it('fills the cap with unfinished episodes rather than counting dropped ones', () => {
     const many = Array.from({ length: 60 }, (_, i) => episode({ id: `ep-${i}` }))
     const finishedIds = new Set(many.slice(0, 30).map((e) => e.id))
-    const lookup = { server: (_li: string, epId: string) => (finishedIds.has(epId) ? { isFinished: true } : null) }
+    const lookup = { server: (_li: string, epId: string | null) => (epId && finishedIds.has(epId) ? { isFinished: true } : null) }
     const entries = toWearQueueEntries(items(many), lookup)
     expect(entries).toHaveLength(WEAR_QUEUE_LIMIT)
     expect(entries[0].episodeId).toBe('ep-30')
