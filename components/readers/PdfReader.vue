@@ -256,7 +256,7 @@ export default {
 
     this.init()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (screen.orientation) {
       // Not available on ios
       screen.orientation.removeEventListener('change', this.screenOrientationChange)

@@ -478,7 +478,7 @@ async function main() {
     }
   } catch (err) {
     console.error('\n❌ Portrait error:', err)
-    try { await shot('P-ERROR-state', 200) } catch (_) {}
+    try { await shot('P-ERROR-state', 200) } catch { /* the page may be gone; the error is already logged */ }
   } finally {
     await ctxPortrait.close()
   }
@@ -500,7 +500,7 @@ async function main() {
     }
   } catch (err) {
     console.error('\n❌ Landscape error:', err)
-    try { await shot('L-ERROR-state', 200) } catch (_) {}
+    try { await shot('L-ERROR-state', 200) } catch { /* the page may be gone; the error is already logged */ }
   } finally {
     await ctxLandscape.close()
   }

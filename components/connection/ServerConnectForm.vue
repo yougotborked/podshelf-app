@@ -409,7 +409,9 @@ async function oauthExchangeCodeForToken(code: string, state: string) {
     if (platform === 'ios' || platform === 'web') {
       await Browser.close()
     }
-  } catch (err) {} // No Error handling needed
+  } catch {
+    // Best effort: the browser may already be closed, or the platform cannot close it.
+  }
 
   try {
     // Returns the same user response payload as /login

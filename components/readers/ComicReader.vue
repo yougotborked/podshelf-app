@@ -35,9 +35,9 @@
 <script setup lang="ts">
 import Path from 'path'
 import { ref, computed, watch } from 'vue'
-// @ts-ignore
+// @ts-expect-error libarchive.js ships no types
 import { Archive } from 'libarchive.js/main.js'
-// @ts-ignore
+// @ts-expect-error libarchive.js ships no types
 import { CompressedFile } from 'libarchive.js/src/compressed-file'
 
 Archive.init({

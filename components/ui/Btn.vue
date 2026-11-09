@@ -1,5 +1,5 @@
 <template>
-  <nuxt-link v-if="to" :to="to" :class="classList" @click.native="click">
+  <nuxt-link v-if="to" :to="to" :class="classList" @click="click">
     <span v-if="loading" class="absolute inset-0 flex items-center justify-center bg-inherit rounded-inherit">
       <span class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
     </span>
