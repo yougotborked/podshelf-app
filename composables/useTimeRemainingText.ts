@@ -9,7 +9,7 @@ import { listeningTimeRemaining } from '~/composables/useMediaProgress'
  * be read against each other instead of looking contradictory.
  */
 export function useTimeRemainingText() {
-  const { $getString, $elapsedPretty } = useNuxtApp() as any
+  const { $getString, $elapsedPretty } = useNuxtApp()
   return (audioSecondsRemaining: number, playbackRate: number) => {
     const remaining = $getString('LabelTimeRemaining', [$elapsedPretty(audioSecondsRemaining)])
     if (!playbackRate || playbackRate === 1) return remaining

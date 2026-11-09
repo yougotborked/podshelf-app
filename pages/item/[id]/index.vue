@@ -370,9 +370,9 @@ const coverHeight = computed(() => coverWidth.value * bookCoverAspectRatio.value
 // Methods
 function clickMissingButton() {
   void Dialog.alert({
-    title: (useNuxtApp() as any).$strings.LabelMissing,
-    message: (useNuxtApp() as any).$strings.MessageItemMissing,
-    buttonTitle: (useNuxtApp() as any).$strings.ButtonOk
+    title: useNuxtApp().$strings.LabelMissing,
+    message: useNuxtApp().$strings.MessageItemMissing,
+    buttonTitle: useNuxtApp().$strings.ButtonOk
   })
 }
 
@@ -469,8 +469,8 @@ async function play(startTime: number | null = null) {
 
     if (startTime !== null && startTime !== undefined && !appStore.getIsMediaStreaming(playLibraryItemId, null)) {
       const { value } = await Dialog.confirm({
-        title: (useNuxtApp() as any).$strings.HeaderConfirm,
-        message: (useNuxtApp() as any).$getString('MessageConfirmPlaybackTime', [title.value, (useNuxtApp() as any).$secondsToTimestamp(startTime)])
+        title: useNuxtApp().$strings.HeaderConfirm,
+        message: useNuxtApp().$getString('MessageConfirmPlaybackTime', [title.value, useNuxtApp().$secondsToTimestamp(startTime)])
       })
       if (!value) return
     }
@@ -527,7 +527,7 @@ async function download(selectedLocalFolder: any = null) {
     if (!foldersWithMediaType.length) {
       localFolder = {
         id: `internal-${mediaType.value}`,
-        name: (useNuxtApp() as any).$strings.LabelInternalAppStorage,
+        name: useNuxtApp().$strings.LabelInternalAppStorage,
         mediaType: mediaType.value
       }
     } else if (foldersWithMediaType.length === 1 && internalStorageFolder) {
@@ -553,7 +553,7 @@ async function download(selectedLocalFolder: any = null) {
     }
   }
   const { value } = await Dialog.confirm({
-    title: (useNuxtApp() as any).$strings.HeaderConfirm,
+    title: useNuxtApp().$strings.HeaderConfirm,
     message: startDownloadMessage
   })
   if (value) {

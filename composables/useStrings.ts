@@ -58,8 +58,15 @@ function supplant(str: string, subs: Record<string, string | number>): string {
   })
 }
 
-export function useStrings() {
-  return _strings.value
+/**
+ * Every key in strings/en-us.json is typed as a plain `string`, so `$strings.HeaderConfirm`
+ * satisfies a `string` parameter and a misspelt key stops being silently `undefined`. Keys that
+ * are not in the English file fall back to the index signature, `string | undefined`.
+ *
+ * English is the source: a translation missing a key falls back to it (see loadTranslation).
+ */
+export function useStrings(): typeof enUsStrings & StringsMap {
+  return _strings.value as typeof enUsStrings & StringsMap
 }
 
 export function getString(key: string, subs?: (string | number)[]): string {
