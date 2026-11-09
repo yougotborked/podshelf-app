@@ -1,4 +1,4 @@
-import { ref, readonly } from 'vue'
+import { ref } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { AbsDownloader, AbsFileSystem } from '@/plugins/capacitor'
 import enUsStrings from '~/strings/en-us.json'

@@ -26,7 +26,6 @@ import {
 const strings = useStrings()
 const db = useDb()
 const localStore = useLocalStore()
-const nativeHttp = useNativeHttp()
 
 const appStore = useAppStore()
 

@@ -139,7 +139,7 @@ const totalEntityCardWidth = computed(() => {
 })
 
 // useBookshelfCards composable
-const { entityIndexesMounted, entityComponentRefs, mountEntityCard, cardsHelpers } = useBookshelfCards({
+const { entityIndexesMounted, entityComponentRefs, cardsHelpers } = useBookshelfCards({
   entityName,
   entitiesPerShelf,
   entityWidth,
@@ -314,21 +314,6 @@ function destroyEntityComponents() {
       entityComponentRefs[key].unmount()
     }
   }
-}
-
-function setDownloads() {
-  if (entityName.value === 'books') {
-    entities.value = []
-    // TOOD: Sort and filter here
-    totalEntities.value = entities.value.length
-    totalShelves.value = Math.ceil(totalEntities.value / entitiesPerShelf.value)
-  } else {
-    // TODO: Support offline series and collections
-    entities.value = []
-    totalEntities.value = 0
-    totalShelves.value = 0
-  }
-  eventBus.emit('bookshelf-total-entities', totalEntities.value)
 }
 
 async function resetEntities() {

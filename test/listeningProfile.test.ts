@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildListeningProfile, describeBand, describeLengthFit, durationBand, MIN_FINISHED_FOR_PROFILE, rankCandidates, scoreCandidate, type ListeningProfile, type ProgressRow } from '~/composables/useListeningProfile'
+import { buildListeningProfile, describeBand, describeLengthFit, durationBand, MIN_FINISHED_FOR_PROFILE, rankCandidates, scoreCandidate, type ProgressRow } from '~/composables/useListeningProfile'
 
 // Roadmap item 4's angle is that genre is the weakest signal: someone working through a
 // marathon show wants another long one, not another one on the same subject. So the profile is

@@ -29,7 +29,6 @@ const props = defineProps<{
 }>()
 
 // State
-const imageFailed = ref(false)
 const showCoverBg = ref(false)
 
 // Refs

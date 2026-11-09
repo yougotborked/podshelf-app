@@ -135,7 +135,6 @@ const serverEpisodeId = computed(() => {
   return null
 })
 const podcast = computed(() => libraryItem.value?.media)
-const audioFile = computed(() => episode.value?.audioFile)
 const title = computed(() => episode.value?.title || '')
 const description = computed(() => episode.value?.description || '')
 const episodeNumber = computed(() => episode.value?.episode)
@@ -144,7 +143,6 @@ const episodeType = computed(() => {
   if (episode.value?.episodeType === 'full') return null
   return episode.value?.episodeType
 })
-const duration = computed(() => (useNuxtApp() as any).$secondsToTimestamp(episode.value?.duration))
 const coverUrl = computed(() => {
   if (isLocal.value) {
     if (!libraryItem.value?.coverContentUrl) return '/book_placeholder.jpg'
@@ -190,13 +188,6 @@ const userTimeRemaining = computed(() => {
 })
 const timeRemainingText = useTimeRemainingText()
 const timeRemainingLabel = computed(() => timeRemainingText(userTimeRemaining.value, playbackRate.value))
-const timeRemaining = computed(() => {
-  if (playerIsPlaying.value) return 'Playing'
-  if (!progressPercent.value) return (useNuxtApp() as any).$elapsedPretty(episode.value?.duration)
-  if (userIsFinished.value) return 'Finished'
-  const remaining = Math.floor(userItemProgress.value.duration - userItemProgress.value.currentTime)
-  return `${(useNuxtApp() as any).$elapsedPretty(remaining)} left`
-})
 const publishedAt = computed(() => episode.value?.publishedAt)
 const downloadItem = computed(() => globalsStore.getDownloadItem(libraryItemId.value, episode.value?.id))
 const showDownload = computed(() => userCanDownload.value && !localEpisode.value)
@@ -417,14 +408,6 @@ async function download(selectedLocalFolder: any = null) {
 
   console.log('Local folder', JSON.stringify(localFolder))
   startDownload(localFolder)
-}
-
-async function selectFolder() {
-  const folderObj = await AbsFileSystem.selectFolder({ mediaType })
-  if (folderObj.error) {
-    return toast.error(`Error: ${folderObj.error || 'Unknown Error'}`)
-  }
-  return folderObj
 }
 
 async function startDownload(localFolder?: any) {

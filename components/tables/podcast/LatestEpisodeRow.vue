@@ -166,7 +166,6 @@ const timeRemaining = computed(() => {
 })
 const publishedAt = computed(() => props.episode.publishedAt as number | null)
 const downloadItem = computed(() => globalsStore.getDownloadItem(props.libraryItemId || '', props.episode.id as string))
-const localEpisodeId = computed(() => (props.localEpisode?.id as string) || null)
 const podcast = computed(() => (props.episode.podcast as Record<string, unknown>) || {})
 
 function goToEpisodePage() {

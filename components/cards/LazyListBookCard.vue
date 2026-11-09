@@ -73,7 +73,6 @@ const { impact } = useHaptics()
 const eventBus = useEventBus()
 
 // State
-const isProcessingReadUpdate = ref(false)
 const libraryItem = ref<Record<string, unknown> | null>(null)
 const imageReady = ref(false)
 const selected = ref(false)
@@ -123,17 +122,12 @@ const bookCoverSrc = computed(() => {
 const libraryItemId = computed(() => _libraryItem.value.id as string)
 const localLibraryItemId = computed(() => localLibraryItem.value?.id as string | undefined)
 const series = computed(() => mediaMetadata.value.series as Record<string, unknown> | undefined)
-const libraryId = computed(() => _libraryItem.value.libraryId as string)
-const hasEbook = computed(() => media.value.ebookFile)
 const numTracks = computed(() => media.value.numTracks as number)
 const processingBatch = computed(() => appStore.playerIsStartingPlayback)
 const collapsedSeries = computed(() => _libraryItem.value.collapsedSeries as Record<string, unknown> | undefined)
 const booksInSeries = computed(() => (collapsedSeries.value?.numBooks as number) || 0)
-const hasCover = computed(() => !!media.value.coverPath)
-const squareAspectRatio = computed(() => (props.bookCoverAspectRatio || 0) === 1)
 const sizeMultiplier = computed(() => Math.min(1, (props.width || 364) / 364))
 const title = computed(() => (mediaMetadata.value.title as string) || '')
-const playIconFontSize = computed(() => Math.max(2, 3 * sizeMultiplier.value))
 const author = computed(() => {
   if (isPodcast.value) return (mediaMetadata.value.author as string) || 'Unknown'
   return (mediaMetadata.value.authorName as string) || 'Unknown'
@@ -162,7 +156,6 @@ const displaySortLine = computed(() => {
 const userProgress = computed(() => userStore.getUserMediaProgress(libraryItemId.value))
 const userProgressPercent = computed(() => (userProgress.value as Record<string, unknown>)?.progress as number || 0)
 const itemIsFinished = computed(() => !!(userProgress.value as Record<string, unknown>)?.isFinished)
-const showError = computed(() => isMissing.value || isInvalid.value)
 const isPlaying = computed(() => {
   if (localLibraryItemId.value && appStore.getIsMediaStreaming(localLibraryItemId.value as string)) return true
   return appStore.getIsMediaStreaming(libraryItemId.value)
@@ -176,9 +169,7 @@ const playerIsStartingForThisMedia = computed(() => {
   return mediaId === libraryItemId.value
 })
 const isCasting = computed(() => appStore.isCasting)
-const showReadButton = computed(() => !isSelectionMode.value && !showPlayButton.value && hasEbook.value)
 const showPlayButton = computed(() => !isSelectionMode.value && !isMissing.value && !isInvalid.value && numTracks.value && !isPodcast.value)
-const showSmallEBookIcon = computed(() => !isSelectionMode.value && hasEbook.value)
 const isMissing = computed(() => _libraryItem.value.isMissing as boolean)
 const isInvalid = computed(() => _libraryItem.value.isInvalid as boolean)
 const coverWidth = computed(() => 80 / (props.bookCoverAspectRatio || 1.6))

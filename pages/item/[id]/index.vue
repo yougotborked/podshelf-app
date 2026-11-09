@@ -172,7 +172,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Dialog } from '@capacitor/dialog'
-import { AbsFileSystem, AbsDownloader, AbsLogger } from '@/plugins/capacitor'
+import { AbsDownloader, AbsLogger } from '@/plugins/capacitor'
 import { useCellularPermission } from '~/composables/useCellularPermission'
 
 const route = useRoute()
@@ -214,7 +214,6 @@ const descriptionEl = ref<HTMLElement | null>(null)
 const isIos = computed(() => platform === 'ios')
 
 const userCanDownload = computed(() => userStore.getUserCanDownload)
-const userIsAdminOrUp = computed(() => userStore.getIsAdminOrUp)
 const isLocal = computed(() => libraryItem.value?.isLocal)
 const hasLocal = computed(() => isLocal.value || libraryItem.value?.localLibraryItem)
 const localLibraryItem = computed(() => {
@@ -488,14 +487,6 @@ function itemUpdated(updatedLibraryItem: any) {
     libraryItem.value = updatedLibraryItem
     checkDescriptionClamped()
   }
-}
-
-async function selectFolder() {
-  const folderObj = await AbsFileSystem.selectFolder({ mediaType: mediaType.value })
-  if (folderObj.error) {
-    return toast.error(`Error: ${folderObj.error || 'Unknown Error'}`)
-  }
-  return folderObj
 }
 
 function selectedLocalFolder(localFolder: any) {

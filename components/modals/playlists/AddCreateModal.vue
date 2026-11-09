@@ -89,7 +89,7 @@ const sortedPlaylists = computed(() => {
       const includesItem = !(selectedPlaylistItems.value as Record<string, unknown>[]).some((item) => !checkIsItemInPlaylist(playlist, item))
       return { isItemIncluded: includesItem, ...playlist }
     })
-    .sort((a, b) => (a.isItemIncluded ? -1 : 1))) as Array<{ id: string; isItemIncluded: boolean; [key: string]: unknown }>
+    .sort((a) => (a.isItemIncluded ? -1 : 1))) as Array<{ id: string; isItemIncluded: boolean; [key: string]: unknown }>
 })
 
 watch(show, (newVal) => {

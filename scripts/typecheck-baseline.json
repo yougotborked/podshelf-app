@@ -1,6 +1,6 @@
 {
   "recordedAt": "2026-11-09",
-  "totalErrors": 325,
+  "totalErrors": 321,
   "entries": {
     "components/app/AudioPlayer.vue|TS18048|'chunk' is possibly 'undefined'.": 1,
     "components/app/AudioPlayer.vue|TS18048|'prevChapter' is possibly 'undefined'.": 1,
@@ -101,9 +101,6 @@
     "pages/bookshelf/series/[id].vue|TS7030|Not all code paths return a value.": 1,
     "pages/collection/[id].vue|TS2339|Property 'autoContinuePlaylists' does not exist on type '{ jumpForwardTime?: number | undefined; jumpBackwardsTime?: number | undefined; enableAltView?: boolean | undefined; lockOrientation?: string | undefined; downloadUsingCellular?: string | undefined; streamingUsingCellular?: string | undefined; autoCacheUnplayedEpisodes?: boolean | undefined; hapticFeedback?: string ...'.": 1,
     "pages/downloads.vue|TS2532|Object is possibly 'undefined'.": 1,
-    "pages/item/[id]/[episode]/index.vue|TS18046|'userItemProgress.value.currentTime' is of type 'unknown'.": 1,
-    "pages/item/[id]/[episode]/index.vue|TS18046|'userItemProgress.value.duration' is of type 'unknown'.": 1,
-    "pages/item/[id]/[episode]/index.vue|TS18049|'userItemProgress.value' is possibly 'null' or 'undefined'.": 2,
     "pages/item/[id]/[episode]/index.vue|TS2345|Argument of type '{}' is not assignable to parameter of type 'LocalMediaProgress'.": 1,
     "pages/item/[id]/[episode]/index.vue|TS2345|Argument of type '{}' is not assignable to parameter of type 'number'.": 1,
     "pages/item/[id]/[episode]/index.vue|TS2345|Argument of type '{}' is not assignable to parameter of type 'string'.": 1,

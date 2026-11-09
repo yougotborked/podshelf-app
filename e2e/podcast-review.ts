@@ -33,24 +33,6 @@ async function shot(page: Page, name: string, waitMs = 600) {
   return file
 }
 
-async function injectAuth(page: Page) {
-  // Inject server connection config and token into Capacitor Preferences (localStorage fallback on web)
-  await page.evaluate(
-    ({ url, user, pass }) => {
-      // The web fallback for @capacitor/preferences uses localStorage with a _cap_ prefix
-      const serverConfig = {
-        id: 'demo-review',
-        name: 'Demo',
-        address: url,
-        username: user,
-      }
-      localStorage.setItem('_cap_currentServerConnectionConfigId', '"demo-review"')
-      localStorage.setItem('_cap_serverConnectionConfigs', JSON.stringify([serverConfig]))
-    },
-    { url: DEMO_URL, user: DEMO_USER, pass: DEMO_PASS }
-  )
-}
-
 async function loginViaUI(page: Page) {
   console.log('\n🔐 Logging in via UI...')
   await page.goto(APP_URL, { waitUntil: 'networkidle' })

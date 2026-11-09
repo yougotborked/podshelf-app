@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{
+defineProps<{
   tracks: Array<{ index?: string | number; [key: string]: unknown }>
   libraryItemId?: string
 }>()

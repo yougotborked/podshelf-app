@@ -18,7 +18,6 @@ const props = defineProps<{
 }>()
 
 // Computed
-const sizeMultiplier = computed(() => (props.width || 0) / (120 * 1.6 * 2))
 const itemCoverWidth = computed(() => {
   if (libraryItemCovers.value.length === 1) return props.width || 0
   return (props.width || 0) / 2

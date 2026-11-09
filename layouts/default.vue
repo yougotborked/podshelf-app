@@ -15,7 +15,6 @@
 </template>
 
 <script setup lang="ts">
-import { CapacitorHttp } from '@capacitor/core'
 import { AbsLogger } from '~/plugins/capacitor'
 
 const appStore = useAppStore()
@@ -120,11 +119,6 @@ watch(() => appStore.serverReachable, (newVal) => {
 })
 
 // Methods
-function initialStream(stream: unknown) {
-  if (streamContainer.value?.audioPlayerReady) {
-    streamContainer.value.streamOpen(stream)
-  }
-}
 
 async function loadSavedSettings() {
   const userSavedServerSettings = await useLocalStore().getServerSettings()

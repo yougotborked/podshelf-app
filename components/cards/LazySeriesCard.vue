@@ -30,14 +30,11 @@ const props = defineProps<{
 }>()
 
 const userStore = useUserStore()
-const librariesStore = useLibrariesStore()
 const router = useRouter()
 
 // State
 const series = ref<Record<string, unknown> | null>(null)
 const isSelectionMode = ref(false)
-const selected = ref(false)
-const imageReady = ref(false)
 
 // Refs
 const card = ref<HTMLElement | null>(null)
@@ -68,7 +65,6 @@ const seriesPercentInProgress = computed(() => {
   return Math.min(1, Math.max(0, totalFinishedAndInProgress / books.value.length))
 })
 const isSeriesFinished = computed(() => books.value.length === seriesBooksFinished.value.length)
-const currentLibraryId = computed(() => librariesStore.currentLibraryId)
 const seriesId = computed(() => series.value ? series.value.id as string : null)
 
 // Methods
@@ -83,10 +79,6 @@ function setSelectionMode(val: boolean) {
 function clickCard() {
   if (!series.value) return
   router.push(`/bookshelf/series/${seriesId.value}`)
-}
-
-function imageLoaded() {
-  imageReady.value = true
 }
 
 onMounted(() => {

@@ -114,7 +114,6 @@ const sizeMultiplier = computed(() => {
   return (props.width || 120) / baseSize
 })
 const titleFontSize = computed(() => 0.75 * sizeMultiplier.value)
-const authorFontSize = computed(() => 0.6 * sizeMultiplier.value)
 const placeholderCoverPadding = computed(() => {
   if (sizeMultiplier.value < 0.5) return 0
   return sizeMultiplier.value

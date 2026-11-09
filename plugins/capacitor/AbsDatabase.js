@@ -1,4 +1,4 @@
-import { registerPlugin, Capacitor, WebPlugin } from '@capacitor/core'
+import { registerPlugin, WebPlugin } from '@capacitor/core'
 
 /**
  * @typedef {Object} ServerConnectionConfig
@@ -126,10 +126,10 @@ class AbsDatabaseWeb extends WebPlugin {
       ]
     }
   }
-  async getLocalFolder({ folderId }) {
+  async getLocalFolder() {
     return this.getLocalFolders().then((data) => data.value[0])
   }
-  async getLocalLibraryItems(payload) {
+  async getLocalLibraryItems() {
     return {
       value: [
         {
@@ -208,10 +208,10 @@ class AbsDatabaseWeb extends WebPlugin {
       ]
     }
   }
-  async getLocalLibraryItemsInFolder({ folderId }) {
+  async getLocalLibraryItemsInFolder() {
     return this.getLocalLibraryItems()
   }
-  async getLocalLibraryItem({ id }) {
+  async getLocalLibraryItem() {
     return this.getLocalLibraryItems().then((data) => data.value[0])
   }
   async getLocalLibraryItemByLId({ libraryItemId }) {
@@ -240,23 +240,23 @@ class AbsDatabaseWeb extends WebPlugin {
       ]
     }
   }
-  async removeLocalMediaProgress({ localMediaProgressId }) {
+  async removeLocalMediaProgress() {
     return null
   }
 
-  async syncLocalSessionsWithServer({ isFirstSync }) {
+  async syncLocalSessionsWithServer() {
     return null
   }
 
-  async syncServerMediaProgressWithLocalMediaProgress(payload) {
+  async syncServerMediaProgressWithLocalMediaProgress() {
     return null
   }
 
-  async updateLocalTrackOrder({ localLibraryItemId, tracks }) {
+  async updateLocalTrackOrder() {
     return []
   }
 
-  async updateLocalMediaProgressFinished(payload) {
+  async updateLocalMediaProgressFinished() {
     // { localLibraryItemId, localEpisodeId, isFinished }
     return null
   }

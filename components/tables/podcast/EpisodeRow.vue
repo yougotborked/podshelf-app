@@ -71,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { AbsFileSystem, AbsDownloader } from '@/plugins/capacitor'
+import { AbsDownloader } from '@/plugins/capacitor'
 import { getString } from '@/composables/useStrings'
 
 const props = defineProps<{
@@ -155,7 +155,6 @@ const timeRemaining = computed(() => {
 })
 const publishedAt = computed(() => props.episode.publishedAt as number | null)
 const downloadItem = computed(() => globalsStore.getDownloadItem(props.libraryItemId || '', props.episode.id as string))
-const localEpisodeId = computed(() => props.localEpisode?.id as string || null)
 
 function goToEpisodePage() {
   router.push(`/item/${props.libraryItemId}/${props.episode.id}`)

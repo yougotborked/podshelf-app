@@ -35,7 +35,6 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
 const route = useRoute()
-const router = useRouter()
 const eventBus = useEventBus()
 const nativeHttp = useNativeHttp()
 const db = useDb()

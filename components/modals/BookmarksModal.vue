@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Dialog } from '@capacitor/dialog'
 import { useStrings } from '~/composables/useStrings'
 import { useHaptics } from '~/composables/useHaptics'

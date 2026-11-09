@@ -18,19 +18,14 @@ const props = defineProps<{
 }>()
 
 const globalsStore = useGlobalsStore()
-const router = useRouter()
 
 // State
 const noValidCovers = ref(false)
 const coverDiv = ref<HTMLElement | null>(null)
-const isHovering = ref(false)
 const coverWrapperEl = ref<HTMLElement | null>(null)
 const coverImageEls = ref<HTMLElement[]>([])
 const coverWidth = ref(0)
 const offsetIncrement = ref(0)
-const isFannedOut = ref(false)
-const isDetached = ref(false)
-const isAttaching = ref(false)
 const isInit = ref(false)
 
 // Refs
@@ -107,23 +102,6 @@ async function buildCoverImg(coverData: { id: string; coverUrl: string }, bgCove
   img.style.objectFit = showCoverBgResult ? 'contain' : 'cover'
 
   imgdiv.appendChild(img)
-  return imgdiv
-}
-
-function createSeriesNameCover(offsetLeft: number): HTMLElement {
-  const imgdiv = document.createElement('div')
-  imgdiv.style.height = (props.height || 0) + 'px'
-  imgdiv.style.width = (props.height || 0) / (props.bookCoverAspectRatio || 1.6) + 'px'
-  imgdiv.style.left = offsetLeft + 'px'
-  imgdiv.className = 'absolute top-0 box-shadow-book transition-transform flex items-center justify-center'
-  imgdiv.style.boxShadow = '4px 0px 4px rgb(var(--md-scrim) / 0.4)'
-  imgdiv.style.backgroundColor = 'rgb(var(--md-scrim))'
-
-  const innerP = document.createElement('p')
-  innerP.textContent = props.name || ''
-  innerP.className = 'text-smtext-white'
-  imgdiv.appendChild(innerP)
-
   return imgdiv
 }
 

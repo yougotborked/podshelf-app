@@ -152,16 +152,6 @@ const ebooks = computed(() => [
   { id: 'supplementary', name: strings.LabelHasSupplementaryEbook }
 ])
 
-const sublistData: Record<string, unknown[]> = {
-  genres: [],
-  tags: [],
-  series: [],
-  authors: [],
-  narrators: [],
-  languages: [],
-  progress: [],
-  ebooks: []
-}
 
 const sublistItems = computed(() => {
   if (!sublist.value) return []

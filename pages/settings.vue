@@ -581,66 +581,6 @@ async function showConfirmMp3IndexSeeking() {
   }
 }
 
-function toggleEnableMp3IndexSeeking() {
-  settings.enableMp3IndexSeeking = !settings.enableMp3IndexSeeking
-  saveSettings()
-}
-
-function toggleAutoSleepTimer() {
-  settings.autoSleepTimer = !settings.autoSleepTimer
-  saveSettings()
-}
-
-function toggleAutoSleepTimerAutoRewind() {
-  settings.autoSleepTimerAutoRewind = !settings.autoSleepTimerAutoRewind
-  saveSettings()
-}
-
-function toggleDisableSleepTimerFadeOut() {
-  settings.disableSleepTimerFadeOut = !settings.disableSleepTimerFadeOut
-  saveSettings()
-}
-
-function toggleDisableShakeToResetSleepTimer() {
-  settings.disableShakeToResetSleepTimer = !settings.disableShakeToResetSleepTimer
-  saveSettings()
-}
-
-function toggleDisableSleepTimerResetFeedback() {
-  settings.disableSleepTimerResetFeedback = !settings.disableSleepTimerResetFeedback
-  saveSettings()
-}
-
-function toggleSleepTimerAlmostDoneChime() {
-  settings.enableSleepTimerAlmostDoneChime = !settings.enableSleepTimerAlmostDoneChime
-  saveSettings()
-}
-
-function toggleDisableAutoRewind() {
-  settings.disableAutoRewind = !settings.disableAutoRewind
-  saveSettings()
-}
-
-function toggleEnableAltView() {
-  settings.enableAltView = !settings.enableAltView
-  saveSettings()
-}
-
-function toggleAllowSeekingOnMediaControls() {
-  settings.allowSeekingOnMediaControls = !settings.allowSeekingOnMediaControls
-  saveSettings()
-}
-
-function toggleAutoContinuePlaylists() {
-  settings.autoContinuePlaylists = !settings.autoContinuePlaylists
-  saveSettings()
-}
-
-function toggleAutoCacheUnplayedEpisodes() {
-  settings.autoCacheUnplayedEpisodes = !settings.autoCacheUnplayedEpisodes
-  saveSettings()
-}
-
 function getCurrentOrientation(): string {
   const orientation = window.screen?.orientation || {}
   const type = (orientation as ScreenOrientation).type || ''

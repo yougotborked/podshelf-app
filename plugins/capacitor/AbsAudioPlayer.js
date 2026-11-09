@@ -89,7 +89,7 @@ class AbsAudioPlayerWeb extends WebPlugin {
   }
 
   // PluginMethod
-  async prepareLibraryItem({ libraryItemId, episodeId, playWhenReady, startTime, playbackRate, queue, queueIndex }) {
+  async prepareLibraryItem({ libraryItemId, episodeId, playWhenReady, startTime, playbackRate }) {
     console.log('[AbsAudioPlayer] Prepare library item', libraryItemId)
 
     if (!isNaN(playbackRate) && playbackRate) this.playbackRate = playbackRate
@@ -341,7 +341,7 @@ const AbsAudioPlayer = registerPlugin('AbsAudioPlayer', {
 
 export { AbsAudioPlayer }
 
-export default ({ app, store }, inject) => {
+export default ({ app, store }) => {
   $axios = app.$axios
   vuexStore = store
 }

@@ -87,7 +87,6 @@ const localStore = useLocalStore()
 const { hapticsImpact } = useHaptics()
 const toast = useToast()
 const strings = useStrings()
-const globalsStore = useGlobalsStore()
 const appStore = useAppStore()
 const userStore = useUserStore()
 
@@ -109,7 +108,6 @@ const downloadedEpisodeKeys = ref<Set<string> | null>(null)
 
 // Computed
 const networkConnected = computed(() => !appStore.isOffline)
-const bookCoverAspectRatio = computed(() => globalsStore.getBookCoverAspectRatio)
 const playlistItems = computed(() => playlist.value.items || [])
 const playlistTotalItems = computed(() => playlist.value.totalItems || playlistItems.value.length)
 const playlistName = computed(() => playlist.value.name || '')

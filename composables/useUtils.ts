@@ -1,6 +1,6 @@
 import { formatDistance, format, addDays, isDate, setDefaultOptions } from 'date-fns'
 import * as locales from 'date-fns/locale'
-import { StatusBar, Style } from '@capacitor/status-bar'
+import { StatusBar } from '@capacitor/status-bar'
 import { Capacitor, registerPlugin } from '@capacitor/core'
 import { Clipboard } from '@capacitor/clipboard'
 import { AbsFileSystem } from '~/plugins/capacitor'

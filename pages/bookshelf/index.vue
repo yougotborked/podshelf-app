@@ -296,46 +296,6 @@ function libraryChanged() {
   }
 }
 
-function audiobookAdded(audiobook: any) {
-  fetchCategories()
-}
-
-function audiobookUpdated(audiobook: any) {
-  shelves.value.forEach((shelf) => {
-    if (shelf.type === 'books') {
-      shelf.entities = shelf.entities.map((ent: any) => {
-        if (ent.id === audiobook.id) {
-          return audiobook
-        }
-        return ent
-      })
-    } else if (shelf.type === 'series') {
-      shelf.entities.forEach((ent: any) => {
-        ent.books = ent.books.map((book: any) => {
-          if (book.id === audiobook.id) return audiobook
-          return book
-        })
-      })
-    }
-  })
-}
-
-function removeBookFromShelf(audiobook: any) {
-  shelves.value.forEach((shelf) => {
-    if (shelf.type === 'books') {
-      shelf.entities = shelf.entities.filter((ent: any) => {
-        return ent.id !== audiobook.id
-      })
-    } else if (shelf.type === 'series') {
-      shelf.entities.forEach((ent: any) => {
-        ent.books = ent.books.filter((book: any) => {
-          return book.id !== audiobook.id
-        })
-      })
-    }
-  })
-}
-
 onMounted(async () => {
   if (route.query.error) {
     toast.error(route.query.error as string)

@@ -29,7 +29,6 @@ const seriesId = params.id as string
 // asyncData equivalent: fetch series at setup time
 const isNetworkAvailable = !appStore.isOffline && !!userStore.user
 let series: any = null
-let loadedFromCache = false
 
 if (isNetworkAvailable) {
   series = await nativeHttp.get(`/api/series/${seriesId}`, { connectTimeout: 10000 }).catch((error: any) => {
@@ -44,7 +43,6 @@ if (isNetworkAvailable) {
 
 if (!series) {
   series = await localStore.getCachedSeries(seriesId)
-  loadedFromCache = !!series
 }
 
 if (!series) {
@@ -61,7 +59,6 @@ const books = ref(0)
 const missingFiles = ref(0)
 const missingFilesSize = ref(0)
 const libraryIds = ref<string[]>([])
-const isLoadedFromCache = ref(loadedFromCache)
 
 const isIos = computed(() => platform === 'ios')
 const networkConnected = computed(() => !appStore.isOffline)
