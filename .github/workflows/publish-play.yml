@@ -259,6 +259,16 @@ jobs:
             ls -la "$aab"
           done
 
+      # A class the platform builds by name - a manifest component, a startup initializer, a Room
+      # database - can survive R8 with its constructor removed. Nothing fails at build time and
+      # the app closes on every launch: 0.14.0-dev.49 and every earlier Play build of the watch.
+      # Reads the dex that is about to ship.
+      - name: Check classes built by name kept their constructor
+        run: |
+          python3 scripts/r8-check/constructors.py \
+            android/app/build/outputs/bundle/release/app-release.aab \
+            android/wear/build/outputs/bundle/release/wear-release.aab
+
       # Which bundles go up.
       #
       # Play will not accept a Wear OS artifact until the Wear form factor has been added to the
@@ -330,6 +340,7 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.podshelf.app
           releaseFiles: ${{ steps.bundles.outputs.phone }}
+          mappingFile: android/app/build/outputs/mapping/release/mapping.txt
           tracks: ${{ steps.track.outputs.name }}
           status: completed
           releaseName: ${{ steps.version.outputs.name }}
@@ -345,13 +356,13 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.podshelf.app
           releaseFiles: ${{ steps.bundles.outputs.phone }}
+          mappingFile: android/app/build/outputs/mapping/release/mapping.txt
           tracks: ${{ steps.track.outputs.name }}
           status: completed
           releaseName: ${{ steps.version.outputs.name }}
 
-      # No mappingFile on either upload while R8 is off for both bundles: there is no mapping to
-      # send, and pointing the action at a file that does not exist fails the upload. Put them
-      # back with R8 - without one, vitals shows crashes as `z5.a`.
+      # Both bundles are R8-minified, so each mapping goes up with its bundle: without one,
+      # Android vitals shows crashes as `z5.a` and nothing can be diagnosed.
       - name: Upload the watch bundle to Play
         id: watch
         continue-on-error: true
@@ -360,6 +371,7 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.podshelf.app
           releaseFiles: ${{ steps.bundles.outputs.wear }}
+          mappingFile: android/wear/build/outputs/mapping/release/mapping.txt
           tracks: ${{ steps.track.outputs.wear }}
           status: completed
           releaseName: ${{ steps.version.outputs.name }}
@@ -375,6 +387,7 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.podshelf.app
           releaseFiles: ${{ steps.bundles.outputs.wear }}
+          mappingFile: android/wear/build/outputs/mapping/release/mapping.txt
           tracks: ${{ steps.track.outputs.wear }}
           status: completed
           releaseName: ${{ steps.version.outputs.name }}

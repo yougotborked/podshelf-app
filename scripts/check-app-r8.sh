@@ -13,6 +13,10 @@
 #   - Jackson builds every Kotlin model from server JSON through kotlin-reflect, which loads
 #     stdlib classes by name. A rename there fails every parse.
 #
+# and one that hurts every launch, on the watch too: a class the platform or a library builds by
+# name (a manifest component, a startup initializer, a Room database) kept but with its
+# constructor removed. scripts/r8-check/constructors.py reads both release APKs for that first.
+#
 # So this re-runs the release shrink with R8's own configuration, writes class files instead of
 # dex, and runs scripts/r8-check/Smoke.java twice: once on the unminified app to parse a real
 # server payload and store it with Paper's own Kryo, once on the shrunk app to parse the same
@@ -35,7 +39,16 @@ echo "▶ Release build, printing R8's configuration and inputs"
 R8_CHECK_OUT="$OUT" "$ROOT/android/gradlew" -p "$ROOT/android" --no-daemon -q \
   --init-script "$ROOT/scripts/gradle-mirror.init.gradle" \
   --init-script "$ROOT/scripts/r8-check/r8-inputs.init.gradle" \
-  :app:assembleRelease :app:printR8Inputs
+  :app:assembleRelease :app:printR8Inputs :wear:assembleRelease
+
+# Read the dex R8 actually wrote. The class-file run below cannot see this: AGP passes R8 options
+# (strict full mode for keep rules among them) that a standalone R8 run does not get, and that
+# option is what removed WorkDatabase_Impl's constructor from 0.14.0-dev.49 and every Play build
+# of the watch app. Cheap, and meaningful for an unminified build too.
+echo "▶ Classes built by name still have their constructor"
+python3 "$ROOT/scripts/r8-check/constructors.py" \
+  "$ROOT/android/app/build/outputs/apk/release/app-release-unsigned.apk" \
+  "$ROOT/android/wear/build/outputs/apk/release/wear-release-unsigned.apk"
 
 if [[ ! -f "$OUT/r8-config.txt" ]]; then
   echo "• R8 is off for :app (minifyEnabled false in android/app/build.gradle) - nothing to check"
