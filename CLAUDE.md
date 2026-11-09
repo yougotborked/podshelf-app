@@ -126,6 +126,18 @@ a pause discarded inside a listener callback. Pulling the rule into a named pure
 testing it is what stops the same bug coming back on a different screen. A test that cannot
 fail is worth nothing — reintroduce the bug, watch the test go red, then put the fix back.
 
+### R8 on the phone app
+
+The phone app's release build is R8-minified (Play requires obfuscation from February 2027), and
+its keep rules can only be judged by running what R8 produced: a class reached by name and
+renamed fails at runtime, never at build time. `scripts/check-app-r8.sh` (`verify.sh r8`, in
+`verify.sh all`) re-runs the release shrink to class files and checks the shrunk app parses a
+real server payload and reads records stored by the current app exactly as the current app does.
+Paper writes class and field names to disk, so a bad rule there loses every user's downloads and
+progress on update. **Run it after changing `android/app/proguard-rules.pro` or adding a
+library.** It caught kotlin-reflect loading `kotlin.jvm.functions.Function1` by name before that
+shipped.
+
 ### Kotlin changes are verifiable locally
 
 `npm run test:android` compiles the Android sources and runs the tests in `:app`, `:wear` and

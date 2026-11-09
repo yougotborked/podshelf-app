@@ -36,6 +36,12 @@ android {
     warningsAsErrors = false
     checkDependencies = false
     disable 'GradleDependency'
+    // Resources are deliberately not shrunk alongside R8: Capacitor looks its theme and plugin
+    // resources up by name with getIdentifier(), which the resource shrinker cannot see. The
+    // check is also what crashes lint outright - it reports this against line 101 of
+    // capacitor.build.gradle and cordova.variables.gradle, files shorter than that, and the SARIF
+    // writer throws ArrayIndexOutOfBoundsException building the context for those locations.
+    disable 'NotShrinkingResources'
     baseline = file('lint-baseline.xml')
   }
   compileSdk rootProject.ext.compileSdkVersion
@@ -95,7 +101,10 @@ android {
       if (System.getenv('PODSHELF_KEYSTORE_PATH')) {
         signingConfig signingConfigs.release
       }
-      minifyEnabled false
+      // R8 on: Play requires obfuscation from February 2027. What is kept and why is in
+      // proguard-rules.pro. Resources are not shrunk - Capacitor looks its theme and a few
+      // others up by name, and resource shrinking was never what Play asked for.
+      minifyEnabled true
       proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
     }
   }

@@ -330,6 +330,7 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.podshelf.app
           releaseFiles: ${{ steps.bundles.outputs.phone }}
+          mappingFile: android/app/build/outputs/mapping/release/mapping.txt
           tracks: ${{ steps.track.outputs.name }}
           status: completed
           releaseName: ${{ steps.version.outputs.name }}
@@ -345,12 +346,13 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.podshelf.app
           releaseFiles: ${{ steps.bundles.outputs.phone }}
+          mappingFile: android/app/build/outputs/mapping/release/mapping.txt
           tracks: ${{ steps.track.outputs.name }}
           status: completed
           releaseName: ${{ steps.version.outputs.name }}
 
-      # The watch is the one R8-minified build, so its mapping goes up with it: without one,
-      # Android vitals shows crashes as `z5.a` and nothing on the watch can be diagnosed.
+      # Both bundles are R8-minified, so each mapping goes up with its bundle: without one,
+      # Android vitals shows crashes as `z5.a` and nothing can be diagnosed.
       - name: Upload the watch bundle to Play
         id: watch
         continue-on-error: true
@@ -387,6 +389,7 @@ jobs:
           name: podshelf-aab-${{ steps.version.outputs.name }}
           path: |
             android/app/build/outputs/bundle/release/*.aab
+            android/app/build/outputs/mapping/release/mapping.txt
             android/wear/build/outputs/bundle/release/*.aab
             android/wear/build/outputs/mapping/release/mapping.txt
           if-no-files-found: warn
