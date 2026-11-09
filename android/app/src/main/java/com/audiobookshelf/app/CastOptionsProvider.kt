@@ -11,7 +11,7 @@ import com.google.android.gms.cast.framework.media.CastMediaOptions
 class CastOptionsProvider : OptionsProvider {
   override fun getCastOptions(context: Context): CastOptions {
     Log.d("CastOptionsProvider", "getCastOptions")
-    var appId = "FD1F76C5"
+    val appId = "FD1F76C5"
 //    var defaultId =CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID
     return CastOptions.Builder()
       .setReceiverApplicationId(appId).setCastMediaOptions(

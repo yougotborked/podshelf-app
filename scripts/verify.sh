@@ -25,7 +25,8 @@ Steps:
   i18n       strings/*.json alphabetization (same rule as the i18n CI workflow)
   theme      no retired or off-palette colour classes (see check-theme-tokens.mjs)
   unit       vitest over the pure logic in composables/
-  android    compile the Android sources and run the Kotlin unit tests
+  android    compile the Android sources (warnings are errors), run the Kotlin unit tests,
+             and Android lint both apps
   apk        assemble the debug APK (slow; not in the default set)
   r8         run the phone app as R8 ships it against stored data (slow; see check-app-r8.sh)
 

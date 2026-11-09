@@ -73,6 +73,12 @@ internal class TrackSelectionArray(vararg selections: CastTrackSelection) {
 }
 
 
+// Media3 deprecated these for the _WITH_FLAGS commands. Advertised as well, so a controller built
+// against an older Media3 - which knows only these - still offers volume control.
+@Suppress("DEPRECATION")
+private val legacyVolumeCommands =
+  intArrayOf(Player.COMMAND_SET_DEVICE_VOLUME, Player.COMMAND_ADJUST_DEVICE_VOLUME)
+
 class CastPlayer(var castContext: CastContext) : BasePlayer() {
   val tag = "CastPlayer"
 
@@ -121,13 +127,14 @@ class CastPlayer(var castContext: CastContext) : BasePlayer() {
       COMMAND_SET_SPEED_AND_PITCH,
       COMMAND_GET_CURRENT_MEDIA_ITEM,
       COMMAND_GET_TIMELINE,
-      COMMAND_GET_MEDIA_ITEMS_METADATA,
-      COMMAND_SET_MEDIA_ITEMS_METADATA,
+      COMMAND_GET_METADATA,
+      COMMAND_SET_PLAYLIST_METADATA,
       COMMAND_CHANGE_MEDIA_ITEMS,
       COMMAND_GET_TRACKS,
       COMMAND_GET_DEVICE_VOLUME,
-      COMMAND_SET_DEVICE_VOLUME,
-      COMMAND_ADJUST_DEVICE_VOLUME)
+      COMMAND_SET_DEVICE_VOLUME_WITH_FLAGS,
+      COMMAND_ADJUST_DEVICE_VOLUME_WITH_FLAGS)
+    .addAll(*legacyVolumeCommands)
     .build()
 
   var currentPlaybackState = Player.STATE_IDLE
@@ -211,9 +218,9 @@ class CastPlayer(var castContext: CastContext) : BasePlayer() {
 
     currentMediaItems = mediaItems
 
-    var mediaQueueItems = mediaItems.map { toMediaQueueItem(it) }
+    val mediaQueueItems = mediaItems.map { toMediaQueueItem(it) }
 
-    var queueData = MediaQueueData.Builder().apply {
+    val queueData = MediaQueueData.Builder().apply {
       setItems(mediaQueueItems)
       setQueueType(if (mediaType == "book") MediaQueueData.MEDIA_QUEUE_TYPE_AUDIO_BOOK else MediaQueueData.MEDIA_QUEUE_TYPE_PODCAST_SERIES)
       setRepeatMode(MediaStatus.REPEAT_MODE_REPEAT_OFF)
@@ -221,7 +228,7 @@ class CastPlayer(var castContext: CastContext) : BasePlayer() {
       setStartTime(startTime)
     }.build()
 
-    var loadRequestData = MediaLoadRequestData.Builder().apply {
+    val loadRequestData = MediaLoadRequestData.Builder().apply {
       setPlaybackRate(playbackRate.toDouble())
       setQueueData(queueData)
       setAutoplay(playWhenReady)
@@ -310,7 +317,7 @@ class CastPlayer(var castContext: CastContext) : BasePlayer() {
   }
 
   private fun updatePlayerStateAndNotifyIfChanged() {
-    var newPlayWhenReadyValue = remoteMediaClient?.isPaused != true
+    val newPlayWhenReadyValue = remoteMediaClient?.isPaused != true
 
     @Player.PlayWhenReadyChangeReason val playWhenReadyChangeReason = if (newPlayWhenReadyValue != playWhenReady) PLAY_WHEN_READY_CHANGE_REASON_REMOTE else PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST
     // We do not mask the playback state, so try setting it regardless of the playWhenReady masking.
@@ -427,7 +434,7 @@ class CastPlayer(var castContext: CastContext) : BasePlayer() {
     currentMediaItemIndex = fetchCurrentWindowIndex(remoteMediaClient, currentTimeline)
     val currentPeriodUid = if (!currentTimeline.isEmpty) currentTimeline.getPeriod(currentMediaItemIndex, period,  /* setIds= */true).uid else null
     if (!playingPeriodChangedByTimelineChange
-      && !Util.areEqual(oldPeriodUid, currentPeriodUid)
+      && oldPeriodUid != currentPeriodUid
       && pendingSeekCount == 0) {
       // Report discontinuity and media item auto transition.
       currentTimeline.getPeriod(oldWindowIndex, period,  /* setIds= */true)
@@ -696,7 +703,7 @@ class CastPlayer(var castContext: CastContext) : BasePlayer() {
     val pendingResult: PendingResult<RemoteMediaClient.MediaChannelResult> =
             if (playWhenReady) client.play() else client.pause()
 
-    val resultCb = ResultCallback<RemoteMediaClient.MediaChannelResult?> {
+    val resultCb = ResultCallback<RemoteMediaClient.MediaChannelResult> {
       updatePlayerStateAndNotifyIfChanged()
     }
 
@@ -728,7 +735,7 @@ class CastPlayer(var castContext: CastContext) : BasePlayer() {
   override fun seekTo(mediaItemIndex: Int, positionMs: Long, seekCommand: Int, isRepeatingCurrentItem: Boolean) {
     Log.d(tag, "seekTo $mediaItemIndex position $positionMs")
 
-    val resultCb = ResultCallback<RemoteMediaClient.MediaChannelResult?> {
+    val resultCb = ResultCallback<RemoteMediaClient.MediaChannelResult> {
       val statusCode: Int = it.status.statusCode
       if (statusCode != CastStatusCodes.SUCCESS && statusCode != CastStatusCodes.REPLACED) {
         Log.e(tag, "Seek failed. Error code $statusCode")
@@ -812,7 +819,7 @@ class CastPlayer(var castContext: CastContext) : BasePlayer() {
 
     val pendingResult: PendingResult<RemoteMediaClient.MediaChannelResult>? = remoteMediaClient?.setPlaybackRate(actualPlaybackParameters.speed.toDouble(),  /* customData= */null)
 
-    val resultCb = ResultCallback<RemoteMediaClient.MediaChannelResult?> {
+    val resultCb = ResultCallback<RemoteMediaClient.MediaChannelResult> {
       updatePlaybackRateAndNotifyIfChanged()
       listeners.flushEvents()
     }
@@ -842,7 +849,7 @@ class CastPlayer(var castContext: CastContext) : BasePlayer() {
   }
 
   override fun getTrackSelectionParameters(): TrackSelectionParameters {
-    return TrackSelectionParameters.DEFAULT_WITHOUT_CONTEXT
+    return TrackSelectionParameters.DEFAULT
   }
 
   override fun setTrackSelectionParameters(parameters: TrackSelectionParameters) {}
@@ -1002,7 +1009,7 @@ class CastPlayer(var castContext: CastContext) : BasePlayer() {
     return session?.isMute ?: false
   }
 
-  override fun setDeviceVolume(volume: Int) {
+  override fun setDeviceVolume(volume: Int, flags: Int) {
     val session = castContext.sessionManager.currentCastSession
     try {
       val clamped = volume.coerceIn(0, 100)
@@ -1018,26 +1025,26 @@ class CastPlayer(var castContext: CastContext) : BasePlayer() {
     }
   }
 
-  // Media3 1.1+ added flags-bearing overloads; delegate to the no-flags versions.
-  override fun setDeviceVolume(volume: Int, flags: Int) = setDeviceVolume(volume)
+  // Media3 1.1 replaced the volume calls with flags-bearing ones; Cast has no use for the flags.
+  // The old ones stay overridden for controllers that still call them.
+  @Deprecated("Use setDeviceVolume(volume, flags)", ReplaceWith("setDeviceVolume(volume, 0)"))
+  override fun setDeviceVolume(volume: Int) = setDeviceVolume(volume, 0)
 
-  override fun increaseDeviceVolume() {
-    val current = getDeviceVolume()
-    val next = current + 1
-    setDeviceVolume(next.coerceAtMost(100))
+  override fun increaseDeviceVolume(flags: Int) {
+    setDeviceVolume((getDeviceVolume() + 1).coerceAtMost(100), flags)
   }
 
-  override fun increaseDeviceVolume(flags: Int) = increaseDeviceVolume()
+  @Deprecated("Use increaseDeviceVolume(flags)", ReplaceWith("increaseDeviceVolume(0)"))
+  override fun increaseDeviceVolume() = increaseDeviceVolume(0)
 
-  override fun decreaseDeviceVolume() {
-    val current = getDeviceVolume()
-    val next = current - 1
-    setDeviceVolume(next.coerceAtLeast(0))
+  override fun decreaseDeviceVolume(flags: Int) {
+    setDeviceVolume((getDeviceVolume() - 1).coerceAtLeast(0), flags)
   }
 
-  override fun decreaseDeviceVolume(flags: Int) = decreaseDeviceVolume()
+  @Deprecated("Use decreaseDeviceVolume(flags)", ReplaceWith("decreaseDeviceVolume(0)"))
+  override fun decreaseDeviceVolume() = decreaseDeviceVolume(0)
 
-  override fun setDeviceMuted(muted: Boolean) {
+  override fun setDeviceMuted(muted: Boolean, flags: Int) {
     val session = castContext.sessionManager.currentCastSession
     try {
       session?.isMute = muted
@@ -1046,11 +1053,12 @@ class CastPlayer(var castContext: CastContext) : BasePlayer() {
     }
   }
 
-  override fun setDeviceMuted(muted: Boolean, flags: Int) = setDeviceMuted(muted)
+  @Deprecated("Use setDeviceMuted(muted, flags)", ReplaceWith("setDeviceMuted(muted, 0)"))
+  override fun setDeviceMuted(muted: Boolean) = setDeviceMuted(muted, 0)
 
   // media3 1.9.x: mute()/unmute() added as abstract methods in BasePlayer
-  override fun mute() = setDeviceMuted(true)
-  override fun unmute() = setDeviceMuted(false)
+  override fun mute() = setDeviceMuted(true, 0)
+  override fun unmute() = setDeviceMuted(false, 0)
 
   inner class StatusListener() : RemoteMediaClient.Callback(), SessionManagerListener<CastSession>, RemoteMediaClient.ProgressListener {
     val TAG = "StatusListener"

@@ -1,5 +1,7 @@
 package com.audiobookshelf.app.services
 
+import android.annotation.SuppressLint
+import androidx.core.content.edit
 import android.content.Context
 import androidx.core.content.ContextCompat
 import com.audiobookshelf.app.device.FolderScanner
@@ -28,6 +30,8 @@ object DownloadServiceHost {
           val cancel: String
   )
 
+  // Holds the application context only (see ensure), which lives as long as the process.
+  @SuppressLint("StaticFieldLeak")
   private var manager: DownloadItemManager? = null
   private var bridgeEmitter: DownloadItemManager.DownloadEventEmitter = NoopEmitter
   @Volatile private var service: DownloadService? = null
@@ -117,14 +121,13 @@ object DownloadServiceHost {
           downloads: String,
           cancel: String
   ) {
-    context.getSharedPreferences(NOTIFICATION_PREFERENCES, Context.MODE_PRIVATE)
-            .edit()
-            .putString(KEY_PREPARING, preparing)
-            .putString(KEY_DOWNLOADING_FILE, downloadingFile)
-            .putString(KEY_WAITING_FOR_STORAGE, waitingForStorage)
-            .putString(KEY_DOWNLOADS, downloads)
-            .putString(KEY_CANCEL, cancel)
-            .apply()
+    context.getSharedPreferences(NOTIFICATION_PREFERENCES, Context.MODE_PRIVATE).edit {
+      putString(KEY_PREPARING, preparing)
+      putString(KEY_DOWNLOADING_FILE, downloadingFile)
+      putString(KEY_WAITING_FOR_STORAGE, waitingForStorage)
+      putString(KEY_DOWNLOADS, downloads)
+      putString(KEY_CANCEL, cancel)
+    }
   }
 
   fun notificationStrings(context: Context): NotificationStrings {

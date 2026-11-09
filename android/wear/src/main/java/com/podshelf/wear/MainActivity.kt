@@ -357,9 +357,10 @@ private fun WifiSetupPrompt(onOpenSettings: () -> Unit) {
  */
 private fun openWifiSettings(context: android.content.Context) {
   try {
+    // No FLAG_ACTIVITY_NEW_TASK: started from the activity, settings joins our task, so a swipe
+    // back returns to the list instead of leaving a stray Settings task in Recents.
     context.startActivity(
             Intent("com.google.android.clockwork.settings.connectivity.wifi.ADD_NETWORK_SETTINGS")
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     )
   } catch (e: Exception) {
     // Nothing useful to say on a 1.2 inch screen; the prompt stays and the list still works.

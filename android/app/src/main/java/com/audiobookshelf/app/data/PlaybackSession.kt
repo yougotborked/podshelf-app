@@ -179,7 +179,6 @@ class PlaybackSession(
       }
 
       return coverUri
-              ?: ("android.resource://${BuildConfig.APPLICATION_ID}/" + R.drawable.icon).toUri()
     }
 
     if (coverPath == null)

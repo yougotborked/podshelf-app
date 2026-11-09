@@ -177,26 +177,25 @@ mistakes it for an oversight.
 
 **Clears when** there is an unrelated reason to touch every file in the module anyway.
 
-### `noUncheckedIndexedAccess` is off, though Nuxt 4 turns it on
+### The stricter TypeScript flags are on, with their existing errors baselined
 
-**Where** `tsconfig.json`
+**Where** `tsconfig.json`, `scripts/typecheck-baseline.json`
 
-Nuxt 4's generated tsconfig enables `noUncheckedIndexedAccess`, which types `arr[i]` and
-`record[key]` as possibly `undefined`. It is the right setting: it catches the empty-array and
-missing-key crashes that `strict` alone lets through. Turning it on reported **102 new errors
-across ~50 files**, one to six per file, almost all in UI components with no test coverage.
+`noUncheckedIndexedAccess`, `noImplicitReturns`, `noFallthroughCasesInSwitch` and
+`noImplicitOverride` are on. `noUncheckedIndexedAccess` types `arr[i]` and `record[key]` as
+possibly `undefined` - the empty-array and missing-key crashes `strict` alone lets through.
 
-Fixing them means adding a guard at each site, and a guard is a behaviour decision - skip the
-row, show a placeholder, bail out - not a type annotation. Making ~100 of those across untested
-screens inside a framework upgrade is how a Nuxt bump ships a regression, so the root
-`tsconfig.json` overrides it to `false` and the upgrade lands on its own.
+Turning them on reported 106 errors in existing code, mostly in UI components with no test
+coverage. Fixing one means adding a guard, and a guard is a behaviour decision - skip the row,
+show a placeholder, bail out - not a type annotation, so they were not mass-fixed with `!`.
+They are in the typecheck baseline instead. This used to be argued the other way (one visible
+`false` in tsconfig rather than 102 hidden baseline entries); what changed it is that with the
+flag off, *new* code was not checked either. Now every new index access is.
 
-Not added to the typecheck baseline instead, deliberately: 102 baseline entries would hide each
-one individually, where one line in `tsconfig.json` is a single visible decision.
+The `noImplicitReturns` entries are the `return toast.error(...)` early-exit idiom, not bugs.
 
-**Clears when** the 102 sites are fixed - a file at a time, each guard chosen rather than
-asserted with `!` - and the override removed. `npm run typecheck` with the line deleted lists
-them.
+**Clears when** the baseline entries for these codes (TS18048, TS2532, TS2538, TS7030 and the
+TS2322/TS2345 that come from an index access) are gone - a file at a time, each guard chosen.
 
 ### 56 pre-existing type errors
 

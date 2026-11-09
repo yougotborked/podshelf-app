@@ -152,23 +152,23 @@ class AbsDatabase : Plugin() {
         serverConnectionConfig = ServerConnectionConfig(sscId, sscIndex, "$serverAddress ($username)", serverAddress, serverVersion, userId, username, accessToken, serverConfigPayload.customHeaders)
 
         // Add and save
-        DeviceManager.deviceData.serverConnectionConfigs.add(serverConnectionConfig!!)
-        DeviceManager.deviceData.lastServerConnectionConfigId = serverConnectionConfig?.id
+        DeviceManager.deviceData.serverConnectionConfigs.add(serverConnectionConfig)
+        DeviceManager.deviceData.lastServerConnectionConfigId = serverConnectionConfig.id
         DeviceManager.dbManager.saveDeviceData(DeviceManager.deviceData)
       } else {
         var shouldSave = false
-        if (serverConnectionConfig?.username != username || serverConnectionConfig?.token != accessToken || serverConnectionConfig?.version != serverVersion) {
-          serverConnectionConfig?.userId = userId
-          serverConnectionConfig?.username = username
-          serverConnectionConfig?.name = "${serverConnectionConfig?.address} (${serverConnectionConfig?.username})"
-          serverConnectionConfig?.version = serverVersion
-          serverConnectionConfig?.token = accessToken
+        if (serverConnectionConfig.username != username || serverConnectionConfig.token != accessToken || serverConnectionConfig.version != serverVersion) {
+          serverConnectionConfig.userId = userId
+          serverConnectionConfig.username = username
+          serverConnectionConfig.name = "${serverConnectionConfig.address} (${serverConnectionConfig.username})"
+          serverConnectionConfig.version = serverVersion
+          serverConnectionConfig.token = accessToken
           shouldSave = true
         }
 
         // Update refresh token if provided
         if (!refreshToken.isNullOrEmpty()) {
-          val stored = secureStorage.storeRefreshToken(serverConnectionConfig!!.id, refreshToken)
+          val stored = secureStorage.storeRefreshToken(serverConnectionConfig.id, refreshToken)
           Log.d(tag, "Refresh token secured = $stored")
         }
 

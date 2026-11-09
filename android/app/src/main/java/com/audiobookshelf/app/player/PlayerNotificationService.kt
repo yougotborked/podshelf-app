@@ -286,10 +286,8 @@ class PlayerNotificationService : MediaBrowserServiceCompat() {
       mediaSession =
               MediaSessionCompat(this, tag).apply {
                 setSessionActivity(sessionActivityPendingIntent)
-                setFlags(
-                  MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
-                  MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
-                )
+                // No setFlags: FLAG_HANDLES_MEDIA_BUTTONS and FLAG_HANDLES_TRANSPORT_CONTROLS
+                // are always on since API 26 (our minimum), which is why they are deprecated.
                 setMediaButtonReceiver(null)
                 isActive = true
               }
@@ -524,6 +522,8 @@ class PlayerNotificationService : MediaBrowserServiceCompat() {
     ) // Save playback session to use when app is closed
 
     // Publish metadata now with the cover uri, then again once the full-resolution bitmap lands
+    // Job's own cancel(cause); lint flags that kotlinx.coroutines also has a cancel() extension.
+    @SuppressLint("MemberExtensionConflict")
     metadataArtJob?.cancel()
     metadataArtJob =
             playbackSession.resolveCoverBitmapAsync(ctx, metadataScope) {
@@ -830,7 +830,7 @@ class PlayerNotificationService : MediaBrowserServiceCompat() {
         // Clamp, update UI immediately, then send to device
         val clamped = volume.coerceIn(0, 100)
         setCurrentVolume(clamped)
-        try { castPlayer?.setDeviceVolume(clamped) } catch (_: Exception) {}
+        try { castPlayer?.setDeviceVolume(clamped, 0) } catch (_: Exception) {}
       }
 
       override fun onAdjustVolume(direction: Int) {
@@ -838,7 +838,7 @@ class PlayerNotificationService : MediaBrowserServiceCompat() {
         val current = currentVolume
         val target = (current + direction).coerceIn(0, 100)
         setCurrentVolume(target)
-        try { castPlayer?.setDeviceVolume(target) } catch (_: Exception) {}
+        try { castPlayer?.setDeviceVolume(target, 0) } catch (_: Exception) {}
       }
     }
     remoteVolumeProvider = provider
@@ -1825,10 +1825,11 @@ class PlayerNotificationService : MediaBrowserServiceCompat() {
                       }
               val children =
                       episodesWithRecentEpisode?.map { libraryItem ->
-                        val podcast = libraryItem.media as Podcast
+                        // By item, not library: this compared against libraryItem.libraryId,
+                        // which no progress record ever matches, so the shelf showed none.
                         val progress =
                                 mediaManager.serverUserMediaProgress.find {
-                                  it.libraryItemId == libraryItem.libraryId &&
+                                  it.libraryItemId == libraryItem.id &&
                                           it.episodeId == libraryItem.recentEpisode?.id
                                 }
 
@@ -2230,10 +2231,10 @@ class PlayerNotificationService : MediaBrowserServiceCompat() {
     result.detach()
     if (cachedSearch != query) {
       Log.d(tag, "Search bundle: $extras")
-      var foundBooks: MutableList<MediaBrowserCompat.MediaItem> = mutableListOf()
-      var foundPodcasts: MutableList<MediaBrowserCompat.MediaItem> = mutableListOf()
-      var foundSeries: MutableList<MediaBrowserCompat.MediaItem> = mutableListOf()
-      var foundAuthors: MutableList<MediaBrowserCompat.MediaItem> = mutableListOf()
+      val foundBooks: MutableList<MediaBrowserCompat.MediaItem> = mutableListOf()
+      val foundPodcasts: MutableList<MediaBrowserCompat.MediaItem> = mutableListOf()
+      val foundSeries: MutableList<MediaBrowserCompat.MediaItem> = mutableListOf()
+      val foundAuthors: MutableList<MediaBrowserCompat.MediaItem> = mutableListOf()
 
       mediaManager.serverLibraries.forEach { serverLibrary ->
         runBlocking {

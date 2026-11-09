@@ -1,6 +1,7 @@
 package com.audiobookshelf.app.plugins
 
 import android.app.AlertDialog
+import androidx.core.content.edit
 import android.content.Context
 import android.net.Uri
 import androidx.core.net.toUri
@@ -72,14 +73,13 @@ class AbsFileSystem : Plugin() {
 
   @PluginMethod
   fun setFolderPickerStrings(call: PluginCall) {
-    mainActivity.getSharedPreferences(FOLDER_PICKER_PREFERENCES, Context.MODE_PRIVATE)
-            .edit()
-            .putString(KEY_WRITE_ACCESS_REQUIRED, call.getString("writeAccessRequired"))
-            .putString(KEY_ALLOW, call.getString("allow"))
-            .putString(KEY_CANCEL, call.getString("cancel"))
-            .putString(KEY_ACCESS_DENIED, call.getString("accessDenied"))
-            .putString(KEY_PERMISSION_DENIED, call.getString("permissionDenied"))
-            .apply()
+    mainActivity.getSharedPreferences(FOLDER_PICKER_PREFERENCES, Context.MODE_PRIVATE).edit {
+      putString(KEY_WRITE_ACCESS_REQUIRED, call.getString("writeAccessRequired"))
+      putString(KEY_ALLOW, call.getString("allow"))
+      putString(KEY_CANCEL, call.getString("cancel"))
+      putString(KEY_ACCESS_DENIED, call.getString("accessDenied"))
+      putString(KEY_PERMISSION_DENIED, call.getString("permissionDenied"))
+    }
     call.resolve()
   }
 

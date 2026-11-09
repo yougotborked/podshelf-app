@@ -60,7 +60,7 @@ class InternalDownloadManager(
           handle: ActiveDownloadHandle,
           allowRestart: Boolean
   ) {
-    var existingBytes = destinationFile.takeIf { it.exists() }?.length() ?: 0L
+    val existingBytes = destinationFile.takeIf { it.exists() }?.length() ?: 0L
     AbsLogger.info(
             tag,
             "Starting ${if (existingBytes > 0L) "resumed" else "new"} download for ${destinationFile.name} at byte $existingBytes")
@@ -119,14 +119,14 @@ class InternalDownloadManager(
                       progressCallback.onComplete(true)
                       return
                     }
-                    if (!response.isSuccessful || response.body == null) {
+                    if (!response.isSuccessful) {
                       AbsLogger.error(tag, "Download HTTP failure ${response.code} for ${destinationFile.name}")
                       progressCallback.onComplete(true)
                       return
                     }
 
                     val startingBytes = if (append) existingBytes else 0L
-                    val responseLength = response.body!!.contentLength()
+                    val responseLength = response.body.contentLength()
                     val serverSize =
                             if (append) contentRangeTotal(response)
                             else responseLength.takeIf { it >= 0L }
@@ -135,7 +135,7 @@ class InternalDownloadManager(
                             serverSize ?: if (expectedSize > 0L) expectedSize else 0L
 
                     FileOutputStream(destinationFile, append).use { output ->
-                      response.body!!.byteStream().use { input ->
+                      response.body.byteStream().use { input ->
                         val buffer = ByteArray(CHUNK_SIZE)
                         var totalBytes = startingBytes
                         while (true) {

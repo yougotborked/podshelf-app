@@ -70,7 +70,7 @@ touching `android/gradle.properties`.
 ## Verification
 
 `scripts/verify.sh` (`npm run verify`) runs lint, typecheck, the i18n sort check, the JS unit
-tests and the Kotlin unit tests, and prints a pass/fail summary. `scripts/verify.sh --list` shows the
+tests, and the Kotlin build, unit tests and Android lint, and prints a pass/fail summary. `scripts/verify.sh --list` shows the
 steps; `scripts/verify.sh all` adds the debug APK. Every step works in a bare container —
 no distrobox, no preinstalled Android tooling — so an agent session can verify its own work
 instead of pushing to find out.
@@ -169,6 +169,26 @@ the condition into a named pure function next to its caller — as
 `player/PauseEventFilter.kt` does for `PlayerListener.onIsPlayingChanged` — makes the rule
 testable and puts the reasoning somewhere it can be read. Prefer that over commenting a
 condition in place.
+
+### Every checker is at its strictest
+
+A warning nobody has to act on is a warning nobody reads, so nothing here only warns:
+
+| Checker | Setting | Existing findings |
+|---|---|---|
+| Kotlin (`:app`, `:wear`, `:wear-sync`) | `allWarningsAsErrors` + `-Wextra`, in `android/build.gradle` | none — all fixed |
+| Android lint (both apps) | `checkAllWarnings`, `warningsAsErrors`, `abortOnError`, in `android/build.gradle` | none — fixed or suppressed in place with the reason |
+| TypeScript | `strict` + `noUncheckedIndexedAccess`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noImplicitOverride` | `scripts/typecheck-baseline.json` |
+| ESLint (`.ts`, `.vue`, `.js`) | type-aware: `no-floating-promises`, `no-misused-promises`, `no-unnecessary-condition`, `switch-exhaustiveness-check` … | `scripts/lint-baseline.json` |
+
+The two baselines hold what predates the rule, keyed by file + rule + message rather than line,
+and fail on anything new. **Never add to a baseline to get a change through** — fix the finding,
+or suppress that one line with the reason next to it. After fixing baselined findings, tighten
+with `npm run lint:update` / `npm run typecheck:update`.
+
+None of this would have caught the R8 launch crash: R8 did exactly what the keep rules said and
+printed nothing. Problems that only exist in the built artifact need a check that reads the
+artifact — that is what `scripts/r8-check/constructors.py` is.
 
 ### Typecheck runs against a baseline
 

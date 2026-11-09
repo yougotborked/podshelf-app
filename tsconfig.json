@@ -6,10 +6,9 @@
     "strictNullChecks": true,
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": false,
-    // Nuxt 4 turns this on in its generated config. It is the right setting and it is off here
-    // on purpose, for now: turning it on reported 102 new errors across ~50 files, almost all
-    // UI components with no test coverage, and fixing them means hand-editing guard logic on
-    // every screen inside a framework upgrade. Tracked in docs/TECH_DEBT.md.
-    "noUncheckedIndexedAccess": false
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true
   }
 }

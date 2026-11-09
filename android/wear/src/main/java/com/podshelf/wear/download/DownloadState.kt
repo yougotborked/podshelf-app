@@ -1,6 +1,7 @@
 package com.podshelf.wear.download
 
 import android.content.Context
+import androidx.core.content.edit
 import com.podshelf.wearsync.WATCH_DOWNLOAD_TARGET
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,19 +40,17 @@ class DownloadState(context: Context) {
   val downloadTarget: StateFlow<Int> = _downloadTarget.asStateFlow()
 
   fun setDownloadTarget(target: Int) {
-    prefs.edit().putInt(KEY_TARGET, target).apply()
+    prefs.edit { putInt(KEY_TARGET, target) }
     _downloadTarget.value = target
   }
 
   fun recordAttempt(succeeded: Boolean, acquiredNetwork: Boolean) {
-    prefs.edit()
-            .putBoolean(KEY_FAILED, !succeeded)
-            .apply {
-              // Only ever set, never cleared: one good night proves the watch can do this, and
-              // a later failure is a different problem than never having been set up.
-              if (acquiredNetwork) putBoolean(KEY_EVER, true)
-            }
-            .apply()
+    prefs.edit {
+      putBoolean(KEY_FAILED, !succeeded)
+      // Only ever set, never cleared: one good night proves the watch can do this, and a later
+      // failure is a different problem than never having been set up.
+      if (acquiredNetwork) putBoolean(KEY_EVER, true)
+    }
 
     _lastAttemptFailed.value = !succeeded
     if (acquiredNetwork) _hasEverDownloaded.value = true

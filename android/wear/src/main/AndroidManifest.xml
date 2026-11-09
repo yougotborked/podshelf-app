@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!--
       required="true" stated rather than left to the default, which is already true. Play routes
@@ -56,10 +57,14 @@
             android:name="com.google.android.wearable.standalone"
             android:value="false" />
 
+        <!-- Exported with no permission on purpose: the system media controls, the watch face
+             and the phone's Wear OS app all bind to it as media controllers. Media3's
+             MediaSession decides per controller what it may do (onConnect). -->
         <service
             android:name=".player.WearPlayerService"
             android:exported="true"
-            android:foregroundServiceType="mediaPlayback">
+            android:foregroundServiceType="mediaPlayback"
+            tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="androidx.media3.session.MediaSessionService" />
             </intent-filter>

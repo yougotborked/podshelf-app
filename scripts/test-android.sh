@@ -43,6 +43,10 @@ if [[ -n "${1:-}" ]]; then
   # The modules set failOnNoMatchingTests false so the other two report zero tests instead of
   # failing the run.
   GRADLE_ARGS+=(--tests "$1")
+else
+  # The whole run also lints both apps, as CI's staticAnalysis does: every check, warnings are
+  # errors (see android/build.gradle). Skipped when asking for one test class.
+  GRADLE_ARGS+=(:app:lintDebug :wear:lintDebug)
 fi
 
 printf '▶ ./gradlew %s\n' "${GRADLE_ARGS[*]}"

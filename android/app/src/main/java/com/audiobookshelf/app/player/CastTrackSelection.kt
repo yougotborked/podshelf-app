@@ -19,7 +19,6 @@ package com.audiobookshelf.app.player
 import androidx.media3.common.C
 import androidx.media3.common.Format
 import androidx.media3.common.TrackGroup
-import androidx.media3.common.util.Assertions
 
 // TODO(media3): TrackSelection interface was removed in Media3.  CastTrackSelection is no longer
 // a formal TrackSelection — it is now a plain helper class used only internally by CastPlayer to
@@ -33,7 +32,7 @@ internal class CastTrackSelection(val trackGroup: TrackGroup) {
   fun length(): Int = 1
 
   fun getFormat(index: Int): Format {
-    Assertions.checkArgument(index == 0)
+    require(index == 0)
     return trackGroup.getFormat(0)
   }
 

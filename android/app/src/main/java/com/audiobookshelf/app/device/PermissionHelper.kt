@@ -1,6 +1,7 @@
 package com.audiobookshelf.app.device
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.os.Build
 
 object PermissionHelper {
@@ -27,6 +28,8 @@ object PermissionHelper {
      * implicitly through INTERNET. Asking for it there is not just useless, it is what Google
      * explicitly tells apps not to do.
      */
+    // The SDK check is on the parameter, which lint cannot follow; the constant is only a string.
+    @SuppressLint("InlinedApi")
     fun localNetworkPermission(sdkInt: Int = Build.VERSION.SDK_INT): String? {
         return if (sdkInt >= Build.VERSION_CODES.CINNAMON_BUN) {
             Manifest.permission.ACCESS_LOCAL_NETWORK

@@ -55,6 +55,56 @@ subprojects {
     }
 }
 
+// The Kotlin compiler at its strictest, for the modules that are ours. Capacitor and its plugins
+// are subprojects too, compiled from node_modules, and their warnings are not ours to fix.
+//
+// - allWarningsAsErrors: a warning nobody has to act on is a warning nobody reads. Every one
+//   the compiler raises here is either a real smell (a safe call on something that cannot be
+//   null means the types and the author disagree) or a deprecation that will become an error.
+// - -Wextra: the compiler's additional checkers, off by default - redundant calls, unused
+//   variables and values, conditions that can never change.
+['app', 'wear', 'wear-sync'].each { name ->
+    project(":$name") {
+        tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask).configureEach {
+            compilerOptions {
+                allWarningsAsErrors = true
+                freeCompilerArgs.add('-Wextra')
+            }
+        }
+    }
+}
+
+// Android lint at its strictest, for both apps: every check on, including the ones Google ships
+// switched off, and any finding fails the build. There is no baseline - a finding is fixed, or
+// suppressed in place with the reason next to it (@SuppressLint / tools:ignore).
+//
+// It used to report and never fail (abortOnError false), and only for the phone. Turned on, it
+// found a widget drawing icons private to a beta library, a WorkManager API the watch was not
+// allowed to call, and a Context held statically.
+//
+// Off:
+// - The checks that compare our versions with whatever was published most recently. They would
+//   fail a build that has not changed, on the day a library ships, and Dependabot already raises
+//   those as pull requests.
+// - LogConditional: wants every Log call behind BuildConfig.DEBUG. Release builds log on
+//   purpose - a logcat from a user's phone or watch is how most bugs here get diagnosed.
+// - SyntheticAccessor: a Java-era cost of private access from inner classes. R8 removes the
+//   accessors, and the "fix" is widening visibility.
+['app', 'wear'].each { name ->
+    project(":$name") {
+        pluginManager.withPlugin('com.android.application') {
+            android.lint {
+                checkAllWarnings = true
+                warningsAsErrors = true
+                abortOnError = true
+                checkDependencies = false
+                disable 'GradleDependency', 'NewerVersionAvailable', 'AndroidGradlePluginVersion',
+                        'LogConditional', 'SyntheticAccessor'
+            }
+        }
+    }
+}
+
 tasks.register('clean', Delete) {
   delete rootProject.layout.buildDirectory
 }
