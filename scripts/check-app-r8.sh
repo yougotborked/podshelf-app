@@ -37,6 +37,11 @@ R8_CHECK_OUT="$OUT" "$ROOT/android/gradlew" -p "$ROOT/android" --no-daemon -q \
   --init-script "$ROOT/scripts/r8-check/r8-inputs.init.gradle" \
   :app:assembleRelease :app:printR8Inputs
 
+if [[ ! -f "$OUT/r8-config.txt" ]]; then
+  echo "• R8 is off for :app (minifyEnabled false in android/app/build.gradle) - nothing to check"
+  exit 0
+fi
+
 APP="$ROOT/android/app/build/intermediates"
 R8_JAR="$(ls ~/.gradle/caches/modules-2/files-2.1/com.android.tools.build/builder/*/*/builder-*.jar | grep -v sources | sort -V | tail -1)"
 mapfile -t LIBS < <(grep -v '^$' "$OUT/libs.txt")

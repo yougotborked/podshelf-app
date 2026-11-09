@@ -71,13 +71,12 @@ android {
             if (System.getenv('PODSHELF_KEYSTORE_PATH')) {
                 signingConfig signingConfigs.release
             }
-            // On, unlike :app. A watch has a real storage budget, and this module's
-            // dependencies - Compose, media3 - are almost entirely dead weight without
-            // shrinking: 33MB unminified for what is a list and a player, against 1.2MB with
-            // R8. The only thing needing a keep rule is kotlinx.serialization's generated
-            // serializers; see proguard-rules.pro.
-            minifyEnabled true
-            shrinkResources true
+            // R8 off. Every Play build of the watch app - the only minified ones - has closed
+            // immediately on launch, and the phone's first minified build (0.14.0-dev.49) did the
+            // same. Off for both until that is understood; the size cost on a watch (about 33MB
+            // against 1.2MB) is the price of an app that opens. proguard-rules.pro stays ready.
+            minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
