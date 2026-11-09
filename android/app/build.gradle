@@ -95,7 +95,10 @@ android {
       if (System.getenv('PODSHELF_KEYSTORE_PATH')) {
         signingConfig signingConfigs.release
       }
-      minifyEnabled false
+      // R8 on: Play requires obfuscation from February 2027. What is kept and why is in
+      // proguard-rules.pro. Resources are not shrunk - Capacitor looks its theme and a few
+      // others up by name, and resource shrinking was never what Play asked for.
+      minifyEnabled true
       proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
     }
   }

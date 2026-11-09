@@ -1,0 +1,23 @@
+// Applied by scripts/check-app-r8.sh only. Makes the release build print R8's merged
+// configuration, and writes out the classes jars R8 was given, so the same shrink can be re-run
+// to class files and executed on the JVM.
+def out = System.getenv('R8_CHECK_OUT')
+allprojects {
+  pluginManager.withPlugin('com.android.application') {
+    if (project.path == ':app') {
+      def extra = new File(out, 'print-configuration.pro')
+      extra.text = "-printconfiguration ${out}/r8-config.txt\n"
+      android.buildTypes.release.proguardFile(extra)
+      afterEvaluate {
+        tasks.register('printR8Inputs') {
+          doLast {
+            def view = configurations.releaseRuntimeClasspath.incoming.artifactView {
+              attributes { attribute(Attribute.of('artifactType', String), 'android-classes-jar') }
+            }
+            new File(out, 'libs.txt').text = view.files.join('\n') + '\n'
+          }
+        }
+      }
+    }
+  }
+}

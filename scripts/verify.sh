@@ -5,7 +5,7 @@
 #   scripts/verify.sh                 lint, typecheck, i18n, theme, vitest, Kotlin unit tests
 #   scripts/verify.sh lint typecheck  just those steps
 #   scripts/verify.sh --list          show the available steps
-#   scripts/verify.sh all             the default steps plus the debug APK build
+#   scripts/verify.sh all             the default steps plus the debug APK and the R8 check
 #
 # Steps run to completion even after one fails, so a single run reports everything that is
 # wrong rather than just the first thing.
@@ -15,7 +15,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
 DEFAULT_STEPS=(lint typecheck i18n theme unit android)
-ALL_STEPS=(lint typecheck i18n theme unit android apk)
+ALL_STEPS=(lint typecheck i18n theme unit android apk r8)
 
 usage() {
   cat <<'USAGE'
@@ -27,6 +27,7 @@ Steps:
   unit       vitest over the pure logic in composables/
   android    compile the Android sources and run the Kotlin unit tests
   apk        assemble the debug APK (slow; not in the default set)
+  r8         run the phone app as R8 ships it against stored data (slow; see check-app-r8.sh)
 
 Aliases: "all" = every step above. No arguments = lint typecheck i18n theme unit android.
 USAGE
@@ -72,6 +73,7 @@ step_i18n() { node scripts/check-i18n-sorted.mjs; }
 step_theme() { node scripts/check-theme-tokens.mjs; }
 step_unit() { npx vitest run; }
 step_android() { scripts/test-android.sh; }
+step_r8() { scripts/check-app-r8.sh; }
 step_apk() {
   export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-/opt/android-sdk}"
   export ANDROID_HOME="$ANDROID_SDK_ROOT"
@@ -84,7 +86,7 @@ step_apk() {
 
 for step in "${STEPS[@]}"; do
   case "$step" in
-    lint | typecheck | i18n | theme | unit | android | apk) run_step "$step" "step_${step}" ;;
+    lint | typecheck | i18n | theme | unit | android | apk | r8) run_step "$step" "step_${step}" ;;
     *)
       echo "Unknown step: $step" >&2
       usage >&2

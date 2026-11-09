@@ -1,0 +1,137 @@
+{
+ "id": "li_hardcore",
+ "libraryId": "lib_podcasts",
+ "mediaType": "podcast",
+ "folderId": "fld_1",
+ "addedAt": 1786467564692,
+ "updatedAt": 1794157164692,
+ "isMissing": false,
+ "isInvalid": false,
+ "numEpisodesIncomplete": 2,
+ "media": {
+  "id": "md_li_hardcore",
+  "libraryItemId": "li_hardcore",
+  "metadata": {
+   "title": "Hardcore History",
+   "titleIgnorePrefix": "Hardcore History",
+   "author": "Dan Carlin",
+   "description": "<p>Hardcore History, hosted by Dan Carlin.</p>",
+   "genres": [
+    "History",
+    "Society & Culture"
+   ],
+   "language": "en",
+   "explicit": false,
+   "feedUrl": "https://feeds.example/hh"
+  },
+  "coverPath": "/cover/li_hardcore",
+  "tags": [],
+  "episodes": [
+   {
+    "id": "ep_h1",
+    "libraryItemId": "li_hardcore",
+    "title": "Blueprint for Armageddon VI",
+    "subtitle": "",
+    "description": "<p>Blueprint for Armageddon VI - from Hardcore History.</p>",
+    "season": "",
+    "episode": "",
+    "episodeType": "full",
+    "pubDate": "Fri, 06 Nov 2026 16:59:24 GMT",
+    "publishedAt": 1793984364692,
+    "addedAt": 1793984364692,
+    "audioFile": {
+     "index": 1,
+     "ino": "ino-0",
+     "metadata": {
+      "filename": "ep_h1.mp3",
+      "ext": ".mp3",
+      "path": "/podcasts/ep_h1.mp3",
+      "relPath": "ep_h1.mp3",
+      "size": 516480000
+     },
+     "duration": 16140,
+     "mimeType": "audio/mpeg"
+    },
+    "duration": 16140,
+    "size": 516480000,
+    "audioTrack": {
+     "index": 1,
+     "startOffset": 0,
+     "duration": 16140,
+     "title": "ep_h1.mp3",
+     "contentUrl": "/api/items/li_hardcore/file/ino-0",
+     "mimeType": "audio/mpeg",
+     "metadata": null,
+     "isLocal": false,
+     "localFileId": null,
+     "serverIndex": null
+    }
+   },
+   {
+    "id": "ep_h2",
+    "libraryItemId": "li_hardcore",
+    "title": "Supernova in the East IV",
+    "subtitle": "",
+    "description": "<p>Supernova in the East IV - from Hardcore History.</p>",
+    "season": "",
+    "episode": "",
+    "episodeType": "full",
+    "pubDate": "Wed, 28 Oct 2026 16:59:24 GMT",
+    "publishedAt": 1793206764692,
+    "addedAt": 1793206764692,
+    "audioFile": {
+     "index": 1,
+     "ino": "ino-1",
+     "metadata": {
+      "filename": "ep_h2.mp3",
+      "ext": ".mp3",
+      "path": "/podcasts/ep_h2.mp3",
+      "relPath": "ep_h2.mp3",
+      "size": 464640000
+     },
+     "duration": 14520,
+     "mimeType": "audio/mpeg"
+    },
+    "duration": 14520,
+    "size": 464640000,
+    "audioTrack": {
+     "index": 1,
+     "startOffset": 0,
+     "duration": 14520,
+     "title": "ep_h2.mp3",
+     "contentUrl": "/api/items/li_hardcore/file/ino-1",
+     "mimeType": "audio/mpeg",
+     "metadata": null,
+     "isLocal": false,
+     "localFileId": null,
+     "serverIndex": null
+    }
+   }
+  ],
+  "numEpisodes": 2,
+  "autoDownloadEpisodes": true
+ },
+ "ino": "ino-item",
+ "path": "/podcasts/Hardcore History",
+ "relPath": "Hardcore History",
+ "mtimeMs": 1700000000000,
+ "ctimeMs": 1700000000000,
+ "birthtimeMs": 1690000000000,
+ "lastScan": 1700000000000,
+ "scanVersion": "2.20.0",
+ "libraryFiles": [],
+ "userMediaProgress": {
+  "id": "mp-1",
+  "libraryItemId": "li_hardcore",
+  "episodeId": "ep_h1",
+  "duration": 16140,
+  "progress": 0.42,
+  "currentTime": 6778.8,
+  "isFinished": false,
+  "ebookLocation": null,
+  "ebookProgress": null,
+  "lastUpdate": 1700000000000,
+  "startedAt": 1690000000000,
+  "finishedAt": null
+ }
+}

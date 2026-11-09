@@ -108,8 +108,9 @@ else. Note this corrects the entry that used to live here, which blamed
 `@webnativellc/capacitor-filesharer`. Filesharer is gone now and the flag was still needed, so
 it was either never the only caller or never a caller at all.
 
-It changes nothing for Podshelf either way: `:app` does not enable minification on either build
-type.
+It changes nothing for Podshelf's own shrinking: `:app` and `:wear` minify their release builds
+with `proguard-android-optimize.txt`, which the check never objected to. The flag only keeps the
+volume-buttons build file evaluable.
 
 **Clears when** volume-buttons ships a build file that does not call the removed default, or
 its uses are replaced — a far smaller job than when a dozen plugins needed it.
