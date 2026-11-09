@@ -7,11 +7,26 @@
 			"enabled": false
 		},
 		"StatusBar": {
-			"backgroundColor": "#2C2722",
 			"style": "DARK"
 		}
 	},
 	"server": {
 		"androidScheme": "http"
+	},
+	"android": {
+		"includePlugins": [
+			"@capacitor-community/keep-awake",
+			"@capacitor-community/volume-buttons",
+			"@capacitor/app",
+			"@capacitor/browser",
+			"@capacitor/clipboard",
+			"@capacitor/dialog",
+			"@capacitor/filesystem",
+			"@capacitor/haptics",
+			"@capacitor/network",
+			"@capacitor/preferences",
+			"@capacitor/share",
+			"cordova-plugin-screen-orientation"
+		]
 	}
 }

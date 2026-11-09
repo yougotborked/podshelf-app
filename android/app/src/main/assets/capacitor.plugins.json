@@ -44,10 +44,6 @@
 		"classpath": "com.capacitorjs.plugins.share.SharePlugin"
 	},
 	{
-		"pkg": "@capacitor/status-bar",
-		"classpath": "com.capacitorjs.plugins.statusbar.StatusBarPlugin"
-	},
-	{
 		"pkg": "@capacitor/android",
 		"classpath": "com.getcapacitor.cordova.CordovaPlugin"
 	}
