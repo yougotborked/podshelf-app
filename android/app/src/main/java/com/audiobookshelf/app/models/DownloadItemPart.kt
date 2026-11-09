@@ -1,6 +1,7 @@
 package com.audiobookshelf.app.models
 
 import android.net.Uri
+import androidx.core.net.toUri
 import android.util.Log
 import com.audiobookshelf.app.data.AudioTrack
 import com.audiobookshelf.app.data.EBookFile
@@ -47,7 +48,7 @@ data class DownloadItemPart(
       val destinationUri = Uri.fromFile(destinationFile)
       val finalDestinationUri = Uri.fromFile(finalDestinationFile)
       val rawCover = if (serverPath.endsWith("/cover")) "?raw=1" else ""
-      val downloadUri = Uri.parse("${DeviceManager.serverAddress}${serverPath}$rawCover")
+      val downloadUri = "${DeviceManager.serverAddress}${serverPath}$rawCover".toUri()
 
       Log.d("DownloadItemPart", "Audio File Destination Uri: $destinationUri | Final Destination Uri: $finalDestinationUri | Server Path $serverPath")
       return DownloadItemPart(

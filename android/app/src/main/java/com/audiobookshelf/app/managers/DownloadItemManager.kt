@@ -1,6 +1,7 @@
 package com.audiobookshelf.app.managers
 
 import android.content.Context
+import androidx.core.net.toUri
 import android.net.Uri
 import android.os.StatFs
 import androidx.documentfile.provider.DocumentFile
@@ -165,7 +166,7 @@ class DownloadItemManager(
         } else if (part.moved && !part.reusedExistingFile) {
           part.completedDestinationUri?.let { uri ->
             try {
-              DocumentFile.fromSingleUri(context, Uri.parse(uri))?.delete()
+              DocumentFile.fromSingleUri(context, uri.toUri())?.delete()
             } catch (e: Exception) {
               AbsLogger.error(
                       tag,
@@ -493,7 +494,7 @@ class DownloadItemManager(
   private fun moveDownloadedFile(item: DownloadItem, part: DownloadItemPart) {
     if (part.moved || part.isMoving) return
     val root =
-            DocumentFile.fromTreeUri(context, Uri.parse(part.localFolderUrl))
+            DocumentFile.fromTreeUri(context, part.localFolderUrl.toUri())
                     ?: return failFinalization(item, part, "Could not resolve SAF destination")
     part.isMoving = true
     persist(item, force = true)
@@ -664,7 +665,7 @@ class DownloadItemManager(
 
   private fun findSharedStorageFile(part: DownloadItemPart): DocumentFile? {
     if (part.isInternalStorage) return null
-    val root = DocumentFile.fromTreeUri(context, Uri.parse(part.localFolderUrl)) ?: return null
+    val root = DocumentFile.fromTreeUri(context, part.localFolderUrl.toUri()) ?: return null
     var folder = root
     part.finalDestinationSubfolder.split('/').filter { it.isNotBlank() }.forEach { segment ->
       if (segment == "." || segment == "..") return null
@@ -721,7 +722,7 @@ class DownloadItemManager(
     }
     part.completedDestinationUri?.let { uri ->
       try {
-        val file = DocumentFile.fromSingleUri(context, Uri.parse(uri))
+        val file = DocumentFile.fromSingleUri(context, uri.toUri())
         if (file?.isFile == true && (part.fileSize <= 0L || file.length() == part.fileSize))
                 return true
       } catch (e: Exception) {

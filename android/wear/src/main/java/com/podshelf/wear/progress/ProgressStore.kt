@@ -1,6 +1,7 @@
 package com.podshelf.wear.progress
 
 import android.content.Context
+import androidx.core.content.edit
 import com.podshelf.wearsync.WearProgressQueue
 import com.podshelf.wearsync.WearProgressRecord
 import com.podshelf.wearsync.mergeProgressRecord
@@ -41,12 +42,12 @@ class ProgressStore(context: Context) {
   }
 
   private fun write(records: List<WearProgressRecord>) {
-    prefs.edit()
-            .putString(
-                    KEY_RECORDS,
-                    json.encodeToString(WearProgressQueue.serializer(), WearProgressQueue(records))
-            )
-            .apply()
+    prefs.edit {
+      putString(
+              KEY_RECORDS,
+              json.encodeToString(WearProgressQueue.serializer(), WearProgressQueue(records))
+      )
+    }
   }
 
   companion object {

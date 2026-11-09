@@ -134,7 +134,7 @@ class ApiHandler(var ctx:Context) {
             return
           }
 
-          val bodyString = it.body!!.string()
+          val bodyString = it.body.string()
           if (bodyString == "OK") {
             cb(JSObject())
           } else {
@@ -238,7 +238,7 @@ class ApiHandler(var ctx:Context) {
             return
           }
           try {
-            val user = JSONObject(it.body!!.string()).optJSONObject("user")
+            val user = JSONObject(it.body.string()).optJSONObject("user")
             val accessToken = user?.optString("accessToken").orEmpty()
             if (accessToken.isEmpty()) {
               AbsLogger.error(tag, "Refresh response had no access token for ${config.name}")
@@ -356,7 +356,7 @@ class ApiHandler(var ctx:Context) {
               return
             }
 
-            val bodyString = it.body!!.string()
+            val bodyString = it.body.string()
             if (bodyString == "OK") {
               callback(JSObject())
             } else {

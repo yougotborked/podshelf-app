@@ -1,6 +1,7 @@
 package com.audiobookshelf.app.device
 
 import android.content.Context
+import androidx.core.net.toUri
 import android.net.Uri
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
@@ -41,7 +42,7 @@ class FolderScanner(private val ctx: Context) {
     }
 
     part.completedDestinationUri?.let { contentUrl ->
-      val uri = Uri.parse(contentUrl)
+      val uri = contentUrl.toUri()
       val size =
               try {
                 ctx.contentResolver.openFileDescriptor(uri, "r")?.use { descriptor ->
@@ -125,7 +126,7 @@ class FolderScanner(private val ctx: Context) {
               if (part.isInternalStorage) {
                 null
               } else {
-                part.completedDestinationUri?.let { DocumentFileCompat.fromUri(ctx, Uri.parse(it)) }
+                part.completedDestinationUri?.let { DocumentFileCompat.fromUri(ctx, it.toUri()) }
                         ?: resolveExternalFile(externalFolder, part)
               }
       Log.d(tag, "Resolve part ${part.filename}: externalFile=${externalFile?.uri}")
@@ -285,7 +286,7 @@ class FolderScanner(private val ctx: Context) {
       return
     }
 
-    val root = DocumentFileCompat.fromUri(ctx, Uri.parse(item.localFolder.contentUrl))
+    val root = DocumentFileCompat.fromUri(ctx, item.localFolder.contentUrl.toUri())
     if (root == null) {
       Log.e(tag, "Invalid SAF root: ${item.localFolder.contentUrl}")
       callback(null)

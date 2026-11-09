@@ -229,7 +229,7 @@ class BookMetadata(
   var authorNameLF:String?,
   var narratorName:String?,
   var seriesName:String?,
-  @JsonFormat(with=[JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY])
+  @param:JsonFormat(with=[JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY])
   var series:List<SeriesType>?
 ) : MediaTypeMetadata(title, explicit) {
   @JsonIgnore

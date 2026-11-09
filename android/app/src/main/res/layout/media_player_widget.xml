@@ -87,7 +87,7 @@
           android:layout_weight="1"
           android:layout_margin="6dp"
           android:contentDescription="@string/widget_play_pause_description"
-          android:src="@drawable/ic_media_play_dark" />
+          android:src="@drawable/widget_play" />
 
         <ImageView
           android:id="@+id/widgetFastForwardButton"
@@ -108,7 +108,6 @@
       android:orientation="vertical">
 
       <ImageView
-        android:id="@+id/tinyCornerIcon"
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:layout_margin="6dp"

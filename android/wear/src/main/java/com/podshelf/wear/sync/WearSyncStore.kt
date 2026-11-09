@@ -1,6 +1,7 @@
 package com.podshelf.wear.sync
 
 import android.content.Context
+import androidx.core.content.edit
 import com.podshelf.wearsync.WearQueue
 import com.podshelf.wearsync.WearServerSession
 import com.podshelf.wearsync.WearSync
@@ -40,21 +41,21 @@ class WearSyncStore(context: Context) {
 
   fun putSessionJson(json: String) {
     val decoded = WearSync.decodeSession(json) ?: return
-    prefs.edit().putString(KEY_SESSION, json).apply()
+    prefs.edit { putString(KEY_SESSION, json) }
     _session.value = decoded
     markSynced()
   }
 
   fun putQueueJson(json: String) {
     val decoded = WearSync.decodeQueue(json) ?: return
-    prefs.edit().putString(KEY_QUEUE, json).apply()
+    prefs.edit { putString(KEY_QUEUE, json) }
     _queue.value = decoded
     markSynced()
   }
 
   private fun markSynced() {
     val now = System.currentTimeMillis()
-    prefs.edit().putLong(KEY_LAST_SYNC, now).apply()
+    prefs.edit { putLong(KEY_LAST_SYNC, now) }
     _lastSyncedAtMs.value = now
   }
 

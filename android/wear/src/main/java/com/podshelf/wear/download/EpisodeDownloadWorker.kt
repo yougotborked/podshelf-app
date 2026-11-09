@@ -77,9 +77,11 @@ class EpisodeDownloadWorker(context: Context, params: WorkerParameters) :
             }
 
             try {
-              val result = downloadAll(pending, session, episodes)
-              state.recordAttempt(succeeded = result is Result.Success, acquiredNetwork = true)
-              return@withContext result
+              // A Boolean, not the Result: Result.Success is restricted to WorkManager's own
+              // library group, so `is Result.Success` is an API we are not allowed to use.
+              val succeeded = downloadAll(pending, session, episodes)
+              state.recordAttempt(succeeded = succeeded, acquiredNetwork = true)
+              return@withContext if (succeeded) Result.success() else Result.retry()
             } finally {
               network.release()
             }
@@ -89,7 +91,7 @@ class EpisodeDownloadWorker(context: Context, params: WorkerParameters) :
           pending: List<com.podshelf.wearsync.WearQueueEntry>,
           session: com.podshelf.wearsync.WearServerSession,
           episodes: EpisodeStore
-  ): Result =
+  ): Boolean =
           withContext(Dispatchers.IO) {
             val api = WearApi()
             var failed = false
@@ -138,7 +140,7 @@ class EpisodeDownloadWorker(context: Context, params: WorkerParameters) :
               if (isStopped) break
             }
 
-            if (failed) Result.retry() else Result.success()
+            !failed
           }
 
   companion object {

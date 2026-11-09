@@ -144,3 +144,10 @@ tasks.withType(Test).configureEach {
     failOnNoMatchingTests = false
   }
 }
+
+// CI runs `staticAnalysis` across the build; the watch had no such task, so it was never linted.
+tasks.register('staticAnalysis') {
+  group = 'verification'
+  description = 'Runs static analysis checks.'
+  dependsOn('lint')
+}
