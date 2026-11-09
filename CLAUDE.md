@@ -138,6 +138,18 @@ progress on update. **Run it after changing `android/app/proguard-rules.pro` or 
 library.** It caught kotlin-reflect loading `kotlin.jvm.functions.Function1` by name before that
 shipped.
 
+That run re-invokes R8 itself, so it cannot see options AGP passes to R8 — and one of those shipped
+two launch crashes. AGP 9 runs R8 in **strict full mode for keep rules**: a `-keep` naming only a
+class no longer keeps its constructor. Room's consumer rule is written that way, so
+`WorkDatabase_Impl` lost the constructor Room calls by reflection, and WorkManager's startup
+initializer killed both apps before `Application.onCreate` (0.14.0-dev.49, and every Play build of
+the watch). `android.r8.strictFullModeForKeepRules=false` in `android/gradle.properties` puts the
+old meaning back; do not remove it until the libraries' rules are written for strict mode.
+`scripts/r8-check/constructors.py` reads the dex that is about to ship and fails if any class the
+platform builds by name — manifest components, startup initializers, Room databases, service
+providers — has no constructor. `check-app-r8.sh` runs it on both release APKs and the Play
+workflow runs it on both bundles before upload.
+
 ### Kotlin changes are verifiable locally
 
 `npm run test:android` compiles the Android sources and runs the tests in `:app`, `:wear` and
