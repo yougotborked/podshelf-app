@@ -148,7 +148,7 @@ export function setServerLanguageCode(code: string): void {
   }
   languageCodes.server = code
   if (!languageCodes.local && code !== defaultCode) {
-    setLanguageCode(code)
+    void setLanguageCode(code)
   }
 }
 

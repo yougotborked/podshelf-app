@@ -254,13 +254,13 @@ function relocated(location: { start: { cfi: string; location: number }; end: { 
   currentLocationCfi.value = location.start.cfi
 
   if (location.end.percentage) {
-    updateProgress({
+    void updateProgress({
       ebookLocation: location.start.cfi,
       ebookProgress: location.end.percentage
     })
     progress.value = Math.round(location.end.percentage * 100)
   } else {
-    updateProgress({
+    void updateProgress({
       ebookLocation: location.start.cfi
     })
   }
@@ -384,6 +384,8 @@ async function screenOrientationChange() {
   isRefreshingUI.value = false
 }
 
+const screenOrientationChangeListener = asVoidHandler(screenOrientationChange)
+
 function refreshUI() {
   if ((rendition.value as any)?.resize) {
     ;(rendition.value as any).resize(window.innerWidth, window.innerHeight - readerHeightOffset.value)
@@ -396,22 +398,22 @@ onMounted(() => {
   initEpub()
 
   if (screen.orientation) {
-    screen.orientation.addEventListener('change', screenOrientationChange)
+    screen.orientation.addEventListener('change', screenOrientationChangeListener)
   } else {
-    document.addEventListener('orientationchange', screenOrientationChange)
+    document.addEventListener('orientationchange', screenOrientationChangeListener)
   }
-  window.addEventListener('resize', screenOrientationChange)
+  window.addEventListener('resize', screenOrientationChangeListener)
 })
 
 onBeforeUnmount(() => {
   ;(book.value as any)?.destroy?.()
 
   if (screen.orientation) {
-    screen.orientation.removeEventListener('change', screenOrientationChange)
+    screen.orientation.removeEventListener('change', screenOrientationChangeListener)
   } else {
-    document.removeEventListener('orientationchange', screenOrientationChange)
+    document.removeEventListener('orientationchange', screenOrientationChangeListener)
   }
-  window.removeEventListener('resize', screenOrientationChange)
+  window.removeEventListener('resize', screenOrientationChangeListener)
 })
 </script>
 

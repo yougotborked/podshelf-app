@@ -123,7 +123,7 @@ function onPlaybackEnded() {
 // A collection belongs to a single library, so leave rather than show one that is not in it
 function libraryChanged(libraryId: string) {
   if (!libraryId || libraryId !== collection.value?.libraryId) {
-    navigateTo('/bookshelf/collections')
+    void navigateTo('/bookshelf/collections')
   }
 }
 

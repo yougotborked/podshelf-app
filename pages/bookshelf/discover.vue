@@ -299,11 +299,11 @@ function selectGenre(genre: { label: string; cat?: string }) {
   const newGenre = genre.label === 'All' ? null : genre.label
   if (activeGenre.value === newGenre) {
     activeGenre.value = null
-    loadTrending()
+    void loadTrending()
     return
   }
   activeGenre.value = newGenre
-  loadTrending(genre.cat)
+  void loadTrending(genre.cat)
 }
 
 // ── Search ────────────────────────────────────────────────────────────────────
@@ -313,7 +313,10 @@ function onSearchInput() {
     searchResults.value = []
     return
   }
-  searchDebounce.value = setTimeout(() => doSearch(searchQuery.value.trim()), 400)
+  searchDebounce.value = setTimeout(
+    asVoidHandler(() => doSearch(searchQuery.value.trim())),
+    400
+  )
 }
 
 async function doSearch(term: string) {
@@ -387,7 +390,7 @@ async function onCardClick(podcast: any) {
   // something that is one tap away in full.
   const existingId = libraryItemIdFor(podcast?.feedUrl)
   if (existingId) {
-    router.push(`/item/${existingId}`)
+    void router.push(`/item/${existingId}`)
     return
   }
 
@@ -471,8 +474,8 @@ function onCloseOverlay() {
 
 onMounted(() => {
   eventBus.on('close-page-overlay', onCloseOverlay)
-  loadLibraryFeedUrls()
-  loadTrending()
+  void loadLibraryFeedUrls()
+  void loadTrending()
 })
 
 onBeforeUnmount(() => {

@@ -240,7 +240,7 @@ async function autoPlaylistRuleAction(value: string) {
 watch(
   () => [props.modelValue, serverLibraryItemId.value] as const,
   ([isShown]) => {
-    if (isShown) loadAutoPlaylistRule()
+    if (isShown) void loadAutoPlaylistRule()
   },
   { immediate: true }
 )
@@ -314,8 +314,8 @@ const moreMenuItems = computed(() => {
 function moreMenuAction(action: string) {
   show.value = false
   if (action === 'manageLocal') {
-    nextTick(() => {
-      router.push(`/localMedia/item/${localLibraryItemId.value}`)
+    void nextTick(() => {
+      void router.push(`/localMedia/item/${localLibraryItemId.value}`)
     })
   } else if (action === 'details') {
     showDetailsModal.value = true
@@ -323,9 +323,9 @@ function moreMenuAction(action: string) {
     globalsStore.selectedPlaylistItems = [{ libraryItem: props.libraryItem, episode: props.episode }]
     globalsStore.showPlaylistsAddCreateModal = true
   } else if (action === 'removeFromPlaylist') {
-    removeFromPlaylistClick()
+    void removeFromPlaylistClick()
   } else if (action === 'autoPlaylistRule') {
-    nextTick(() => {
+    void nextTick(() => {
       showAutoPlaylistRuleModal.value = true
     })
   } else if (action === 'markFinished') {
@@ -342,22 +342,22 @@ function moreMenuAction(action: string) {
         userIsFinished: userIsFinished.value
       })}`
     })
-    if (props.episode) toggleEpisodeFinished()
-    else toggleFinished()
+    if (props.episode) void toggleEpisodeFinished()
+    else void toggleFinished()
   } else if (action === 'history') {
-    router.push(`/media/${mediaId.value}/history?title=${title.value}`)
+    void router.push(`/media/${mediaId.value}/history?title=${title.value}`)
   } else if (action === 'discardProgress') {
-    clearProgressClick()
+    void clearProgressClick()
   } else if (action === 'deleteLocal') {
-    deleteLocalItem()
+    void deleteLocalItem()
   } else if (action === 'deleteLocalEpisode') {
-    deleteLocalEpisode()
+    void deleteLocalEpisode()
   } else if (action === 'rssFeed') {
     clickRSSFeed()
   } else if (action === 'sendEbook') {
     showSendEbookDevicesModal.value = true
   } else if (action === 'openWebClient') {
-    userStore.openWebClient(`/item/${serverLibraryItemId.value}`)
+    void userStore.openWebClient(`/item/${serverLibraryItemId.value}`)
   }
 }
 
@@ -554,9 +554,9 @@ async function deleteLocalEpisode() {
     if (res?.id) {
       if (isLocal.value) {
         if (serverEpisodeId.value) {
-          router.replace(`/item/${serverLibraryItemId.value}/${serverEpisodeId.value}`)
+          void router.replace(`/item/${serverLibraryItemId.value}/${serverEpisodeId.value}`)
         } else {
-          router.replace(`/item/${localLibraryItemId.value}`)
+          void router.replace(`/item/${localLibraryItemId.value}`)
         }
       } else {
         ;(props.libraryItem as Record<string, unknown>).localLibraryItem = res
@@ -578,9 +578,9 @@ async function deleteLocalItem() {
     if (res?.success) {
       if (isLocal.value) {
         if (serverLibraryItemId.value) {
-          router.replace(`/item/${serverLibraryItemId.value}`)
+          void router.replace(`/item/${serverLibraryItemId.value}`)
         } else {
-          router.replace('/bookshelf')
+          void router.replace('/bookshelf')
         }
       } else {
         delete (props.libraryItem as Record<string, unknown>).localLibraryItem

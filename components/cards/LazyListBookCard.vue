@@ -194,8 +194,8 @@ function clickCard(e: MouseEvent) {
     e.preventDefault()
     selectBtnClick()
   } else {
-    if (collapsedSeries.value) router.push(`/bookshelf/series/${collapsedSeries.value.id}`)
-    else router.push(`/item/${libraryItemId.value}`)
+    if (collapsedSeries.value) void router.push(`/bookshelf/series/${collapsedSeries.value.id}`)
+    else void router.push(`/item/${libraryItemId.value}`)
   }
 }
 
@@ -240,7 +240,7 @@ function imageLoaded() {
 
     if (arDiff > 0.15) {
       showCoverBg.value = true
-      nextTick(setCoverBg)
+      void nextTick(setCoverBg)
     } else {
       showCoverBg.value = false
     }

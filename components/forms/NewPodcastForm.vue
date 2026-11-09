@@ -125,7 +125,7 @@ function submit() {
     .then((libraryItem) => {
       emit('update:processing', false)
       toast.success(strings.ToastPodcastCreateSuccess)
-      router.push(`/item/${(libraryItem as Record<string, unknown>).id}`)
+      void router.push(`/item/${(libraryItem as Record<string, unknown>).id}`)
     })
     .catch((error: Error & { response?: { data?: string } }) => {
       const errorMsg = error.response?.data ? error.response.data : strings.ToastPodcastCreateFailed

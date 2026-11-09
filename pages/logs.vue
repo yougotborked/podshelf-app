@@ -72,7 +72,7 @@ async function dialogAction(action: string) {
 
 async function copyToClipboard() {
   await useHaptics().impact()
-  useUtils().copyToClipboard(getLogsString()).then(() => {
+  void useUtils().copyToClipboard(getLogsString()).then(() => {
     isCopied.value = true
     setTimeout(() => {
       isCopied.value = false
@@ -161,7 +161,7 @@ function loadLogs() {
         log.maskedMessage = maskLogMessage(log.message)
         return log
       })
-      nextTick(() => {
+      void nextTick(() => {
         scrollToBottom()
       })
       isLoading.value = false
@@ -179,7 +179,7 @@ onMounted(() => {
     logs.value.push(log)
     logs.value.sort((a, b) => a.timestamp - b.timestamp)
 
-    nextTick(() => {
+    void nextTick(() => {
       scrollToBottom()
     })
   })

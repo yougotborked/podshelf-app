@@ -60,7 +60,7 @@ function toggleMenu() {
 
 function openMenu() {
   showMenu.value = true
-  nextTick(() => {
+  void nextTick(() => {
     if (!detachedMenu) unmountMountMenu()
     recalcMenuPos()
   })

@@ -369,7 +369,7 @@ const coverHeight = computed(() => coverWidth.value * bookCoverAspectRatio.value
 
 // Methods
 function clickMissingButton() {
-  Dialog.alert({
+  void Dialog.alert({
     title: (useNuxtApp() as any).$strings.LabelMissing,
     message: (useNuxtApp() as any).$strings.MessageItemMissing,
     buttonTitle: (useNuxtApp() as any).$strings.ButtonOk
@@ -401,7 +401,7 @@ function readBook() {
 }
 
 function playAtTimestamp(seconds: number) {
-  play(seconds)
+  void play(seconds)
 }
 
 async function playClick() {
@@ -409,7 +409,7 @@ async function playClick() {
   if (playerIsPlaying.value) {
     eventBus.emit('pause-item')
   } else {
-    play()
+    void play()
   }
 }
 
@@ -491,7 +491,7 @@ function itemUpdated(updatedLibraryItem: any) {
 
 function selectedLocalFolder(localFolder: any) {
   showSelectLocalFolder.value = false
-  download(localFolder)
+  void download(localFolder)
 }
 
 async function downloadClick() {
@@ -507,9 +507,9 @@ async function downloadClick() {
 
   await hapticsImpact()
   if (isIos.value) {
-    startDownload()
+    void startDownload()
   } else {
-    download()
+    void download()
   }
 }
 
@@ -536,7 +536,7 @@ async function download(selectedLocalFolder: any = null) {
       globalsStore.showSelectLocalFolderModalAction({
         mediaType: mediaType.value,
         callback: (folder: any) => {
-          download(folder)
+          void download(folder)
         }
       })
       return
@@ -557,7 +557,7 @@ async function download(selectedLocalFolder: any = null) {
     message: startDownloadMessage
   })
   if (value) {
-    startDownload(localFolder)
+    void startDownload(localFolder)
   }
 }
 
@@ -589,7 +589,7 @@ function newLocalLibraryItem(item: any) {
 function libraryChanged(changedLibraryId: string) {
   const itemLibraryId = libraryItem.value?.libraryId
   if (itemLibraryId !== changedLibraryId) {
-    router.replace('/bookshelf')
+    void router.replace('/bookshelf')
   }
 }
 
@@ -637,12 +637,12 @@ function rssFeedClosed(data: any) {
 async function setLibrary() {
   if (!libraryItem.value?.libraryId) return
   await librariesStore.fetch(libraryItem.value.libraryId)
-  localStore.setLastLibraryId(libraryItem.value.libraryId)
+  void localStore.setLastLibraryId(libraryItem.value.libraryId)
 }
 
 function init() {
   if (librariesStore.currentLibraryId !== libraryItem.value?.libraryId) {
-    setLibrary()
+    void setLibrary()
   }
 
   windowWidth.value = window.innerWidth

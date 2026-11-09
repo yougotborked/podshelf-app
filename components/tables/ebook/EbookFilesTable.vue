@@ -57,7 +57,7 @@ const libraryIsAudiobooksOnly = computed(() => librariesStore.getLibraryIsAudiob
 function moreMenuAction(action: string) {
   showMoreMenu.value = false
   if (action === 'updateStatus') {
-    updateEbookStatus()
+    void updateEbookStatus()
   }
 }
 

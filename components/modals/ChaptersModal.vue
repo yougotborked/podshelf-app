@@ -83,7 +83,7 @@ const currentChapterId = computed(() => props.currentChapter?.id)
 
 watch(() => props.modelValue, (newVal) => {
   if (newVal) {
-    nextTick(scrollToChapter)
+    void nextTick(scrollToChapter)
   }
 })
 

@@ -247,10 +247,10 @@ export const useAppStore = defineStore('app', {
     startAutoDownloadTimer() {
       if (this.autoDownloadIntervalId) return
       const id = setInterval(() => {
-        this.autoDownloadCheck()
+        void this.autoDownloadCheck()
       }, 30 * 60 * 1000)
       this.autoDownloadIntervalId = id
-      this.autoDownloadCheck()
+      void this.autoDownloadCheck()
     },
 
     stopAutoDownloadTimer() {
@@ -343,7 +343,7 @@ export const useAppStore = defineStore('app', {
       AbsLogger.info({ tag: 'Store', message: `Network status: ${JSON.stringify(status)}` })
       this.setNetworkStatus(status)
 
-      Network.addListener('networkStatusChange', (status) => {
+      void Network.addListener('networkStatusChange', (status) => {
         AbsLogger.info({ tag: 'Store', message: `Network status changed: ${JSON.stringify({ connected: status.connected, connectionType: status.connectionType })}` })
         this.setNetworkStatus(status)
       })
@@ -390,7 +390,7 @@ export const useAppStore = defineStore('app', {
     setPlaybackSession(playbackSession: PlaybackSession | null) {
       this.currentPlaybackSession = playbackSession
       this.isCasting = playbackSession?.mediaPlayer === 'cast-player'
-      useLocalStore().setPlaybackSession(playbackSession)
+      void useLocalStore().setPlaybackSession(playbackSession)
 
       if (playbackSession && this.playQueue.length) {
         const idx = this.playQueue.findIndex((q) => {
@@ -484,13 +484,13 @@ export const useAppStore = defineStore('app', {
       AbsLogger.info({ tag: 'Store', message: `[Store] setPlayQueue called: ${JSON.stringify(incomingSummary)}` })
       this.playQueue = sanitizeQueue(queue)
       AbsLogger.info({ tag: 'Store', message: `[Store] setPlayQueue sanitized length: ${this.playQueue.length}` })
-      useLocalStore().setPlayQueue(this.playQueue)
+      void useLocalStore().setPlayQueue(this.playQueue)
     },
 
     setQueueIndex(index: number | null) {
       this.queueIndex = index
       AbsLogger.info({ tag: 'Store', message: `[Store] setQueueIndex: ${JSON.stringify({ queueIndex: index, queueLength: this.playQueue.length })}` })
-      useLocalStore().setQueueIndex(index)
+      void useLocalStore().setQueueIndex(index)
     },
 
     reorderQueue({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) {
@@ -526,7 +526,7 @@ export const useAppStore = defineStore('app', {
 
     setServerSettings(val: Record<string, unknown> | null) {
       this.serverSettings = val
-      useLocalStore().setServerSettings(val)
+      void useLocalStore().setServerSettings(val)
     }
   }
 })

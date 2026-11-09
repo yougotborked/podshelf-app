@@ -148,7 +148,7 @@ function inputFocus() {
     unmountMountMenu()
   }
   isFocused.value = true
-  nextTick(recalcMenuPos)
+  void nextTick(recalcMenuPos)
 }
 
 function inputBlur() {
@@ -194,7 +194,7 @@ function clickedOption(e: MouseEvent | null, itemValue: string) {
   textInput.value = null
   currentSearch.value = null
   emit('update:modelValue', newSelected)
-  nextTick(() => {
+  void nextTick(() => {
     recalcMenuPos()
   })
 }
@@ -211,7 +211,7 @@ function removeItem(item: string) {
   const remaining = selected.value.filter((i) => i !== item)
   emit('update:modelValue', remaining)
   emit('removedItem', item)
-  nextTick(() => {
+  void nextTick(() => {
     recalcMenuPos()
   })
 }
@@ -222,7 +222,7 @@ function insertNewItem(item: string) {
   emit('newItem', item)
   textInput.value = null
   currentSearch.value = null
-  nextTick(() => {
+  void nextTick(() => {
     blur()
   })
 }

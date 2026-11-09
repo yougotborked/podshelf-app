@@ -198,7 +198,7 @@ async function searchDownloaded(value: string | null): Promise<Record<string, Re
 function updateSearch(val: string) {
   if (searchTimeout.value) clearTimeout(searchTimeout.value)
   searchTimeout.value = setTimeout(() => {
-    runSearch(val)
+    void runSearch(val)
   }, 500)
 }
 
@@ -213,9 +213,9 @@ function setFocus() {
 onMounted(() => {
   if (globalsStore.lastSearch) {
     search.value = globalsStore.lastSearch
-    runSearch(search.value)
+    void runSearch(search.value)
   } else {
-    nextTick(setFocus)
+    void nextTick(setFocus)
   }
 })
 </script>

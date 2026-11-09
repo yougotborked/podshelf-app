@@ -100,24 +100,24 @@ watch(networkConnected, (newVal) => {
     if (isFirstNetworkConnection.value) {
       isFirstNetworkConnection.value = false
       console.log(`[categories] networkConnected true first network connection. lastServerFetch=${lastServerFetch.value}`)
-      fetchCategories()
+      void fetchCategories()
       return
     }
 
     setTimeout(() => {
       console.log(`[categories] networkConnected true so fetching categories. lastServerFetch=${lastServerFetch.value}`)
-      fetchCategories()
+      void fetchCategories()
     }, 4000)
   } else {
     console.log(`[categories] networkConnected false so fetching categories`)
-    fetchCategories()
+    void fetchCategories()
   }
 })
 
 watch(user, (newVal, oldVal) => {
   if ((newVal && !oldVal) || (!newVal && oldVal)) {
     console.log(`[categories] user changed so fetching categories`)
-    fetchCategories()
+    void fetchCategories()
   }
 })
 
@@ -292,7 +292,7 @@ async function fetchCategories() {
 function libraryChanged() {
   if (currentLibraryId.value) {
     console.log(`[categories] libraryChanged so fetching categories`)
-    fetchCategories()
+    void fetchCategories()
   }
 }
 
@@ -304,7 +304,7 @@ onMounted(async () => {
   eventBus.on('library-changed', libraryChanged)
   await globalsStore.loadLocalMediaProgress()
   console.log(`[categories] mounted so fetching categories`)
-  fetchCategories()
+  void fetchCategories()
 })
 
 onBeforeUnmount(() => {

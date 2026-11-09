@@ -123,7 +123,7 @@ const pageItems = computed(() => {
 const isPlayerOpen = computed(() => appStore.getIsPlayerOpen)
 
 watch(() => props.url, () => {
-  extract()
+  void extract()
 }, { immediate: true })
 
 async function updateProgress() {
@@ -175,12 +175,12 @@ function clickShowPageMenu() {
 
 function next() {
   if (!canGoNext.value) return
-  setPage(page.value + 1)
+  void setPage(page.value + 1)
 }
 
 function prev() {
   if (!canGoPrev.value) return
-  setPage(page.value - 1)
+  void setPage(page.value - 1)
 }
 
 function setPage(p: number) {
@@ -191,7 +191,7 @@ function setPage(p: number) {
   const filename = pages.value![p - 1]
   page.value = p
 
-  updateProgress()
+  void updateProgress()
   return extractFile(filename)
 }
 
@@ -201,10 +201,12 @@ function setLoadTimeout() {
   }, 150)
 }
 
-function extractFile(filename: string) {
-  return new Promise<void>(async (resolve) => {
-    setLoadTimeout()
-    const file = await filesObject.value![filename].extract()
+async function extractFile(filename: string) {
+  setLoadTimeout()
+  // An async Promise executor loses a rejection from extract(): the outer promise would never
+  // settle and the page would sit on its loading state. Awaiting it here lets the caller see it.
+  const file = await filesObject.value![filename].extract()
+  await new Promise<void>((resolve) => {
     const reader = new FileReader()
     reader.onload = (e) => {
       mainImg.value = (e.target as FileReader).result as string

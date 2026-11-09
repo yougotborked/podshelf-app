@@ -109,7 +109,7 @@ export const useUserStore = defineStore('user', {
         }
       }
       if (Object.keys(settingsUpdate).length) {
-        this.updateUserSettings(settingsUpdate)
+        void this.updateUserSettings(settingsUpdate)
       }
     },
 
@@ -180,7 +180,7 @@ export const useUserStore = defineStore('user', {
       await db.logout()
       useSocket().logout()
       const localStore = useLocalStore()
-      localStore.removeLastLibraryId()
+      void localStore.removeLastLibraryId()
       await localStore.setPlaybackSession(null)
       await localStore.setPlayQueue([])
       await localStore.setQueueIndex(null)

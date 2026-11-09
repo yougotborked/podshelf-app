@@ -116,6 +116,6 @@ async function init() {
 }
 
 onMounted(() => {
-  init()
+  void init()
 })
 </script>

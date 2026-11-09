@@ -444,12 +444,12 @@ const moreMenuSelected = computed(() => {
 
 function sleepTimerLengthModalSelection(value: number) {
   settings.sleepTimerLength = value
-  saveSettings()
+  void saveSettings()
 }
 
 function showAutoSleepTimerRewindLengthModalSelection(value: number) {
   settings.autoSleepTimerAutoRewindTime = value
-  saveSettings()
+  void saveSettings()
 }
 
 function showSleepTimerOptions() {
@@ -509,60 +509,60 @@ function clickMenuAction(action: string) {
   showMoreMenuDialog.value = false
   if (moreMenuSetting.value === 'shakeSensitivity') {
     settings.shakeSensitivity = action
-    saveSettings()
+    void saveSettings()
   } else if (moreMenuSetting.value === 'hapticFeedback') {
     settings.hapticFeedback = action
     hapticFeedbackUpdated(action)
   } else if (moreMenuSetting.value === 'language') {
     settings.languageCode = action
-    saveSettings()
+    void saveSettings()
   } else if (moreMenuSetting.value === 'theme') {
     theme.value = action
     saveTheme(action)
   } else if (moreMenuSetting.value === 'downloadUsingCellular') {
     settings.downloadUsingCellular = action
-    saveSettings()
+    void saveSettings()
   } else if (moreMenuSetting.value === 'streamingUsingCellular') {
     settings.streamingUsingCellular = action
-    saveSettings()
+    void saveSettings()
   } else if (moreMenuSetting.value === 'androidAutoBrowseSeriesSequenceOrder') {
     settings.androidAutoBrowseSeriesSequenceOrder = action
-    saveSettings()
+    void saveSettings()
   } else if (moreMenuSetting.value === 'jumpForward') {
     settings.jumpForwardTime = Number(action)
-    saveSettings()
+    void saveSettings()
   } else if (moreMenuSetting.value === 'jumpBackwards') {
     settings.jumpBackwardsTime = Number(action)
-    saveSettings()
+    void saveSettings()
   }
 }
 
 function saveTheme(t: string) {
   document.documentElement.dataset.theme = t
-  useLocalStore().setTheme(t)
+  void useLocalStore().setTheme(t)
 }
 
 function autoSleepTimerTimeUpdated(val: string) {
   if (!val) return // invalid times return falsy
-  saveSettings()
+  void saveSettings()
 }
 
 function androidAutoBrowseLimitForGroupingUpdated(val: number) {
   if (!val) return // invalid values return falsy
   if (val > 1000) val = 1000
   if (val < 30) val = 30
-  saveSettings()
+  void saveSettings()
 }
 
 function hapticFeedbackUpdated(val: string) {
   globalsStore.hapticFeedback = val
-  saveSettings()
+  void saveSettings()
 }
 
 function showInfo(setting: string) {
   const info = (settingInfo.value as Record<string, { name: string; message: string }>)[setting]
   if (info) {
-    Dialog.alert({
+    void Dialog.alert({
       title: info.name,
       message: info.message
     })
@@ -599,7 +599,7 @@ function toggleLockOrientation() {
     settings.lockOrientation = 'NONE'
   }
   useUtils().setOrientationLock(settings.lockOrientation as string)
-  saveSettings()
+  void saveSettings()
 }
 
 const minimalModeOnLaunch = ref(false)
@@ -611,7 +611,7 @@ async function saveMinimalModeOnLaunch(enabled: boolean) {
 
 async function openMinimalMode() {
   await useHaptics().impact()
-  useRouter().push('/minimal')
+  void useRouter().push('/minimal')
 }
 
 async function saveSettings() {
@@ -676,7 +676,7 @@ async function init() {
 }
 
 onMounted(async () => {
-  init()
+  void init()
   minimalModeOnLaunch.value = await useLocalStore().getMinimalModeOnLaunch()
   window.addEventListener('resize', updateOrientationLockHonored)
 })

@@ -70,7 +70,7 @@ function showAlertDialog() {
   } else {
     msg = isNetworkUnmetered.value ? strings.MessageSocketConnectedOverUnmeteredWifi : strings.MessageSocketConnectedOverMeteredWifi
   }
-  Dialog.alert({
+  void Dialog.alert({
     title: strings.HeaderConnectionStatus,
     message: msg
   })

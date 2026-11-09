@@ -374,11 +374,11 @@ async function clickCard(e: MouseEvent) {
     e.preventDefault()
     selectBtnClick()
   } else {
-    if (collapsedSeries.value) router.push(`/bookshelf/series/${collapsedSeries.value.id}`)
+    if (collapsedSeries.value) void router.push(`/bookshelf/series/${collapsedSeries.value.id}`)
     else if (localLibraryItem.value) {
-      router.push(`/item/${libraryItemId.value}?localLibraryItemId=${localLibraryItemId.value}`)
+      void router.push(`/item/${libraryItemId.value}?localLibraryItemId=${localLibraryItemId.value}`)
     } else {
-      router.push(`/item/${libraryItemId.value}`)
+      void router.push(`/item/${libraryItemId.value}`)
     }
   }
 }
@@ -404,7 +404,7 @@ function imageLoaded() {
 
     if (arDiff > 0.15) {
       showCoverBg.value = true
-      nextTick(setCoverBg)
+      void nextTick(setCoverBg)
     } else {
       showCoverBg.value = false
     }

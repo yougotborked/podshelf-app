@@ -42,7 +42,7 @@ onMounted(load)
 watch(
   () => useUserStore().serverConnectionConfig?.address,
   (address, previous) => {
-    if (address && address !== previous) load()
+    if (address && address !== previous) void load()
   }
 )
 </script>

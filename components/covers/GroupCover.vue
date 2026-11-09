@@ -40,7 +40,7 @@ const sizeMultiplier = computed(() => {
 // Watch
 watch(() => props.bookItems, (newVal) => {
   if (newVal) {
-    nextTick(init)
+    void nextTick(init)
   }
 }, { immediate: true })
 

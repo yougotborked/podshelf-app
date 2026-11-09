@@ -44,7 +44,7 @@ watch(
   () => [userStore.getServerAddress, userStore.getToken, userStore.getServerConnectionConfigId],
   ([serverAddress, token, configId]) => {
     if (!serverAddress || !token) return
-    wearSync.publish({ serverAddress, token, userId: (userStore.user?.id as string) || '', serverConnectionConfigId: configId || '' }, null)
+    void wearSync.publish({ serverAddress, token, userId: (userStore.user?.id as string) || '', serverConnectionConfigId: configId || '' }, null)
   },
   { immediate: true }
 )
@@ -69,9 +69,9 @@ watch(() => appStore.networkConnected, (newVal, oldVal) => {
     // rather than assuming, so a flapping link cannot bounce the whole UI online and back.
     reconnectAttempts.value = 0
     if (!userStore.user) {
-      attemptConnection()
+      void attemptConnection()
     } else if (!librariesStore.currentLibraryId) {
-      initLibraries()
+      void initLibraries()
     } else {
       // Syncing straight away would spend its timeouts discovering the link is still dead, and
       // it cannot tell us whether the server is back. The scheduled retry probes first and syncs
@@ -81,7 +81,7 @@ watch(() => appStore.networkConnected, (newVal, oldVal) => {
       scheduleConnectionRetry(reconnectDelayMs(0))
     }
     if (userStore.user && librariesStore.currentLibraryId) {
-      appStore.autoDownloadCheck()
+      void appStore.autoDownloadCheck()
     }
   } else {
     console.log('[default] lost network connection')
@@ -186,7 +186,7 @@ async function attemptConnection() {
       appStore.attemptingConnection = false
       await AbsLogger.info({ tag: 'default', message: `attemptConnection: Old token detected, requesting re-login` })
       await userStore.logout()
-      router.push(`/connect?error=oldAuthToken&serverConnectionConfigId=${serverConfig.id}`)
+      void router.push(`/connect?error=oldAuthToken&serverConnectionConfigId=${serverConfig.id}`)
       return
     }
     serverConfig.token = userStore.accessToken || serverConfig.token
@@ -307,6 +307,8 @@ async function userMediaProgressUpdated(payload: Record<string, unknown>) {
   }
 }
 
+const userMediaProgressUpdatedListener = asVoidHandler(userMediaProgressUpdated)
+
 /**
  * Re-reads the user's media progress from the server after time out of focus.
  *
@@ -365,6 +367,8 @@ async function visibilityChanged() {
     bus.emit('device-focus-update', false)
   }
 }
+
+const visibilityChangedListener = asVoidHandler(visibilityChanged)
 
 function changeLanguage(code: string) {
   console.log('Changed lang', code)
@@ -468,15 +472,17 @@ async function goOnline() {
   await syncLocalSessions(false)
 }
 
+const goOnlineListener = asVoidHandler(goOnline)
+
 // Lifecycle
 onMounted(async () => {
   bus.on('change-lang', changeLanguage)
-  bus.on('go-online', goOnline)
-  document.addEventListener('visibilitychange', visibilityChanged)
+  bus.on('go-online', goOnlineListener)
+  document.addEventListener('visibilitychange', visibilityChangedListener)
 
   const socket = useSocket()
   socket.$on('user_updated', userUpdated)
-  socket.$on('user_media_progress_updated', userMediaProgressUpdated)
+  socket.$on('user_media_progress_updated', userMediaProgressUpdatedListener)
 
   if (appStore.isFirstLoad) {
     await AbsLogger.info({ tag: 'default', message: `mounted: initializing first load (${usePlatform()} v${config.public.version})` })
@@ -528,10 +534,10 @@ onMounted(async () => {
       const localItems = (await useDb().getLocalLibraryItems().catch(() => [])) as unknown[]
       if (localItems?.length && appStore.isOffline) {
         await AbsLogger.info({ tag: 'default', message: 'mounted: No server config and offline, showing downloads' })
-        if (route.path !== '/downloads') router.replace('/downloads')
+        if (route.path !== '/downloads') void router.replace('/downloads')
       } else {
         await AbsLogger.info({ tag: 'default', message: 'mounted: No server config, redirecting to connect' })
-        router.push('/connect')
+        void router.push('/connect')
       }
       hasMounted.value = true
       return
@@ -546,12 +552,12 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-  bus.off('go-online', goOnline)
+  bus.off('go-online', goOnlineListener)
   bus.off('change-lang', changeLanguage)
-  document.removeEventListener('visibilitychange', visibilityChanged)
+  document.removeEventListener('visibilitychange', visibilityChangedListener)
   const socket = useSocket()
   socket.$off('user_updated', userUpdated)
-  socket.$off('user_media_progress_updated', userMediaProgressUpdated)
+  socket.$off('user_media_progress_updated', userMediaProgressUpdatedListener)
   clearConnectionRetry()
 })
 </script>

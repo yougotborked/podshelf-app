@@ -163,7 +163,7 @@ const isOpenIDAuthEnabled = computed(() => authMethods.value.includes('openid'))
 
 // Methods
 function showOldUserIdWarningDialog() {
-  Dialog.alert({
+  void Dialog.alert({
     title: 'Old Server Connection Warning',
     message: strings.MessageOldServerConnectionWarningHelp,
     buttonTitle: strings.ButtonOk
@@ -388,6 +388,8 @@ async function appUrlOpen(url: string) {
   }
 }
 
+const appUrlOpenListener = asVoidHandler(appUrlOpen)
+
 /**
  * Exchanges an oauth2 authorization code for a JWT token.
  * And uses that token to finalise the log in process using authenticateToken()
@@ -441,7 +443,7 @@ async function oauthExchangeCodeForToken(code: string, state: string) {
       _payload.user.refreshToken = user.refreshToken
     }
 
-    setUserAndConnection(_payload)
+    void setUserAndConnection(_payload)
   } catch (err: any) {
     console.error('[SSO] Error in exchangeCodeForToken: ', err)
     toast.error(`SSO error: ${err.message || err}`)
@@ -486,7 +488,7 @@ async function connectToServer(config: Record<string, any>) {
 
   if (payload) {
     // Will NOT include access token and refresh token
-    setUserAndConnection(payload as { user: Record<string, any>; userDefaultLibraryId?: string; serverSettings: Record<string, any>; ereaderDevices?: unknown[] })
+    void setUserAndConnection(payload as { user: Record<string, any>; userDefaultLibraryId?: string; serverSettings: Record<string, any>; ereaderDevices?: unknown[] })
   } else {
     let savedError = error.value
     if (await submit(true)) {
@@ -710,7 +712,7 @@ async function submit(preventAutoLogin = false): Promise<boolean> {
       serverConfig.value.version = statusData.data.serverVersion
 
       if (statusData.data.authFormData?.authOpenIDAutoLaunch && !preventAutoLogin) {
-        clickLoginWithOpenId()
+        void clickLoginWithOpenId()
       }
       return true
     } else {
@@ -870,7 +872,7 @@ async function submitAuth() {
   processing.value = false
   if (payload) {
     // Will include access token and refresh token
-    setUserAndConnection(payload)
+    void setUserAndConnection(payload)
   }
 }
 
@@ -894,7 +896,7 @@ async function setUserAndConnection({ user, userDefaultLibraryId, serverSettings
     } else {
       // Detect if the connection config is using the old token. If so, force re-login
       if (serverConfig.value.token === user.token || user.isOldToken) {
-        setForceRelogin('oldAuthToken')
+        void setForceRelogin('oldAuthToken')
         return
       }
 
@@ -919,7 +921,7 @@ async function setUserAndConnection({ user, userDefaultLibraryId, serverSettings
     const updatedDeviceData = await db.updateDeviceSettings(updatedDeviceSettings as Record<string, unknown>)
     if (updatedDeviceData) {
       appStore.setDeviceData(updatedDeviceData as any)
-      setLanguageCode((updatedDeviceData as Record<string, any>).deviceSettings?.languageCode || 'en-us')
+      void setLanguageCode((updatedDeviceData as Record<string, any>).deviceSettings?.languageCode || 'en-us')
     }
   }
 
@@ -939,7 +941,7 @@ async function setUserAndConnection({ user, userDefaultLibraryId, serverSettings
   await userStore.loadUserSettings()
 
   socket.connect(serverConfig.value.address, serverConfig.value.token)
-  router.replace('/bookshelf')
+  void router.replace('/bookshelf')
 }
 
 async function authenticateToken() {
@@ -994,7 +996,7 @@ function init() {
     const _serverConfig = serverConnectionConfigs.value.find((scc: Record<string, any>) => scc.id === route.query.serverConnectionConfigId)
     if (_serverConfig) {
       serverConfig.value = { ..._serverConfig }
-      setForceRelogin(route.query.error as string)
+      void setForceRelogin(route.query.error as string)
       return
     } else {
       console.error('[ServerConnectForm] init with serverConnectionConfigId but no serverConfig found', route.query.serverConnectionConfigId)
@@ -1003,7 +1005,7 @@ function init() {
 
   if (lastServerConnectionConfig.value) {
     console.log('[ServerConnectForm] init with lastServerConnectionConfig', lastServerConnectionConfig.value)
-    connectToServer(lastServerConnectionConfig.value)
+    void connectToServer(lastServerConnectionConfig.value)
   } else {
     showForm.value = !serverConnectionConfigs.value.length
   }
@@ -1011,11 +1013,11 @@ function init() {
 
 // Lifecycle
 onMounted(() => {
-  eventBus.on('url-open', appUrlOpen)
+  eventBus.on('url-open', appUrlOpenListener)
   init()
 })
 
 onBeforeUnmount(() => {
-  eventBus.off('url-open', appUrlOpen)
+  eventBus.off('url-open', appUrlOpenListener)
 })
 </script>

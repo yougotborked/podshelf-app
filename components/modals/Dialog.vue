@@ -60,7 +60,7 @@ const itemsToShow = computed((): DialogItem[] => {
 })
 
 watch(show, (newVal: boolean) => {
-  if (newVal) nextTick(init)
+  if (newVal) void nextTick(init)
 }, { immediate: true })
 
 function clickedOption(action: string) {
