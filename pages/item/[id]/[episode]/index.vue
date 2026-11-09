@@ -198,7 +198,7 @@ const moreMenuItems = computed(() => {
 
   if (!userIsFinished.value) {
     items.push({
-      text: (useNuxtApp() as any).$strings.MessageMarkAsFinished,
+      text: useNuxtApp().$strings.MessageMarkAsFinished,
       value: 'markFinished',
       icon: 'beenhere'
     })
@@ -206,7 +206,7 @@ const moreMenuItems = computed(() => {
 
   if (progressPercent.value > 0) {
     items.push({
-      text: (useNuxtApp() as any).$strings.MessageDiscardProgress,
+      text: useNuxtApp().$strings.MessageDiscardProgress,
       value: 'discardProgress',
       icon: 'backspace'
     })
@@ -214,7 +214,7 @@ const moreMenuItems = computed(() => {
 
   if (!isLocal.value) {
     items.push({
-      text: (useNuxtApp() as any).$strings.LabelAddToPlaylist,
+      text: useNuxtApp().$strings.LabelAddToPlaylist,
       value: 'playlist',
       icon: 'playlist_add'
     })
@@ -222,7 +222,7 @@ const moreMenuItems = computed(() => {
 
   if (localEpisodeId.value) {
     items.push({
-      text: (useNuxtApp() as any).$strings.ButtonDeleteLocalEpisode,
+      text: useNuxtApp().$strings.ButtonDeleteLocalEpisode,
       value: 'deleteLocal',
       icon: 'delete'
     })
@@ -230,7 +230,7 @@ const moreMenuItems = computed(() => {
 
   if (isAdminOrUp.value && serverEpisodeId.value) {
     items.push({
-      text: (useNuxtApp() as any).$strings.ButtonRemoveFromServer,
+      text: useNuxtApp().$strings.ButtonRemoveFromServer,
       value: 'remove_from_server',
       icon: 'delete_forever'
     })
@@ -274,8 +274,8 @@ async function deleteLocalEpisode() {
   }
 
   const { value } = await Dialog.confirm({
-    title: (useNuxtApp() as any).$strings.HeaderConfirm,
-    message: (useNuxtApp() as any).$getString('MessageConfirmDeleteLocalEpisode', [localFile.basePath])
+    title: useNuxtApp().$strings.HeaderConfirm,
+    message: useNuxtApp().$getString('MessageConfirmDeleteLocalEpisode', [localFile.basePath])
   })
   if (value) {
     const res = await AbsFileSystem.deleteTrackFromItem({ id: localLibraryItemId.value, trackLocalFileId: localFile.id, trackContentUrl: localEpisodeAudioTrack.contentUrl })
@@ -390,7 +390,7 @@ async function download(selectedLocalFolder: any = null) {
     if (!foldersWithMediaType.length) {
       localFolder = {
         id: `internal-${mediaType}`,
-        name: (useNuxtApp() as any).$strings.LabelInternalAppStorage,
+        name: useNuxtApp().$strings.LabelInternalAppStorage,
         mediaType
       }
     } else if (foldersWithMediaType.length === 1 && internalStorageFolder) {
@@ -446,8 +446,8 @@ async function discardProgress() {
   await hapticsImpact()
 
   const { value } = await Dialog.confirm({
-    title: (useNuxtApp() as any).$strings.HeaderConfirm,
-    message: (useNuxtApp() as any).$strings.MessageConfirmDiscardProgress
+    title: useNuxtApp().$strings.HeaderConfirm,
+    message: useNuxtApp().$strings.MessageConfirmDiscardProgress
   })
   if (value) {
     resettingProgress.value = true
@@ -500,7 +500,7 @@ async function toggleFinished() {
     }
     nativeHttp.patch(`/api/me/progress/${libraryItemId.value}/${episode.value?.id}`, updatePayload, { connectTimeout: 10000 }).catch((error: any) => {
       console.error('Failed', error)
-      toast.error(updatePayload.isFinished ? (useNuxtApp() as any).$strings.ToastItemMarkedAsFinishedFailed : (useNuxtApp() as any).$strings.ToastItemMarkedAsNotFinishedFailed)
+      toast.error(updatePayload.isFinished ? useNuxtApp().$strings.ToastItemMarkedAsFinishedFailed : useNuxtApp().$strings.ToastItemMarkedAsNotFinishedFailed)
     })
   }
 }
@@ -509,8 +509,8 @@ async function deleteEpisodeFromServerClick() {
   await hapticsImpact()
 
   const { value } = await Dialog.confirm({
-    title: (useNuxtApp() as any).$strings.HeaderConfirm,
-    message: (useNuxtApp() as any).$getString('MessageConfirmDeleteServerEpisode', [title.value])
+    title: useNuxtApp().$strings.HeaderConfirm,
+    message: useNuxtApp().$getString('MessageConfirmDeleteServerEpisode', [title.value])
   })
 
   if (value) {

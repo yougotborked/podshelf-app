@@ -62,7 +62,7 @@ const mediaItemEpisodeId = computed(() => {
 })
 const groupedMediaEvents = computed(() => {
   const groups: Record<string, any[]> = {}
-  const nuxtApp = useNuxtApp() as any
+  const nuxtApp = useNuxtApp()
 
   const today = nuxtApp.$formatDate(new Date(), 'MMM dd, yyyy')
   const yesterday = nuxtApp.$formatDate(Date.now() - 1000 * 60 * 60 * 24, 'MMM dd, yyyy')

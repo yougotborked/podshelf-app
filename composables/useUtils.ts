@@ -41,12 +41,12 @@ export function useUtils() {
     setDefaultOptions({ locale: loc as Parameters<typeof setDefaultOptions>[0]['locale'] })
   }
 
-  const dateDistanceFromNow = (unixms: number | null): string => {
+  const dateDistanceFromNow = (unixms: number | Date | null): string => {
     if (!unixms) return ''
     return formatDistance(unixms, Date.now(), { addSuffix: true })
   }
 
-  const formatDate = (unixms: number | null, fnsFormat = 'MM/dd/yyyy HH:mm'): string => {
+  const formatDate = (unixms: number | Date | null, fnsFormat = 'MM/dd/yyyy HH:mm'): string => {
     if (!unixms) return ''
     return format(unixms, fnsFormat)
   }
