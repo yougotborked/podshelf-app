@@ -1,13 +1,21 @@
 import { formatDistance, format, addDays, isDate, setDefaultOptions } from 'date-fns'
 import * as locales from 'date-fns/locale'
 import { StatusBar, Style } from '@capacitor/status-bar'
-import { Capacitor } from '@capacitor/core'
+import { Capacitor, registerPlugin } from '@capacitor/core'
 import { Clipboard } from '@capacitor/clipboard'
 import { AbsFileSystem } from '~/plugins/capacitor'
+
+// @capacitor/status-bar is not in the Android build - see AbsSystemBars.kt - so on Android the
+// status bar is shown and hidden through the app's own plugin, and on iOS through that one.
+const AbsSystemBars = registerPlugin<{ setStatusBarVisible(options: { visible: boolean }): Promise<void> }>('AbsSystemBars')
 
 export function useUtils() {
   const showHideStatusBar = async (show: boolean): Promise<void> => {
     if (Capacitor.getPlatform() === 'web') return
+    if (Capacitor.getPlatform() === 'android') {
+      await AbsSystemBars.setStatusBarVisible({ visible: show })
+      return
+    }
     if (show) {
       await StatusBar.show()
     } else {

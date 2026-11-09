@@ -7,8 +7,9 @@ export default defineNuxtPlugin(async () => {
   const bus = useEventBus()
   const router = useRouter()
 
-  // Set dark status bar on non-web platforms
-  if (Capacitor.getPlatform() !== 'web') {
+  // Light status bar text over the dark bar. iOS only: on Android the status-bar plugin is not
+  // built in, and MainActivity's enableEdgeToEdge sets the same thing natively.
+  if (Capacitor.getPlatform() === 'ios') {
     await StatusBar.setStyle({ style: Style.Dark }).catch(() => {})
   }
 

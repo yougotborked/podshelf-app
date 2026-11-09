@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.Uri
 import androidx.core.net.toUri
 import android.os.Build
@@ -14,6 +15,8 @@ import android.os.IBinder
 import android.util.Log
 import android.view.ViewGroup
 import android.webkit.WebView
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.core.app.ActivityCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -38,6 +41,7 @@ import com.audiobookshelf.app.plugins.AbsDownloader
 import com.audiobookshelf.app.plugins.AbsFileSystem
 import com.audiobookshelf.app.plugins.AbsFoldPosture
 import com.audiobookshelf.app.plugins.AbsLogger
+import com.audiobookshelf.app.plugins.AbsSystemBars
 import com.audiobookshelf.app.plugins.AbsWearSync
 import com.getcapacitor.BridgeActivity
 import kotlinx.coroutines.launch
@@ -67,12 +71,20 @@ class MainActivity : BridgeActivity() {
     registerPlugin(AbsDatabase::class.java)
     registerPlugin(AbsLogger::class.java)
     registerPlugin(AbsWearSync::class.java)
+    registerPlugin(AbsSystemBars::class.java)
 
     super.onCreate(savedInstanceState)
     Log.d(tag, "onCreate")
 
-    // 4.2 — Edge-to-edge: allow content to draw behind status/nav bars
-    WindowCompat.setDecorFitsSystemWindows(window, false)
+    // Edge-to-edge through androidx, not WindowCompat.setDecorFitsSystemWindows: Play checks the
+    // dex for this exact call ("Edge-to-edge may not display for all users") and it also takes
+    // over the bar colours that used to come from the deprecated android:statusBarColor theme
+    // attributes. Dark styles - transparent bars, light icons - so the bars show the window
+    // background behind them (background_dark, as before) rather than following the system theme.
+    enableEdgeToEdge(
+      statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
+      navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
+    )
 
     // Back navigation is Capacitor's. AppPlugin registers its own OnBackPressedCallback during
     // super.onCreate above, and the dispatcher runs callbacks last-registered-first, so anything
@@ -90,7 +102,9 @@ class MainActivity : BridgeActivity() {
     val webView: WebView = findViewById(R.id.webview)
     webView.setOnApplyWindowInsetsListener { v, insets ->
       val sysInsets = WindowInsetsCompat.toWindowInsetsCompat(insets, v)
-        .getInsets(WindowInsetsCompat.Type.systemBars())
+        // The cutout too: enableEdgeToEdge lets the window extend into it, and in landscape a
+        // camera cutout sits beside the content where the system bars' insets do not reach.
+        .getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
       Log.d(tag, "safe sysInsets: $sysInsets")
       val (left, top, right, bottom) = arrayOf(
         sysInsets.left,
