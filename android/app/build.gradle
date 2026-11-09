@@ -101,10 +101,11 @@ android {
       if (System.getenv('PODSHELF_KEYSTORE_PATH')) {
         signingConfig signingConfigs.release
       }
-      // R8 on: Play requires obfuscation from February 2027. What is kept and why is in
-      // proguard-rules.pro. Resources are not shrunk - Capacitor looks its theme and a few
-      // others up by name, and resource shrinking was never what Play asked for.
-      minifyEnabled true
+      // R8 is off again: the first minified build (0.14.0-dev.49) closed immediately on launch,
+      // as the watch's Play builds do. Play requires obfuscation from February 2027, so this is
+      // to come back on once the launch crash is understood - proguard-rules.pro and
+      // scripts/check-app-r8.sh stay ready for it.
+      minifyEnabled false
       proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
     }
   }
