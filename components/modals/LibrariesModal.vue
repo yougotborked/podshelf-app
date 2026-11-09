@@ -52,6 +52,6 @@ async function clickedOption(lib: Record<string, unknown>) {
   if (lib.id === currentLibraryId.value) return
   await librariesStore.fetch(lib.id as string)
   eventBus.emit('library-changed', lib.id as string)
-  localStore.setLastLibraryId(lib.id as string)
+  void localStore.setLastLibraryId(lib.id as string)
 }
 </script>

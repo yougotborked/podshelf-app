@@ -96,7 +96,7 @@ async function clickAction(action: string) {
   await hapticsImpact()
   if (action === 'logout') {
     await userStore.logout()
-    router.push('/connect')
+    void router.push('/connect')
   } else if (action === 'openWebClient') {
     show.value = false
     const path = `/library/${librariesStore.currentLibraryId}`

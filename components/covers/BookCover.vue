@@ -129,7 +129,7 @@ function setCoverBg() {
 
 function imageLoaded() {
   loading.value = false
-  nextTick(() => {
+  void nextTick(() => {
     imageReady.value = true
   })
   if (!props.noBg && cover.value && coverPath.value !== placeholderUrl.value) {
@@ -139,7 +139,7 @@ function imageLoaded() {
 
     if (arDiff > 0.15) {
       showCoverBg.value = true
-      nextTick(setCoverBg)
+      void nextTick(setCoverBg)
     } else {
       showCoverBg.value = false
     }

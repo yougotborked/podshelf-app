@@ -353,8 +353,8 @@ export default {
       this.$refs.readerComponent?.updateSettings?.(this.ereaderSettings)
       localStorage.setItem('ereaderSettings', JSON.stringify(this.ereaderSettings))
 
-      this.initWatchVolume()
-      this.initKeepScreenAwake()
+      void this.initWatchVolume()
+      void this.initKeepScreenAwake()
     },
     goToChapter(href) {
       this.showTOCModal = false
@@ -517,8 +517,8 @@ export default {
       this.eventBus.on('close-ebook', this.closeEvt)
       document.body.addEventListener('touchstart', this.touchstart)
       document.body.addEventListener('touchend', this.touchend)
-      this.initWatchVolume()
-      this.initKeepScreenAwake()
+      void this.initWatchVolume()
+      void this.initKeepScreenAwake()
     },
     unregisterListeners() {
       this.eventBus.off('close-ebook', this.closeEvt)

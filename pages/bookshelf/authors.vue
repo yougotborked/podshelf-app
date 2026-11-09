@@ -118,15 +118,15 @@ function authorRemoved(author: any) {
 function libraryChanged(libraryId: string) {
   if (libraryId !== loadedLibraryId.value) {
     if (librariesStore.getCurrentLibraryMediaType === 'book') {
-      init()
+      void init()
     } else {
-      router.replace('/bookshelf')
+      void router.replace('/bookshelf')
     }
   }
 }
 
 onMounted(() => {
-  init()
+  void init()
   socket.$on('author_added', authorAdded)
   socket.$on('author_updated', authorUpdated)
   socket.$on('author_removed', authorRemoved)

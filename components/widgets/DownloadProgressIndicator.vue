@@ -47,7 +47,7 @@ const progress = computed(() => {
 
 
 function clickedIt() {
-  router.push('/downloading')
+  void router.push('/downloading')
 }
 
 function onItemDownloadComplete(data: Record<string, unknown>) {

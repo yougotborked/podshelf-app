@@ -157,7 +157,7 @@ const publishedAt = computed(() => props.episode.publishedAt as number | null)
 const downloadItem = computed(() => globalsStore.getDownloadItem(props.libraryItemId || '', props.episode.id as string))
 
 function goToEpisodePage() {
-  router.push(`/item/${props.libraryItemId}/${props.episode.id}`)
+  void router.push(`/item/${props.libraryItemId}/${props.episode.id}`)
 }
 
 function addToPlaylist() {
@@ -178,9 +178,9 @@ async function downloadClick() {
   await impact()
   if (isIos.value) {
     // no local folders on iOS
-    startDownload(null)
+    void startDownload(null)
   } else {
-    download(null)
+    void download(null)
   }
 }
 
@@ -207,7 +207,7 @@ async function download(selectedLocalFolder: Record<string, unknown> | null = nu
       globalsStore.showSelectLocalFolderModalAction({
         mediaType,
         callback: (folder: Record<string, unknown>) => {
-          download(folder)
+          void download(folder)
         }
       })
       return
@@ -215,7 +215,7 @@ async function download(selectedLocalFolder: Record<string, unknown> | null = nu
   }
 
   console.log('Local folder', JSON.stringify(localFolder))
-  startDownload(localFolder)
+  void startDownload(localFolder)
 }
 
 async function startDownload(localFolder: Record<string, unknown> | null) {

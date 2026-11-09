@@ -160,7 +160,7 @@ watch(
     // recompute below lands
     firstVisibleIndex.value = Math.min(firstVisibleIndex.value, Math.max(0, props.items.length - 1))
     lastVisibleIndex.value = Math.min(lastVisibleIndex.value || INITIAL_VISIBLE_ROWS, props.items.length)
-    nextTick(() => {
+    void nextTick(() => {
       measureRowHeight()
       recomputeWindow()
     })
@@ -171,7 +171,7 @@ onMounted(() => {
   scrollParent = findScrollParent(listEl.value)
   scrollParent.addEventListener('scroll', scheduleRecompute, { passive: true })
   window.addEventListener('resize', scheduleRecompute, { passive: true })
-  nextTick(() => {
+  void nextTick(() => {
     measureRowHeight()
     recomputeWindow()
   })

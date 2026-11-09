@@ -170,12 +170,12 @@ export default {
     prev() {
       if (this.page <= 1) return
       this.page--
-      this.updateProgress()
+      void this.updateProgress()
     },
     next() {
       if (this.page >= this.numPages) return
       this.page++
-      this.updateProgress()
+      void this.updateProgress()
     },
     async handleRefreshFailure() {
       try {
@@ -208,7 +208,7 @@ export default {
         return null
       })
       if (!newAccessToken) {
-        this.handleRefreshFailure()
+        void this.handleRefreshFailure()
         return
       }
 

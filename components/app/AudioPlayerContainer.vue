@@ -872,13 +872,13 @@ export default {
     },
     /** Socket was down long enough that progress updates from elsewhere may have been missed. */
     onSocketReconnected() {
-      this.deviceFocused(true)
+      void this.deviceFocused(true)
     },
 
     onSkipNextRequest() {
       const nextItem = this.appStore.getNextQueueItem
       if (nextItem) {
-        this.playLibraryItem({
+        void this.playLibraryItem({
           libraryItemId: nextItem.localLibraryItem?.id || nextItem.libraryItemId,
           episodeId: nextItem.localEpisode?.id || nextItem.episodeId,
           serverLibraryItemId: nextItem.libraryItemId,
@@ -892,7 +892,7 @@ export default {
       const idx = this.appStore.queueIndex
       if (idx > 0) {
         const prevItem = this.appStore.playQueue[idx - 1]
-        this.playLibraryItem({
+        void this.playLibraryItem({
           libraryItemId: prevItem.localLibraryItem?.id || prevItem.libraryItemId,
           episodeId: prevItem.localEpisode?.id || prevItem.episodeId,
           serverLibraryItemId: prevItem.libraryItemId,
@@ -914,7 +914,7 @@ export default {
     selectQueueItem(index) {
       const item = this.appStore.playQueue[index]
       if (!item) return
-      this.playLibraryItem({
+      void this.playLibraryItem({
         libraryItemId: item.localLibraryItem?.id || item.libraryItemId,
         episodeId: item.localEpisode?.id || item.episodeId,
         serverLibraryItemId: item.libraryItemId,

@@ -53,17 +53,17 @@ watch(networkConnected, (newVal) => {
   if (newVal && autoCacheUnplayedEpisodes.value) {
     if (!autoPlaylist.value.items.length) {
       setTimeout(() => {
-        fetchAutoPlaylist()
+        void fetchAutoPlaylist()
       }, 1000)
     } else {
-      checkAutoDownload()
+      void checkAutoDownload()
     }
   }
 })
 
 watch(autoCacheUnplayedEpisodes, (newVal) => {
   if (newVal && !autoPlaylist.value.items.length) {
-    fetchAutoPlaylist()
+    void fetchAutoPlaylist()
   }
 })
 
@@ -81,7 +81,7 @@ async function fetchAutoPlaylist() {
     }
 
     await localStore.setCachedPlaylist(toCacheablePlaylist(autoPlaylist.value))
-    checkAutoDownload()
+    void checkAutoDownload()
   } catch (error) {
     console.error('Failed to fetch auto playlist', error)
   }
@@ -117,6 +117,6 @@ async function checkAutoDownload() {
 }
 
 onMounted(() => {
-  if (autoCacheUnplayedEpisodes.value) fetchAutoPlaylist()
+  if (autoCacheUnplayedEpisodes.value) void fetchAutoPlaylist()
 })
 </script>

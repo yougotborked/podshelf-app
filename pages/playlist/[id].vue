@@ -152,13 +152,13 @@ watch(networkConnected, (newVal) => {
   if (!playlist.value.items.length) {
     if (!isUnfinished || autoCacheUnplayedEpisodes.value) {
       setTimeout(() => {
-        fetchPlaylist()
+        void fetchPlaylist()
       }, 1000)
     }
     return
   }
 
-  checkAutoDownload()
+  void checkAutoDownload()
 })
 
 watch(autoCacheUnplayedEpisodes, (newVal) => {
@@ -167,7 +167,7 @@ watch(autoCacheUnplayedEpisodes, (newVal) => {
     route.params.id === 'unfinished' &&
     !playlist.value.items.length
   ) {
-    fetchPlaylist()
+    void fetchPlaylist()
   }
 })
 
@@ -422,7 +422,7 @@ async function fetchPlaylist() {
         tag: 'PlaylistPage',
         message: `Not connected, skip fetching remote playlist: ${formatForLog({ id: playlistId })}`
       })
-      checkAutoDownload()
+      void checkAutoDownload()
       return
     }
     fetchedPlaylist = await nativeHttp.get(`/api/playlists/${playlistId}`, { connectTimeout: 10000 }).catch(() => null)
@@ -528,7 +528,7 @@ async function fetchPlaylist() {
     tag: 'PlaylistPage',
     message: `Playlist ready: ${formatForLog(playlistSummary)}`
   })
-  checkAutoDownload()
+  void checkAutoDownload()
 }
 
 function showMore(playlistItem: any) {
@@ -713,7 +713,7 @@ function onPlaybackEnded() {
 function playlistUpdated(updatedPlaylist: any) {
   if (playlist.value.id !== updatedPlaylist.id) return
   playlist.value = updatedPlaylist
-  localStore.setCachedPlaylist(toCacheablePlaylist(updatedPlaylist))
+  void localStore.setCachedPlaylist(toCacheablePlaylist(updatedPlaylist))
 }
 
 async function onAutoPlaylistItemRemoved(options: any = {}) {
@@ -738,7 +738,7 @@ async function onAutoPlaylistItemRemoved(options: any = {}) {
       items,
       totalItems: Math.max(0, (playlist.value.totalItems || 0) - 1)
     }
-    localStore.setCachedPlaylist(toCacheablePlaylist(playlist.value))
+    void localStore.setCachedPlaylist(toCacheablePlaylist(playlist.value))
   }
 
   showMoreMenu.value = false
@@ -758,13 +758,13 @@ function libraryChanged() {
   // The auto playlist is built from every podcast library, so it is not tied to the selection
   if (playlist.value.id === 'unfinished') return
   // A server playlist's contents are shown in the context of its library
-  router.replace('/bookshelf/playlists')
+  void router.replace('/bookshelf/playlists')
 }
 
 function playlistRemoved(removedPlaylist: any) {
   if (playlist.value.id === removedPlaylist.id) {
-    localStore.removeCachedPlaylist(removedPlaylist.id)
-    router.replace('/bookshelf/playlists')
+    void localStore.removeCachedPlaylist(removedPlaylist.id)
+    void router.replace('/bookshelf/playlists')
   }
 }
 
@@ -820,7 +820,7 @@ onMounted(async () => {
   socket.$on('playlist_removed', playlistRemoved)
   eventBus.on('playback-ended', onPlaybackEnded)
   eventBus.on('library-changed', libraryChanged)
-  fetchPlaylist()
+  void fetchPlaylist()
 })
 
 onBeforeUnmount(() => {

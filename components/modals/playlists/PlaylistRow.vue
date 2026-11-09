@@ -39,6 +39,6 @@ function click() {
 
 function clickCover() {
   emit('close')
-  router.push(`/playlist/${props.playlist.id}`)
+  void router.push(`/playlist/${props.playlist.id}`)
 }
 </script>

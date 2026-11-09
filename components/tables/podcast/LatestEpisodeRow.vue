@@ -169,7 +169,7 @@ const downloadItem = computed(() => globalsStore.getDownloadItem(props.libraryIt
 const podcast = computed(() => (props.episode.podcast as Record<string, unknown>) || {})
 
 function goToEpisodePage() {
-  router.push(`/item/${props.libraryItemId}/${props.episode.id}`)
+  void router.push(`/item/${props.libraryItemId}/${props.episode.id}`)
 }
 
 function addToPlaylist() {
@@ -219,7 +219,7 @@ async function download(selectedLocalFolder: Record<string, unknown> | null = nu
       globalsStore.showSelectLocalFolderModalAction({
         mediaType,
         callback: (folder: Record<string, unknown>) => {
-          download(folder)
+          void download(folder)
         }
       })
       return

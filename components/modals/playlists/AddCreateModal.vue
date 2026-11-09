@@ -97,7 +97,7 @@ watch(show, (newVal) => {
     setListeners()
     showPlaylistNameInput.value = false
     newPlaylistName.value = ''
-    loadPlaylists()
+    void loadPlaylists()
   } else {
     unsetListeners()
   }
@@ -124,7 +124,7 @@ async function loadPlaylists() {
     .then((data) => {
       const d = data as Record<string, unknown>
       playlists.value = (d.results as Record<string, unknown>[]) || []
-      localStore.setCachedPlaylists(currentLibraryId.value, playlists.value)
+      void localStore.setCachedPlaylists(currentLibraryId.value, playlists.value)
     })
     .catch((error) => {
       console.error('Failed', error)
@@ -220,8 +220,8 @@ async function submitCreatePlaylist() {
 function playlistAdded(playlist: Record<string, unknown>) {
   if (!playlists.value.some((p) => p.id === playlist.id)) {
     playlists.value.push(playlist)
-    localStore.setCachedPlaylist(playlist)
-    localStore.setCachedPlaylists(currentLibraryId.value, playlists.value)
+    void localStore.setCachedPlaylist(playlist)
+    void localStore.setCachedPlaylists(currentLibraryId.value, playlists.value)
   }
 }
 
@@ -229,18 +229,18 @@ function playlistUpdated(playlist: Record<string, unknown>) {
   const index = playlists.value.findIndex((p) => p.id === playlist.id)
   if (index >= 0) {
     playlists.value.splice(index, 1, playlist)
-    localStore.setCachedPlaylist(playlist)
+    void localStore.setCachedPlaylist(playlist)
   } else {
     playlists.value.push(playlist)
-    localStore.setCachedPlaylist(playlist)
+    void localStore.setCachedPlaylist(playlist)
   }
-  localStore.setCachedPlaylists(currentLibraryId.value, playlists.value)
+  void localStore.setCachedPlaylists(currentLibraryId.value, playlists.value)
 }
 
 function playlistRemoved(playlist: Record<string, unknown>) {
   playlists.value = playlists.value.filter((p) => p.id !== playlist.id)
-  localStore.removeCachedPlaylist(playlist.id as string)
-  localStore.setCachedPlaylists(currentLibraryId.value, playlists.value)
+  void localStore.removeCachedPlaylist(playlist.id as string)
+  void localStore.setCachedPlaylists(currentLibraryId.value, playlists.value)
 }
 
 function setListeners() {

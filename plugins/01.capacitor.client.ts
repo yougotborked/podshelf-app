@@ -2,10 +2,19 @@ import { App } from '@capacitor/app'
 import { Dialog } from '@capacitor/dialog'
 import { StatusBar, Style } from '@capacitor/status-bar'
 import { Capacitor } from '@capacitor/core'
+import { AbsLogger } from '@/plugins/capacitor'
+import { describeRejection } from '~/composables/useRejectionLog'
 
 export default defineNuxtPlugin(async () => {
   const bus = useEventBus()
   const router = useRouter()
+
+  // The last stop for work started with `void promise` or handed to an event listener: a
+  // rejection nobody awaited is written to the in-app log instead of disappearing. See
+  // composables/useRejectionLog.ts.
+  window.addEventListener('unhandledrejection', (event) => {
+    AbsLogger.error({ tag: 'UnhandledRejection', message: describeRejection(event.reason) })
+  })
 
   // Light status bar text over the dark bar. iOS only: on Android the status-bar plugin is not
   // built in, and MainActivity's enableEdgeToEdge sets the same thing natively.
@@ -34,7 +43,7 @@ export default defineNuxtPlugin(async () => {
   }
 
   // Android: hardware back button
-  App.addListener('backButton', async () => {
+  const onBackButton = async () => {
     const globalsStore = useGlobalsStore()
     const appStore = useAppStore()
 
@@ -58,11 +67,12 @@ export default defineNuxtPlugin(async () => {
       title: strings.HeaderConfirm || 'Confirm',
       message: strings.MessageConfirmAppExit || 'Exit app?'
     })
-    if (value) App.exitApp()
-  })
+    if (value) void App.exitApp()
+  }
+  void App.addListener('backButton', asVoidHandler(onBackButton))
 
   // Deep links
-  App.addListener('appUrlOpen', (data) => {
+  void App.addListener('appUrlOpen', (data) => {
     bus.emit('url-open', data.url)
   })
 })

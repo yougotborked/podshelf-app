@@ -160,10 +160,10 @@ const { entityIndexesMounted, entityComponentRefs, cardsHelpers } = useBookshelf
 
 // Watches
 watch(showBookshelfListView, () => {
-  resetEntities()
+  void resetEntities()
 })
 watch(() => props.seriesId, () => {
-  resetEntities()
+  void resetEntities()
 })
 
 // Methods
@@ -178,7 +178,7 @@ function buildLocalLibraryItemMap(items: Record<string, unknown>[] = []) {
 }
 
 function clearFilter() {
-  userStore.updateUserSettings({
+  void userStore.updateUserSettings({
     mobileFilterBy: 'all'
   })
 }
@@ -217,7 +217,7 @@ async function fetchEntities(page: number) {
       return null
     })) as { results: Record<string, unknown>[]; total: number } | null
     if (payload && entityName.value === 'playlists' && payload.results) {
-      localStore.setCachedPlaylists(currentLibraryId.value, payload.results)
+      void localStore.setCachedPlaylists(currentLibraryId.value, payload.results)
     }
     if (!payload) {
       // Losing the connection mid-browse used to leave the shelf blank, because a failed fetch
@@ -230,7 +230,7 @@ async function fetchEntities(page: number) {
   isFetchingEntities.value = false
   if (pendingReset.value) {
     pendingReset.value = false
-    resetEntities()
+    void resetEntities()
     return
   }
   if (payload && payload.results) {
@@ -272,7 +272,7 @@ async function loadPage(page: number) {
 function mountEntites(fromIndex: number, toIndex: number) {
   for (let i = fromIndex; i < toIndex; i++) {
     if (!entityIndexesMounted.includes(i)) {
-      cardsHelpers.mountEntityCard(i)
+      void cardsHelpers.mountEntityCard(i)
     }
   }
 }
@@ -289,10 +289,10 @@ function handleScroll(scrollTop: number) {
   var firstBookPage = Math.floor(firstBookIndex / booksPerFetch.value)
   var lastBookPage = Math.floor(lastBookIndex / booksPerFetch.value)
   if (!pagesLoaded.value[firstBookPage]) {
-    loadPage(firstBookPage)
+    void loadPage(firstBookPage)
   }
   if (!pagesLoaded.value[lastBookPage]) {
-    loadPage(lastBookPage)
+    void loadPage(lastBookPage)
   }
 
   // Remove entities out of view
@@ -350,7 +350,7 @@ function remountEntities() {
   }
   Object.keys(entityComponentRefs).forEach((k) => { delete entityComponentRefs[Number(k)] })
   entityIndexesMounted.forEach((i) => {
-    cardsHelpers.mountEntityCard(i)
+    void cardsHelpers.mountEntityCard(i)
   })
 }
 
@@ -474,27 +474,27 @@ function checkUpdateSearchParams() {
 function settingsUpdated(_settings?: unknown) {
   const wasUpdated = checkUpdateSearchParams()
   if (wasUpdated) {
-    resetEntities()
+    void resetEntities()
   }
 }
 
 function libraryChanged() {
   if (currentLibraryMediaType.value !== 'book' && (props.page === 'series' || props.page === 'collections' || props.page === 'series-books')) {
-    router.replace('/bookshelf')
+    void router.replace('/bookshelf')
     return
   }
 
   if (hasFilter.value) {
     clearFilter()
   } else {
-    resetEntities()
+    void resetEntities()
   }
 }
 
 function libraryItemAdded(libraryItem: Record<string, unknown>) {
   console.log('libraryItem added', libraryItem)
   // TODO: Check if item would be on this shelf
-  resetEntities()
+  void resetEntities()
 }
 
 function libraryItemUpdated(libraryItem: Record<string, unknown>) {
@@ -532,7 +532,7 @@ function libraryItemRemoved(libraryItem: Record<string, unknown>) {
 function libraryItemsAdded(libraryItems: Record<string, unknown>[]) {
   console.log('items added', libraryItems)
   // TODO: Check if item would be on this shelf
-  resetEntities()
+  void resetEntities()
 }
 
 function libraryItemsUpdated(libraryItems: Record<string, unknown>[]) {
@@ -544,7 +544,7 @@ function libraryItemsUpdated(libraryItems: Record<string, unknown>[]) {
 function screenOrientationChange() {
   setTimeout(() => {
     console.log('LazyBookshelf Screen orientation change')
-    resetEntities()
+    void resetEntities()
   }, 50)
 }
 
@@ -601,7 +601,7 @@ onUpdated(() => {
 
 onMounted(() => {
   routeFullPath.value = window.location.pathname + (window.location.search || '')
-  init()
+  void init()
   initListeners()
 })
 

@@ -311,12 +311,12 @@ async function dialogAction(action: string) {
   await hapticsImpact()
 
   if (action == 'delete') {
-    deleteItem()
+    void deleteItem()
   } else if (action == 'track-delete') {
-    if (isPodcast.value) deleteEpisode()
-    else deleteTrack()
+    if (isPodcast.value) void deleteEpisode()
+    else void deleteTrack()
   } else if (action == 'play-episode') {
-    playEpisode()
+    void playEpisode()
   }
   showDialog.value = false
 }
@@ -390,7 +390,7 @@ async function deleteItem() {
     const res = await AbsFileSystem.deleteItem(localLibraryItem.value)
     if (res && res.success) {
       toast.success('Deleted Successfully')
-      router.replace(isIos.value ? '/downloads' : `/localMedia/folders/${folderId.value}`)
+      void router.replace(isIos.value ? '/downloads' : `/localMedia/folders/${folderId.value}`)
     } else toast.error('Failed to delete')
   }
 }
@@ -411,7 +411,7 @@ async function init() {
 }
 
 onMounted(() => {
-  init()
+  void init()
 })
 </script>
 

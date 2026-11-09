@@ -100,7 +100,7 @@ onMounted(async () => {
     appStore.isCastAvailable = !!(data && data.value)
   })
   const castSupportedFn = (AbsAudioPlayer as Record<string, unknown>).getIsCastSupported as (() => Promise<{ value?: boolean } | null>) | undefined
-  castSupportedFn?.()?.then?.((data) => {
+  void castSupportedFn?.()?.then?.((data) => {
     appStore.isCastEnabled = !!(data && data.value)
   })
   onCastAvailableUpdateListener.value = await AbsAudioPlayer.addListener('onCastAvailableUpdate', onCastAvailableUpdate)

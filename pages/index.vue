@@ -28,18 +28,18 @@ async function init() {
     // Minimal mode is a whole-app mode, so it has to be honoured here rather than by redirecting
     // out of the bookshelf - otherwise the app someone asked not to see flashes up on every start
     if (await useLocalStore().getMinimalModeOnLaunch()) {
-      router.replace('/minimal')
+      void router.replace('/minimal')
     } else {
-      router.replace('/bookshelf')
+      void router.replace('/bookshelf')
     }
   } else {
-    router.replace('/connect')
+    void router.replace('/connect')
   }
 }
 
 onMounted(() => {
   librariesStore.reset()
   appStore.isFirstLoad = true
-  init()
+  void init()
 })
 </script>

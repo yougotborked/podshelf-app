@@ -93,7 +93,7 @@ const listeningSummary = computed<ListeningSummary>(() => ({
 
 watch(currentLibraryId, (newVal) => {
   if (newVal) {
-    init()
+    void init()
   }
 })
 
@@ -111,6 +111,6 @@ async function init() {
 }
 
 onMounted(() => {
-  init()
+  void init()
 })
 </script>

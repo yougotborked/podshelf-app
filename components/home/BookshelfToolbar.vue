@@ -44,9 +44,11 @@ const showMoreMenuDialog = ref(false)
 
 const bookshelfListView = computed({
   get: () => globalsStore.bookshelfListView,
-  set: async (val: boolean) => {
-    await localStore.setBookshelfListView(val)
-    globalsStore.bookshelfListView = val
+  set: (val: boolean) => {
+    // A setter cannot be awaited; the store follows once the preference has been written.
+    void localStore.setBookshelfListView(val).then(() => {
+      globalsStore.bookshelfListView = val
+    })
   }
 })
 
@@ -124,7 +126,7 @@ function updateFilter() {
 }
 
 function saveSettings() {
-  userStore.updateUserSettings(settings.value as Parameters<typeof userStore.updateUserSettings>[0])
+  void userStore.updateUserSettings(settings.value as Parameters<typeof userStore.updateUserSettings>[0])
 }
 
 async function init() {
@@ -153,7 +155,7 @@ function downloadSeries() {
 }
 
 onMounted(() => {
-  init()
+  void init()
   eventBus.on('bookshelf-total-entities', setTotalEntities)
   eventBus.on('user-settings', settingsUpdated)
 })

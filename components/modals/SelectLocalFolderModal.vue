@@ -46,7 +46,7 @@ const mediaType = computed(() => modalData.value.mediaType as string)
 
 watch(show, (newVal) => {
   if (newVal) {
-    nextTick(init)
+    void nextTick(init)
   }
 })
 

@@ -80,7 +80,7 @@ async function init() {
 
 onMounted(() => {
   eventBus.on('new-local-library-item', newLocalLibraryItem)
-  init()
+  void init()
 })
 
 onBeforeUnmount(() => {

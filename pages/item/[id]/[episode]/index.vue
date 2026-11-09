@@ -282,9 +282,9 @@ async function deleteLocalEpisode() {
     if (res?.id) {
       if (isLocal.value) {
         if (serverEpisodeId.value) {
-          router.replace(`/item/${serverLibraryItemId.value}/${serverEpisodeId.value}`)
+          void router.replace(`/item/${serverLibraryItemId.value}/${serverEpisodeId.value}`)
         } else {
-          router.replace(`/item/${localLibraryItemId.value}`)
+          void router.replace(`/item/${localLibraryItemId.value}`)
         }
       } else {
         libraryItem.value = { ...libraryItem.value, localLibraryItem: res }
@@ -351,7 +351,7 @@ function bindTimeMarkerEvents() {
   if (container) {
     container.addEventListener('click', (event: any) => {
       if (event.target.classList.contains('time-marker')) {
-        clickPlaybackTime(event)
+        void clickPlaybackTime(event)
       }
     })
   }
@@ -370,9 +370,9 @@ async function downloadClick() {
 
   await hapticsImpact()
   if (isIos.value) {
-    startDownload()
+    void startDownload()
   } else {
-    download()
+    void download()
   }
 }
 
@@ -399,7 +399,7 @@ async function download(selectedLocalFolder: any = null) {
       globalsStore.showSelectLocalFolderModalAction({
         mediaType,
         callback: (folder: any) => {
-          download(folder)
+          void download(folder)
         }
       })
       return
@@ -407,7 +407,7 @@ async function download(selectedLocalFolder: any = null) {
   }
 
   console.log('Local folder', JSON.stringify(localFolder))
-  startDownload(localFolder)
+  void startDownload(localFolder)
 }
 
 async function startDownload(localFolder?: any) {
@@ -429,16 +429,16 @@ async function startDownload(localFolder?: any) {
 function moreMenuAction(action: string) {
   showMoreMenu.value = false
   if (action === 'markFinished') {
-    toggleFinished()
+    void toggleFinished()
   } else if (action === 'discardProgress') {
-    discardProgress()
+    void discardProgress()
   } else if (action === 'playlist' && !isLocal.value) {
     globalsStore.selectedPlaylistItems = [{ libraryItem: libraryItem.value, episode: episode.value }]
     globalsStore.showPlaylistsAddCreateModal = true
   } else if (action === 'remove_from_server' && serverEpisodeId.value && isAdminOrUp.value) {
-    deleteEpisodeFromServerClick()
+    void deleteEpisodeFromServerClick()
   } else if (action === 'deleteLocal') {
-    deleteLocalEpisode()
+    void deleteLocalEpisode()
   }
 }
 
@@ -518,7 +518,7 @@ async function deleteEpisodeFromServerClick() {
     nativeHttp
       .delete(`/api/podcasts/${serverLibraryItemId.value}/episode/${serverEpisodeId.value}?hard=1`, { connectTimeout: 10000 })
       .then(() => {
-        router.replace(`/item/${serverLibraryItemId.value}`)
+        void router.replace(`/item/${serverLibraryItemId.value}`)
       })
       .catch((error: any) => {
         const errorMsg = error.response?.data || 'Failed to delete episode'
@@ -616,8 +616,8 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   eventBus.off('new-local-library-item', newLocalLibraryItem)
-  document.querySelectorAll('.time-marker').forEach((marker) => {
-    marker.removeEventListener('click', clickPlaybackTime)
-  })
+  // The click listener is one delegated handler on .description-container (bindTimeMarkerEvents),
+  // which goes with the page. The loop that used to be here removed clickPlaybackTime from each
+  // marker, a listener that was never added to them.
 })
 </script>

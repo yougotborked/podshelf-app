@@ -196,7 +196,7 @@ async function clearSelected() {
 }
 
 function clickedSublistOption(item: string) {
-  clickedOption({ value: `${sublist.value}.${item}` })
+  void clickedOption({ value: `${sublist.value}.${item}` })
 }
 
 async function clickedOption(option: { value: string; sublist?: boolean }) {

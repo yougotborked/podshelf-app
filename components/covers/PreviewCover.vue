@@ -77,7 +77,7 @@ function imageLoaded() {
 
     if (arDiff > 0.15) {
       showCoverBg.value = true
-      nextTick(setCoverBg)
+      void nextTick(setCoverBg)
     } else {
       showCoverBg.value = false
     }

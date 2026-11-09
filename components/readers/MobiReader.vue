@@ -98,7 +98,7 @@ async function initMobi() {
 }
 
 onMounted(() => {
-  initMobi()
+  void initMobi()
 })
 </script>
 

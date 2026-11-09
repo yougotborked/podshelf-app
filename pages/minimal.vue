@@ -233,7 +233,7 @@ async function loadEpisodes() {
     const payload = (await nativeHttp.get(`/api/libraries/${libraryId}/recent-episodes?limit=200`, { connectTimeout: 10000 })) as Record<string, unknown> | null
     if (!payload) throw new Error('Empty response payload')
     episodes.value = (payload.episodes as ListeningEpisode[]) || []
-    localStore.setCachedLatestEpisodes(libraryId, episodes.value)
+    void localStore.setCachedLatestEpisodes(libraryId, episodes.value)
   } catch (error) {
     console.error('[minimal] Failed to get recent episodes', error)
     await useCachedOrLocalEpisodes(libraryId)
@@ -336,7 +336,7 @@ async function leave() {
   // Turn the launch preference off on the way out, so "leave" is not undone by the next start.
   // Someone pressing this wants the full app back, not the full app until they close it.
   await localStore.setMinimalModeOnLaunch(false)
-  router.replace('/bookshelf')
+  void router.replace('/bookshelf')
 }
 
 function onPlayingUpdate(data: { value?: boolean }) {
@@ -363,7 +363,7 @@ watch(current, () => {
 watch(
   () => librariesStore.currentLibraryId,
   (libraryId) => {
-    if (libraryId) refresh()
+    if (libraryId) void refresh()
   }
 )
 

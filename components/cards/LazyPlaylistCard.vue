@@ -54,7 +54,7 @@ function setSelectionMode(val: boolean) {
 
 function clickCard() {
   if (!playlist.value) return
-  router.push(`/playlist/${playlist.value.id}`)
+  void router.push(`/playlist/${playlist.value.id}`)
 }
 
 onMounted(() => {

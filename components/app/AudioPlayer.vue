@@ -562,7 +562,7 @@ watch(title, (val) => {
 
 // ── Methods ───────────────────────────────────────────────────────────────────
 function showSyncsFailedDialog() {
-  Dialog.alert({
+  void Dialog.alert({
     title: getString('HeaderProgressSyncFailed'),
     message: getString('MessageProgressSyncFailed'),
     buttonTitle: getString('ButtonOk')
@@ -592,7 +592,7 @@ function clickTitleAndAuthor() {
   if (!showFullscreen.value) return
   const llid = props.serverLibraryItemId || (libraryItem.value?.id as string) || (localLibraryItem.value?.id as string)
   if (llid) {
-    router.push(`/item/${llid}`)
+    void router.push(`/item/${llid}`)
     showFullscreen.value = false
   }
 }
@@ -622,7 +622,7 @@ function expandToFullscreen() {
 
   // The track is a different width in fullscreen, so remeasure rather than repaint against the
   // collapsed width
-  nextTick(() => {
+  void nextTick(() => {
     measureAndUpdateTrackWidth()
   })
 }
@@ -849,12 +849,15 @@ function pause() {
 
 function startPlayInterval() {
   clearInterval(playInterval.value ?? undefined)
-  playInterval.value = setInterval(async () => {
-    const data = await AbsAudioPlayer.getCurrentTime()
-    currentTime.value = Number(data.value.toFixed(2))
-    bufferedTime.value = Number(data.bufferedTime.toFixed(2))
-    timeupdate()
-  }, 1000)
+  playInterval.value = setInterval(
+    asVoidHandler(async () => {
+      const data = await AbsAudioPlayer.getCurrentTime()
+      currentTime.value = Number(data.value.toFixed(2))
+      bufferedTime.value = Number(data.bufferedTime.toFixed(2))
+      timeupdate()
+    }),
+    1000
+  )
 }
 
 function stopPlayInterval() {
@@ -936,20 +939,20 @@ function touchmove(e: TouchEvent) {
 async function clickMenuAction(action: string) {
   await hapticsImpact()
   showMoreMenuDialog.value = false
-  nextTick(() => {
+  void nextTick(() => {
     if (action === 'minimal') {
       showFullscreen.value = false
-      router.push('/minimal')
+      void router.push('/minimal')
     } else if (action === 'history') {
-      router.push(`/media/${mediaId.value}/history?title=${title.value}`)
+      void router.push(`/media/${mediaId.value}/history?title=${title.value}`)
       showFullscreen.value = false
     } else if (action === 'scale_elapsed_time') {
       playerSettings.value.scaleElapsedTimeBySpeed = !playerSettings.value.scaleElapsedTimeBySpeed
       updateTimestamp()
-      savePlayerSettings()
+      void savePlayerSettings()
     } else if (action === 'lock') {
       playerSettings.value.lockUi = !playerSettings.value.lockUi
-      savePlayerSettings()
+      void savePlayerSettings()
     } else if (action === 'chapter_track') {
       playerSettings.value.useChapterTrack = !playerSettings.value.useChapterTrack
       playerSettings.value.useTotalTrack = !playerSettings.value.useChapterTrack || playerSettings.value.useTotalTrack
@@ -958,7 +961,7 @@ async function clickMenuAction(action: string) {
       updateTrack()
       updateReadyTrack()
       updateUseChapterTrack()
-      savePlayerSettings()
+      void savePlayerSettings()
     } else if (action === 'total_track') {
       playerSettings.value.useTotalTrack = !playerSettings.value.useTotalTrack
       playerSettings.value.useChapterTrack = !playerSettings.value.useTotalTrack || playerSettings.value.useChapterTrack
@@ -967,7 +970,7 @@ async function clickMenuAction(action: string) {
       updateTrack()
       updateReadyTrack()
       updateUseChapterTrack()
-      savePlayerSettings()
+      void savePlayerSettings()
     } else if (action === 'close') {
       closePlayback()
     }
@@ -1012,7 +1015,7 @@ async function loadPlayerSettings() {
       const playerLockPref = await localStore.getPreferenceByKey('playerLock')
       playerSettings.value.lockUi = playerLockPref === '1'
     }
-    savePlayerSettings()
+    void savePlayerSettings()
   } else {
     playerSettings.value.useChapterTrack = !!savedPlayerSettings.useChapterTrack
     playerSettings.value.useTotalTrack = !!savedPlayerSettings.useTotalTrack
@@ -1076,7 +1079,7 @@ function onPlaybackSession(ps: Record<string, unknown>, opts?: { isLoading?: boo
   appStore.setPlaybackSession(ps as unknown as import('~/types').PlaybackSession)
 
   // Set track width
-  nextTick(() => {
+  void nextTick(() => {
     if (titleMarquee.value) titleMarquee.value.reset()
     showTitle(title.value)
 
@@ -1132,6 +1135,8 @@ async function screenOrientationChange() {
   isRefreshingUI.value = false
 }
 
+const screenOrientationChangeListener = asVoidHandler(screenOrientationChange)
+
 function measureAndUpdateTrackWidth() {
   if (!track.value) {
     console.error('Track not loaded')
@@ -1144,7 +1149,7 @@ function measureAndUpdateTrackWidth() {
 
 function refreshUI() {
   updateScreenSize()
-  nextTick(() => {
+  void nextTick(() => {
     measureAndUpdateTrackWidth()
   })
 }
@@ -1204,7 +1209,7 @@ function showProgressSyncSuccess() {
 async function registerAppStateListener() {
   if (!Capacitor?.isPluginAvailable || !Capacitor.isPluginAvailable('App')) return
   try {
-    appStateListener.value = await App.addListener('appStateChange', onAppStateChange)
+    appStateListener.value = await App.addListener('appStateChange', onAppStateChangeListener)
   } catch (error) {
     console.error('[AudioPlayer] Failed to register app state listener', error)
   }
@@ -1219,6 +1224,8 @@ async function onAppStateChange(state: { isActive: boolean }) {
     stopPlayInterval()
   }
 }
+
+const onAppStateChangeListener = asVoidHandler(onAppStateChange)
 
 async function refreshCurrentPlaybackPosition() {
   if (!playbackSession.value || typeof AbsAudioPlayer?.getCurrentTime !== 'function') return
@@ -1289,19 +1296,19 @@ onMounted(() => {
   updateScreenSize()
   if (screen.orientation) {
     // Not available on ios
-    screen.orientation.addEventListener('change', screenOrientationChange)
+    screen.orientation.addEventListener('change', screenOrientationChangeListener)
   } else {
-    document.addEventListener('orientationchange', screenOrientationChange)
+    document.addEventListener('orientationchange', screenOrientationChangeListener)
   }
-  window.addEventListener('resize', screenOrientationChange)
+  window.addEventListener('resize', screenOrientationChangeListener)
 
-  registerAppStateListener()
+  void registerAppStateListener()
 
   bus.on('minimize-player', minimizePlayerEvt)
   document.body.addEventListener('touchstart', touchstart, { passive: false })
   document.body.addEventListener('touchend', touchend)
   document.body.addEventListener('touchmove', touchmove)
-  nextTick(async () => {
+  void nextTick(async () => {
     await init()
     const saved = appStore.currentPlaybackSession
     if (saved) {
@@ -1317,11 +1324,11 @@ onMounted(() => {
 onBeforeUnmount(() => {
   if (screen.orientation) {
     // Not available on ios
-    screen.orientation.removeEventListener('change', screenOrientationChange)
+    screen.orientation.removeEventListener('change', screenOrientationChangeListener)
   } else {
-    document.removeEventListener('orientationchange', screenOrientationChange)
+    document.removeEventListener('orientationchange', screenOrientationChangeListener)
   }
-  window.removeEventListener('resize', screenOrientationChange)
+  window.removeEventListener('resize', screenOrientationChangeListener)
 
   if (loadingWatchdog) clearTimeout(loadingWatchdog)
   if (seekWatchdog) clearTimeout(seekWatchdog)

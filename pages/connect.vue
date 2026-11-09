@@ -108,6 +108,6 @@ onMounted(() => {
   // Reset data on logouts
   librariesStore.reset()
   appStore.isFirstLoad = true
-  init()
+  void init()
 })
 </script>

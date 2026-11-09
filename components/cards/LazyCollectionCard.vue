@@ -54,7 +54,7 @@ function setSelectionMode(val: boolean) {
 
 function clickCard() {
   if (!collection.value) return
-  router.push(`/collection/${collection.value.id}`)
+  void router.push(`/collection/${collection.value.id}`)
 }
 
 defineExpose({ setEntity, setSelectionMode, isHovering: false })

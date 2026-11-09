@@ -42,13 +42,13 @@ const serverVersion = computed(() => {
 
 onMounted(() => {
   if (!appStore.socketConnected) {
-    router.push('/connect')
+    void router.push('/connect')
   }
 })
 
 async function logout() {
   await useHaptics().impact()
   await userStore.logout()
-  router.push('/connect')
+  void router.push('/connect')
 }
 </script>

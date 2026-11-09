@@ -78,7 +78,7 @@ function setSelectionMode(val: boolean) {
 
 function clickCard() {
   if (!series.value) return
-  router.push(`/bookshelf/series/${seriesId.value}`)
+  void router.push(`/bookshelf/series/${seriesId.value}`)
 }
 
 onMounted(() => {

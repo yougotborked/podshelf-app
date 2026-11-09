@@ -81,8 +81,10 @@ async function downloadSeriesClick() {
   }, 1000)
 
   await hapticsImpact()
-  download()
+  void download()
 }
+
+const downloadSeriesClickListener = asVoidHandler(downloadSeriesClick)
 
 function buildSearchParams() {
   let searchParams = new URLSearchParams()
@@ -164,7 +166,7 @@ async function download(selectedLocalFolder: any = null) {
       globalsStore.showSelectLocalFolderModalAction({
         mediaType: mediaType.value,
         callback: (folder: any) => {
-          download(folder)
+          void download(folder)
         }
       })
       return
@@ -198,7 +200,7 @@ async function download(selectedLocalFolder: any = null) {
   })
   if (value) {
     for (let i = 0; i < libraryIds.value.length; i++) {
-      startDownload(localFolder, libraryIds.value[i])
+      void startDownload(localFolder, libraryIds.value[i])
     }
   }
   libraryIds.value = []
@@ -221,10 +223,10 @@ async function startDownload(localFolder: any = null, libraryItemId: string) {
 }
 
 onMounted(() => {
-  eventBus.on('download-series-click', downloadSeriesClick)
+  eventBus.on('download-series-click', downloadSeriesClickListener)
 })
 
 onBeforeUnmount(() => {
-  eventBus.off('download-series-click', downloadSeriesClick)
+  eventBus.off('download-series-click', downloadSeriesClickListener)
 })
 </script>

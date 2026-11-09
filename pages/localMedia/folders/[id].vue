@@ -86,7 +86,7 @@ function getLocalLibraryItemSubText(localLibraryItem: any) {
 function dialogAction(action: string) {
   console.log('Dialog action', action)
   if (action == 'remove') {
-    removeFolder()
+    void removeFolder()
   }
   showDialog.value = false
 }
@@ -104,7 +104,7 @@ async function removeFolder() {
     removingFolder.value = true
     await AbsFileSystem.removeFolder({ folderId })
     removingFolder.value = false
-    router.replace('/localMedia/folders')
+    void router.replace('/localMedia/folders')
   }
 }
 
@@ -141,7 +141,7 @@ function newLocalLibraryItem(item: any) {
 
 onMounted(() => {
   eventBus.on('new-local-library-item', newLocalLibraryItem)
-  init()
+  void init()
 })
 
 onBeforeUnmount(() => {
