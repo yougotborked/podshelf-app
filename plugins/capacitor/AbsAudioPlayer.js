@@ -283,7 +283,9 @@ class AbsAudioPlayerWeb extends WebPlugin {
       if (this.player.buffered && this.player.buffered.length) {
         buffered = this.player.buffered.end(0)
       }
-    } catch (e) {}
+    } catch {
+      // buffered.end() throws on a range that vanished; report none buffered
+    }
     this.notifyListeners('onTimeUpdate', {
       currentTime: this.overallCurrentTime,
       bufferedTime: buffered

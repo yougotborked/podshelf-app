@@ -87,7 +87,7 @@ export function useUtils() {
     if (minutes < 70) {
       return `${minutes} min${useFullNames ? `ute${minutes === 1 ? '' : 's'}` : ''}`
     }
-    let hours = Math.floor(minutes / 60)
+    const hours = Math.floor(minutes / 60)
     minutes -= hours * 60
     if (!minutes) {
       return `${hours} ${useFullNames ? 'hours' : 'hr'}`
@@ -149,11 +149,13 @@ export function useUtils() {
   const sanitizeFilename = (input: string, colonReplacement = ' - '): string | false => {
     if (typeof input !== 'string') return false
     const MAX_FILENAME_LEN = 240
-    const illegalRe = /[\/\?<>\\:\*\|"]/g
+    const illegalRe = /[/?<>\\:*|"]/g
+    // Control characters are exactly what a filename must not contain, so the rule is the point.
+    // eslint-disable-next-line no-control-regex
     const controlRe = /[\x00-\x1f\x80-\x9f]/g
     const reservedRe = /^\.+$/
     const windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i
-    const windowsTrailingRe = /[\. ]+$/
+    const windowsTrailingRe = /[. ]+$/
     const lineBreaks = /[\n\r]/g
     let sanitized = input
       .replace(':', colonReplacement)

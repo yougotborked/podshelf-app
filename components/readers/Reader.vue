@@ -547,7 +547,7 @@ export default {
       }
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.unregisterListeners()
   }
 }

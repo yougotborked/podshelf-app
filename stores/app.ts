@@ -302,7 +302,7 @@ export const useAppStore = defineStore('app', {
       libraries: for (const lib of librariesStore.libraries) {
         if ((lib as Record<string, unknown>).mediaType !== 'podcast') continue
         let page = 0
-        while (true) {
+        for (;;) {
           const payload = await nativeHttp.get(`/api/libraries/${(lib as Record<string, unknown>).id}/recent-episodes?limit=200&page=${page}`, { connectTimeout: 10000 }).catch(() => null)
           const episodes = (payload as Record<string, unknown>)?.episodes as Record<string, unknown>[] || []
           for (const ep of episodes) {
