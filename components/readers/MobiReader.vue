@@ -19,18 +19,6 @@ const props = defineProps<{
 
 const userStore = useUserStore()
 
-function addHtmlCss() {
-  const iframes = document.getElementsByTagName('iframe')
-  const iframe = iframes[0]
-  if (!iframe) return
-  const doc = iframe.contentDocument
-  if (!doc) return
-  const style = doc.createElement('style')
-  style.id = 'default-style'
-  style.textContent = defaultCss
-  doc.head.appendChild(style)
-}
-
 function handleIFrameHeight(iFrame: HTMLIFrameElement) {
   const isElement = (obj: unknown) => !!(obj && (obj as Node).nodeType === 1)
 

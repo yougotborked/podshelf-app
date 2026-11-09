@@ -38,7 +38,6 @@ const strings = useStrings()
 const userStore = useUserStore()
 const librariesStore = useLibrariesStore()
 const globalsStore = useGlobalsStore()
-const appStore = useAppStore()
 const nativeHttp = useNativeHttp()
 const toast = useToast()
 

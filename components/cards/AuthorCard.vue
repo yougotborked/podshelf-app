@@ -35,7 +35,6 @@ const strings = useStrings()
 const searching = ref(false)
 
 const _author = computed(() => props.author || {})
-const authorId = computed(() => _author.value.id)
 const name = computed(() => (_author.value.name as string) || '')
 const numBooks = computed(() => (_author.value.numBooks as number) || 0)
 </script>

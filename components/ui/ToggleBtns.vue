@@ -12,7 +12,7 @@ interface ToggleItem {
   text: string
 }
 
-const props = defineProps<{
+defineProps<{
   name?: string
   modelValue?: string | number | boolean
   items?: ToggleItem[]

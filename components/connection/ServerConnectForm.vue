@@ -452,10 +452,6 @@ async function oauthExchangeCodeForToken(code: string, state: string) {
   }
 }
 
-function addCustomHeaders() {
-  showAddCustomHeaders.value = true
-}
-
 function showServerList() {
   showForm.value = false
   showAuth.value = false

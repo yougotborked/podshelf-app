@@ -34,7 +34,7 @@
 
 <script setup lang="ts">
 import Path from 'path'
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watch } from 'vue'
 // @ts-ignore
 import { Archive } from 'libarchive.js/main.js'
 // @ts-ignore
@@ -77,7 +77,6 @@ const loadedFirstPage = ref(false)
 const comicMetadata = ref<Record<string, unknown> | null>(null)
 const pageMenuWidth = ref(256)
 
-const libraryItemId = computed(() => (props.libraryItem as Record<string, unknown>)?.id as string)
 const localLibraryItem = computed(() => {
   if (props.isLocal) return props.libraryItem
   return (props.libraryItem.localLibraryItem as Record<string, unknown>) || null
@@ -227,7 +226,6 @@ async function extract() {
   loading.value = true
 
   // TODO: Handle JWT auth refresh
-  const buff = await (window as unknown as Record<string, unknown>).$axios ? (window as unknown as Record<string, unknown>).$axios : null
   // Use fetch directly as $axios is not available in script setup
   const response = await fetch(props.url, {
     headers: {

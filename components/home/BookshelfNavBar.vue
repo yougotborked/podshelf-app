@@ -46,7 +46,6 @@
 const strings = useStrings()
 const appStore = useAppStore()
 const librariesStore = useLibrariesStore()
-const userStore = useUserStore()
 const route = useRoute()
 
 const currentLibrary = computed(() => librariesStore.getCurrentLibrary)
@@ -55,7 +54,6 @@ const userHasPlaylists = computed(() => {
   const autoUnfinished = (appStore.deviceData as Record<string, unknown>)?.deviceSettings && ((appStore.deviceData as Record<string, unknown>).deviceSettings as Record<string, unknown>)?.autoCacheUnplayedEpisodes
   return librariesStore.numUserPlaylists || autoUnfinished
 })
-const userIsAdminOrUp = computed(() => userStore.getIsAdminOrUp)
 const routeName = computed(() => route.name)
 const libraryMediaType = computed(() => librariesStore.getCurrentLibraryMediaType)
 const isPodcast = computed(() => libraryMediaType.value === 'podcast')

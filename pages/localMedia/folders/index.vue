@@ -61,7 +61,6 @@ const mediaTypeItems = [
     text: strings.LabelPodcasts
   }
 ]
-const syncing = ref(false)
 const isAndroid10OrBelow = ref(false)
 const overrideFolderRestriction = ref(false)
 

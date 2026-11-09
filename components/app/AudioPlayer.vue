@@ -206,7 +206,6 @@ const playInterval = ref<ReturnType<typeof setInterval> | null>(null)
 const trackWidth = ref(0)
 const isPlaying = ref(false)
 const isEnded = ref(false)
-const volume = ref(0.5)
 const readyTrackWidth = ref(0)
 const seekedTime = ref(0)
 const seekLoading = ref(false)
@@ -431,7 +430,6 @@ const currentChapterDuration = computed(() => {
   return totalDuration.value
 })
 
-const totalDurationPretty = computed(() => secondsToTimestamp(totalDuration.value))
 
 const currentTimePretty = computed(() => {
   let currentTimeToUse = isDraggingCursor.value ? draggingCurrentTime.value : currentTime.value
@@ -636,13 +634,6 @@ function collapseFullscreen() {
   forceCloseDropdownMenu()
 }
 
-async function jumpNextChapter() {
-  await hapticsImpact()
-  if (showLoadingState.value) return
-  if (!nextChapter.value) return
-  seek((nextChapter.value as Record<string, unknown>).start as number)
-}
-
 async function jumpNextChapterOrQueue() {
   await hapticsImpact()
   if (showLoadingState.value) return
@@ -670,10 +661,6 @@ async function jumpChapterStart() {
   } else {
     seek(currentChapter.value.start as number)
   }
-}
-
-function showSleepTimerModal() {
-  emit('showSleepTimer')
 }
 
 async function setPlaybackSpeed(speed: number) {

@@ -22,7 +22,6 @@ const props = defineProps<{
   isAltViewEnabled?: boolean
 }>()
 
-const librariesStore = useLibrariesStore()
 const router = useRouter()
 
 // State
@@ -43,7 +42,6 @@ const sizeMultiplier = computed(() => {
 })
 const title = computed(() => playlist.value ? playlist.value.name as string : '')
 const items = computed(() => playlist.value ? (playlist.value.items as unknown[]) || [] : [])
-const currentLibraryId = computed(() => librariesStore.currentLibraryId)
 
 // Methods
 function setEntity(p: Record<string, unknown>) {

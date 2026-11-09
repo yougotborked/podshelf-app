@@ -22,13 +22,11 @@ const props = defineProps<{
   isAltViewEnabled?: boolean
 }>()
 
-const librariesStore = useLibrariesStore()
 const router = useRouter()
 
 // State
 const collection = ref<Record<string, unknown> | null>(null)
 const isSelectionMode = ref(false)
-const selected = ref(false)
 
 // Refs
 const card = ref<HTMLElement | null>(null)
@@ -44,7 +42,6 @@ const sizeMultiplier = computed(() => {
 })
 const title = computed(() => collection.value ? collection.value.name as string : '')
 const books = computed(() => collection.value ? (collection.value.books as unknown[]) || [] : [])
-const currentLibraryId = computed(() => librariesStore.currentLibraryId)
 
 // Methods
 function setEntity(_collection: Record<string, unknown>) {

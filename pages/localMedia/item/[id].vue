@@ -156,7 +156,6 @@ const dragOptions = {
 const failed = ref(false)
 const localLibraryItem = ref<any>(null)
 const audioTracksCopy = ref<any[]>([])
-const removingItem = ref(false)
 const folderId = ref<string | null>(null)
 const folder = ref<any>(null)
 const showDialog = ref(false)
@@ -167,7 +166,6 @@ const orderChanged = ref(false)
 // Computed
 const isPlayerOpen = computed(() => appStore.getIsPlayerOpen)
 const isIos = computed(() => platform === 'ios')
-const basePath = computed(() => localLibraryItem.value?.basePath)
 const localFiles = computed(() => localLibraryItem.value?.localFiles || [])
 const otherFiles = computed(() => {
   if (!localFiles.value.filter) {
@@ -180,7 +178,6 @@ const otherFiles = computed(() => {
   })
 })
 const folderName = computed(() => folder.value?.name)
-const isInternalStorage = computed(() => folderId.value?.startsWith('internal-'))
 const mediaType = computed(() => localLibraryItem.value?.mediaType)
 const isPodcast = computed(() => mediaType.value == 'podcast')
 const libraryItemId = computed(() => localLibraryItem.value?.libraryItemId)

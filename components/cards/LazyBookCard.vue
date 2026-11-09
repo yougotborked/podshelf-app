@@ -128,7 +128,6 @@ const { impact } = useHaptics()
 const eventBus = useEventBus()
 
 // State
-const isProcessingReadUpdate = ref(false)
 const libraryItem = ref<Record<string, unknown> | null>(null)
 const imageReady = ref(false)
 const selected = ref(false)
@@ -164,9 +163,6 @@ const bookCoverSrc = computed(() => {
   return globalsStore.getLibraryItemCoverSrc(_libraryItem.value, placeholderUrl.value)
 })
 const libraryItemId = computed(() => _libraryItem.value.id as string)
-const libraryId = computed(() => _libraryItem.value.libraryId as string)
-const hasEbook = computed(() => media.value.ebookFile)
-const numTracks = computed(() => media.value.numTracks as number)
 const numEpisodes = computed(() => {
   if (isLocal.value && isPodcast.value && media.value.episodes) return (media.value.episodes as unknown[]).length
   return media.value.numEpisodes as number
@@ -179,7 +175,6 @@ const processingBatch = computed(() => appStore.playerIsStartingPlayback)
 const collapsedSeries = computed(() => _libraryItem.value.collapsedSeries as Record<string, unknown> | undefined)
 const booksInSeries = computed(() => (collapsedSeries.value?.numBooks as number) || 0)
 const seriesSequenceList = computed(() => (collapsedSeries.value?.seriesSequenceList as string) || null)
-const libraryItemIdsInSeries = computed(() => (collapsedSeries.value?.libraryItemIds as string[]) || [])
 const hasCover = computed(() => !!media.value.coverPath)
 const squareAspectRatio = computed(() => (props.bookCoverAspectRatio || 0) === 1)
 const sizeMultiplier = computed(() => {
@@ -187,8 +182,6 @@ const sizeMultiplier = computed(() => {
   return (props.width || 120) / baseSize
 })
 const title = computed(() => (mediaMetadata.value.title as string) || '')
-const playIconFontSize = computed(() => Math.max(2, 3 * sizeMultiplier.value))
-const authors = computed(() => (mediaMetadata.value.authors as unknown[]) || [])
 const author = computed(() => {
   if (isPodcast.value) return mediaMetadata.value.author as string
   return mediaMetadata.value.authorName as string
@@ -269,18 +262,6 @@ const playerIsStartingForThisMedia = computed(() => {
 const isMissing = computed(() => _libraryItem.value.isMissing as boolean)
 const isInvalid = computed(() => _libraryItem.value.isInvalid as boolean)
 const isExplicit = computed(() => !!( mediaMetadata.value.explicit))
-const overlayWrapperClasslist = computed(() => {
-  const classes: string[] = []
-  if (isSelectionMode.value) classes.push('opacity-60')
-  else classes.push('opacity-40')
-  if (selected.value) {
-    classes.push('border-2 border-md-primary')
-  }
-  return classes
-})
-const userCanUpdate = computed(() => userStore.getUserCanUpdate)
-const userCanDelete = computed(() => userStore.getUserCanDelete)
-const userCanDownload = computed(() => userStore.getUserCanDownload)
 const titleFontSize = computed(() => 0.75 * sizeMultiplier.value)
 const authorFontSize = computed(() => 0.6 * sizeMultiplier.value)
 const placeholderCoverPadding = computed(() => 0.8 * sizeMultiplier.value)

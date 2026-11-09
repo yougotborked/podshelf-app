@@ -12,14 +12,12 @@ import { useGlobalsStore } from '~/stores/globals'
 import { useEventBus } from '~/composables/useEventBus'
 import { useToast } from '~/composables/useToast'
 import { useStrings } from '~/composables/useStrings'
-import { usePlatform } from '~/composables/usePlatform'
 
 const router = useRouter()
 const globalsStore = useGlobalsStore()
 const eventBus = useEventBus()
 const toast = useToast()
 const strings = useStrings()
-const platform = usePlatform()
 
 let downloadItemListener: { remove: () => void } | null = null
 let completeListener: { remove: () => void } | null = null
@@ -47,7 +45,6 @@ const progress = computed(() => {
   return Math.min(1, totalBytesDownloaded / totalBytes)
 })
 
-const isIos = computed(() => platform === 'ios')
 
 function clickedIt() {
   router.push('/downloading')
