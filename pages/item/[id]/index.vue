@@ -38,13 +38,13 @@
 
         <div v-if="hasLocal" class="mx-1">
           <div v-if="currentServerConnectionConfigId && !isLocalMatchingServerAddress" class="w-full rounded-md bg-warning/10 border border-warning p-4">
-            <p class="text-sm">{{ $getString('MessageMediaLinkedToADifferentServer', [localLibraryItem.serverAddress]) }}</p>
+            <p class="text-sm">{{ $getString('MessageMediaLinkedToADifferentServer', [localLibraryItem?.serverAddress ?? '']) }}</p>
           </div>
           <div v-else-if="currentServerConnectionConfigId && !isLocalMatchingUser" class="w-full rounded-md bg-warning/10 border border-warning p-4">
             <p class="text-sm">{{ $strings.MessageMediaLinkedToADifferentUser }}</p>
           </div>
           <div v-else-if="currentServerConnectionConfigId && !isLocalMatchingConnectionConfig" class="w-full rounded-md bg-warning/10 border border-warning p-4">
-            <p class="text-sm">Media is linked to a different server connection config. Downloaded User Id: {{ localLibraryItem.serverUserId }}. Downloaded Server Address: {{ localLibraryItem.serverAddress }}. Currently connected User Id: {{ user?.id }}. Currently connected server address: {{ currentServerAddress }}.</p>
+            <p class="text-sm">Media is linked to a different server connection config. Downloaded User Id: {{ localLibraryItem?.serverUserId }}. Downloaded Server Address: {{ localLibraryItem?.serverAddress }}. Currently connected User Id: {{ user?.id }}. Currently connected server address: {{ currentServerAddress }}.</p>
           </div>
         </div>
 
@@ -84,12 +84,12 @@
         </div>
 
         <!-- metadata -->
-        <div id="metadata" class="grid gap-2 my-2" style>
+        <div id="metadata" class="grid gap-2 my-2">
           <div v-if="podcastAuthor || bookAuthors?.length" class="text-md-label-s text-md-on-surface-variant uppercase tracking-wide">{{ $strings.LabelAuthor }}</div>
           <div v-if="podcastAuthor" class="text-sm">{{ podcastAuthor }}</div>
           <div v-else-if="bookAuthors?.length" class="text-sm">
             <template v-for="(author, index) in bookAuthors" :key="author.id">
-              <nuxt-link :to="`/bookshelf/library?filter=authors.${encode(author.id)}`" class="underline whitespace-nowrap">{{ author.name }}</nuxt-link
+              <nuxt-link :to="`/bookshelf/library?filter=authors.${encode(author.id ?? '')}`" class="underline whitespace-nowrap">{{ author.name }}</nuxt-link
               ><span v-if="(index as number) < bookAuthors.length - 1">, </span>
             </template>
           </div>
@@ -101,12 +101,12 @@
           <div v-if="series?.length" class="text-sm">
             <template v-for="(series, index) in seriesList" :key="series.id">
               <nuxt-link :to="`/bookshelf/series/${series.id}`" class="underline whitespace-nowrap">{{ series.text }}</nuxt-link
-              ><span v-if="(index as number) < seriesList.length - 1">, </span>
+              ><span v-if="(index as number) < (seriesList?.length ?? 0) - 1">, </span>
             </template>
           </div>
 
           <div v-if="numTracks" class="text-md-label-s text-md-on-surface-variant uppercase tracking-wide">{{ $strings.LabelDuration }}</div>
-          <div v-if="numTracks" class="text-sm">{{ $elapsedPretty(duration) }}</div>
+          <div v-if="numTracks" class="text-sm">{{ $elapsedPretty(duration ?? 0) }}</div>
 
           <div v-if="narrators?.length" class="text-md-label-s text-md-on-surface-variant uppercase tracking-wide">{{ $strings.LabelNarrators }}</div>
           <div v-if="narrators?.length" class="text-sm">
@@ -146,7 +146,7 @@
         </div>
 
         <!-- tables -->
-        <tables-podcast-episodes-table v-if="isPodcast" :library-item="libraryItem" :local-library-item-id="localLibraryItemId" :episodes="episodes" :local-episodes="localLibraryItemEpisodes" :is-local="isLocal" />
+        <tables-podcast-episodes-table v-if="isPodcast" :library-item="libraryItem" :local-library-item-id="localLibraryItemId ?? undefined" :episodes="episodes" :local-episodes="localLibraryItemEpisodes" :is-local="isLocal" />
 
         <tables-chapters-table v-if="numChapters" :library-item="libraryItem" @playAtTimestamp="playAtTimestamp" />
 
@@ -174,6 +174,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Dialog } from '@capacitor/dialog'
 import { AbsDownloader, AbsLogger } from '@/plugins/capacitor'
 import { useCellularPermission } from '~/composables/useCellularPermission'
+import type { LibraryItem, LibraryItemMedia, LocalFolder } from '~/types'
 
 const route = useRoute()
 const router = useRouter()
@@ -195,7 +196,7 @@ const { checkCellularPermission } = useCellularPermission()
 const libraryItemId = route.params.id as string
 
 // State
-const libraryItem = ref<any>(null)
+const libraryItem = ref<LibraryItem | null>(null)
 const loadedFromCache = ref(false)
 const processing = ref(false)
 const showSelectLocalFolder = ref(false)
@@ -253,7 +254,10 @@ const bookCoverAspectRatio = computed(() => globalsStore.getBookCoverAspectRatio
 const rssFeed = computed(() => libraryItem.value?.rssFeed)
 const mediaType = computed(() => libraryItem.value?.mediaType)
 const isPodcast = computed(() => mediaType.value == 'podcast')
-const media = computed(() => libraryItem.value?.media || {})
+// A shared empty value, so `media.value.tags` is typed and an item still loading reads as
+// "nothing yet" instead of failing.
+const EMPTY_MEDIA: LibraryItemMedia = { metadata: {} }
+const media = computed(() => libraryItem.value?.media ?? EMPTY_MEDIA)
 const tags = computed(() => media.value.tags || [])
 const mediaMetadata = computed(() => media.value.metadata || {})
 const title = computed(() => mediaMetadata.value.title)
@@ -277,7 +281,7 @@ const description = computed(() => mediaMetadata.value.description || '')
 const series = computed(() => mediaMetadata.value.series || [])
 const seriesList = computed(() => {
   if (isPodcast.value) return null
-  return series.value.map((se: any) => {
+  return series.value.map((se) => {
     let text = se.name
     if (se.sequence) text += ` #${se.sequence}`
     return { ...se, text }
@@ -291,11 +295,11 @@ const userItemProgress = computed(() => {
   return serverItemProgress.value
 })
 const localItemProgress = computed(() => {
-  if (isPodcast.value) return null
+  if (isPodcast.value || !localLibraryItemId.value) return null
   return globalsStore.getLocalMediaProgressById(localLibraryItemId.value)
 })
 const serverItemProgress = computed(() => {
-  if (isPodcast.value) return null
+  if (isPodcast.value || !serverLibraryItemId.value) return null
   return userStore.getUserMediaProgress(serverLibraryItemId.value)
 })
 const userIsFinished = computed(() => !!userItemProgress.value?.isFinished)
@@ -308,13 +312,13 @@ const userTimeRemaining = computed(() => {
 })
 const useEBookProgress = computed(() => {
   if (!userItemProgress.value || userItemProgress.value.progress) return false
-  return userItemProgress.value.ebookProgress > 0
+  return Number(userItemProgress.value.ebookProgress) > 0
 })
 const progressPercent = computed(() => {
-  if (useEBookProgress.value) return Math.max(Math.min(1, userItemProgress.value.ebookProgress), 0)
-  return Math.max(Math.min(1, userItemProgress.value?.progress || 0), 0)
+  if (useEBookProgress.value) return Math.max(Math.min(1, Number(userItemProgress.value?.ebookProgress)), 0)
+  return Math.max(Math.min(1, Number(userItemProgress.value?.progress) || 0), 0)
 })
-const userProgressFinishedAt = computed(() => userItemProgress.value?.finishedAt || 0)
+const userProgressFinishedAt = computed(() => Number(userItemProgress.value?.finishedAt) || 0)
 const isStreaming = computed(() => isPlaying.value && !appStore.getIsCurrentSessionLocal)
 const isPlaying = computed(() => {
   if (localLibraryItemId.value && appStore.getIsMediaStreaming(localLibraryItemId.value)) return true
@@ -349,7 +353,7 @@ const showDownload = computed(() => {
   return user.value && userCanDownload.value && (showPlay.value || showRead.value)
 })
 const libraryFiles = computed(() => libraryItem.value?.libraryFiles || [])
-const ebookFiles = computed(() => libraryFiles.value.filter((lf: any) => lf.fileType === 'ebook'))
+const ebookFiles = computed(() => libraryFiles.value.filter((lf) => lf.fileType === 'ebook'))
 const ebookFile = computed(() => media.value.ebookFile)
 const ebookFormat = computed(() => {
   if (!ebookFile.value) return null
@@ -417,7 +421,7 @@ async function play(startTime: number | null = null) {
   if (playerIsStartingPlayback.value) return
 
   if (isPodcast.value) {
-    episodes.value.sort((a: any, b: any) => {
+    episodes.value.sort((a, b) => {
       if (podcastType.value === 'serial') {
         return String(a.publishedAt).localeCompare(String(b.publishedAt), undefined, { numeric: true, sensitivity: 'base' })
       } else {
@@ -425,7 +429,7 @@ async function play(startTime: number | null = null) {
       }
     })
 
-    let episode = episodes.value.find((ep: any) => {
+    let episode = episodes.value.find((ep) => {
       let podcastProgress = null
       if (!isLocal.value) {
         podcastProgress = userStore.getUserMediaProgress(libraryItemId, ep.id)
@@ -437,11 +441,12 @@ async function play(startTime: number | null = null) {
 
     if (!episode) episode = episodes.value[0]
 
+    if (!episode) return
     const episodeId = episode.id
 
     let localEpisode = null
     if (hasLocal.value && !isLocal.value) {
-      localEpisode = localLibraryItem.value.media.episodes.find((ep: any) => ep.serverEpisodeId == episodeId)
+      localEpisode = localLibraryItem.value?.media.episodes?.find((ep) => ep.serverEpisodeId == episodeId)
     } else if (isLocal.value) {
       localEpisode = episode
     }
@@ -452,7 +457,7 @@ async function play(startTime: number | null = null) {
     appStore.playerStartingPlaybackMediaId = serverEpisodeId
     if (serverEpisodeId && serverLibraryItemId.value && isCasting.value) {
       eventBus.emit('play-item', { libraryItemId: serverLibraryItemId.value, episodeId: serverEpisodeId })
-    } else if (localEpisode) {
+    } else if (localEpisode && localLibraryItem.value) {
       eventBus.emit('play-item', { libraryItemId: localLibraryItem.value.id, episodeId: localEpisode.id, serverLibraryItemId: serverLibraryItemId.value, serverEpisodeId })
     } else {
       eventBus.emit('play-item', { libraryItemId, episodeId })
@@ -463,14 +468,14 @@ async function play(startTime: number | null = null) {
 
     if (hasLocal.value && serverLibraryItemId.value && isCasting.value) {
       playLibraryItemId = serverLibraryItemId.value
-    } else if (hasLocal.value) {
+    } else if (hasLocal.value && localLibraryItem.value) {
       playLibraryItemId = localLibraryItem.value.id
     }
 
     if (startTime !== null && startTime !== undefined && !appStore.getIsMediaStreaming(playLibraryItemId, null)) {
       const { value } = await Dialog.confirm({
         title: useNuxtApp().$strings.HeaderConfirm,
-        message: useNuxtApp().$getString('MessageConfirmPlaybackTime', [title.value, useNuxtApp().$secondsToTimestamp(startTime)])
+        message: useNuxtApp().$getString('MessageConfirmPlaybackTime', [title.value ?? '', useNuxtApp().$secondsToTimestamp(startTime)])
       })
       if (!value) return
     }
@@ -481,7 +486,7 @@ async function play(startTime: number | null = null) {
   }
 }
 
-function itemUpdated(updatedLibraryItem: any) {
+function itemUpdated(updatedLibraryItem: LibraryItem) {
   if (updatedLibraryItem.id === serverLibraryItemId.value) {
     console.log('Item Updated')
     libraryItem.value = updatedLibraryItem
@@ -489,7 +494,7 @@ function itemUpdated(updatedLibraryItem: any) {
   }
 }
 
-function selectedLocalFolder(localFolder: any) {
+function selectedLocalFolder(localFolder: LocalFolder) {
   showSelectLocalFolder.value = false
   void download(localFolder)
 }
@@ -513,17 +518,17 @@ async function downloadClick() {
   }
 }
 
-async function download(selectedLocalFolder: any = null) {
+async function download(selectedLocalFolder: LocalFolder | null = null) {
   let localFolder = selectedLocalFolder
   if (!localFolder) {
     const localFolders = (await db.getLocalFolders()) || []
     console.log('Local folders loaded', localFolders.length)
-    const foldersWithMediaType = localFolders.filter((lf: any) => {
+    const foldersWithMediaType = localFolders.filter((lf) => {
       console.log('Checking local folder', lf.mediaType)
       return lf.mediaType == mediaType.value
     })
     console.log('Folders with media type', mediaType.value, foldersWithMediaType.length)
-    const internalStorageFolder = foldersWithMediaType.find((f: any) => f.id === `internal-${mediaType.value}`)
+    const internalStorageFolder = foldersWithMediaType.find((f) => f.id === `internal-${mediaType.value}`)
     if (!foldersWithMediaType.length) {
       localFolder = {
         id: `internal-${mediaType.value}`,
@@ -535,7 +540,7 @@ async function download(selectedLocalFolder: any = null) {
     } else {
       globalsStore.showSelectLocalFolderModalAction({
         mediaType: mediaType.value,
-        callback: (folder: any) => {
+        callback: (folder: LocalFolder) => {
           void download(folder)
         }
       })
@@ -561,8 +566,8 @@ async function download(selectedLocalFolder: any = null) {
   }
 }
 
-async function startDownload(localFolder: any = null) {
-  const payload: any = {
+async function startDownload(localFolder: LocalFolder | null = null) {
+  const payload: { libraryItemId: string; localFolderId?: string } = {
     libraryItemId
   }
   if (localFolder) {
@@ -577,7 +582,7 @@ async function startDownload(localFolder: any = null) {
   }
 }
 
-function newLocalLibraryItem(item: any) {
+function newLocalLibraryItem(item: LibraryItem) {
   if (item.libraryItemId == libraryItemId) {
     console.log('New local library item', item.id)
     if (libraryItem.value) {
@@ -620,14 +625,14 @@ function windowResized() {
   checkDescriptionClamped()
 }
 
-function rssFeedOpen(data: any) {
+function rssFeedOpen(data: { entityId?: string; [key: string]: unknown }) {
   if (data.entityId === serverLibraryItemId.value) {
     console.log('RSS Feed Opened', data)
     if (libraryItem.value) libraryItem.value = { ...libraryItem.value, rssFeed: data }
   }
 }
 
-function rssFeedClosed(data: any) {
+function rssFeedClosed(data: { entityId?: string; [key: string]: unknown }) {
   if (data.entityId === serverLibraryItemId.value) {
     console.log('RSS Feed Closed', data)
     if (libraryItem.value) libraryItem.value = { ...libraryItem.value, rssFeed: null }
@@ -656,20 +661,21 @@ function init() {
 
   updateBgGradientHeight()
 
-  if (appStore.lastItemScrollData.id === libraryItemId && (window as any)['item-page']) {
-    ;(window as any)['item-page'].scrollTop = appStore.lastItemScrollData.scrollTop || 0
+  const scroller = document.getElementById('item-page')
+  if (appStore.lastItemScrollData.id === libraryItemId && scroller) {
+    scroller.scrollTop = Number(appStore.lastItemScrollData.scrollTop) || 0
   }
 }
 
 async function loadServerLibraryItem() {
-  let fetchedItem = null
+  let fetchedItem: LibraryItem | null = null
 
   if (!appStore.isOffline && userStore.serverConnectionConfig) {
-    fetchedItem = await nativeHttp.get(`/api/items/${libraryItemId}?expanded=1&include=rssfeed`, { connectTimeout: 10000 }).catch((error: any) => {
+    fetchedItem = (await nativeHttp.get(`/api/items/${libraryItemId}?expanded=1&include=rssfeed`, { connectTimeout: 10000 }).catch((error: unknown) => {
       console.error('Failed to fetch library item', error)
-      AbsLogger.error({ tag: 'ItemPage', message: `Failed to fetch library item ${libraryItemId}: ${error?.message || error}` })
+      AbsLogger.error({ tag: 'ItemPage', message: `Failed to fetch library item ${libraryItemId}: ${(error as Error)?.message || error}` })
       return null
-    })
+    })) as LibraryItem | null
 
     if (fetchedItem) {
       await localStore.setCachedLibraryItem(fetchedItem as Record<string, unknown>)
@@ -677,18 +683,19 @@ async function loadServerLibraryItem() {
   }
 
   if (!fetchedItem) {
-    fetchedItem = await localStore.getCachedLibraryItem(libraryItemId)
+    fetchedItem = (await localStore.getCachedLibraryItem(libraryItemId)) as LibraryItem | null
     if (fetchedItem) {
       loadedFromCache.value = true
     }
   }
 
   if (!fetchedItem && route.query.localLibraryItemId) {
-    return router.replace(`/item/${route.query.localLibraryItemId as string}?noredirect=1`)
+    await router.replace(`/item/${route.query.localLibraryItemId as string}?noredirect=1`)
+    return
   }
 
   if (!fetchedItem) {
-    const fallbackLocal = (await db.getLocalLibraryItemByLId(libraryItemId).catch(() => null)) as any
+    const fallbackLocal = (await db.getLocalLibraryItemByLId(libraryItemId).catch(() => null)) as LibraryItem | null
     if (fallbackLocal) {
       fetchedItem = fallbackLocal
       loadedFromCache.value = true
@@ -697,15 +704,16 @@ async function loadServerLibraryItem() {
 
   if (!fetchedItem) {
     toast.error('Failed to get library item from server')
-    return leaveUnloadablePage(router, '/bookshelf')
+    await leaveUnloadablePage(router, '/bookshelf')
+    return
   }
 
   try {
-    const localLibraryItemCheck = (await db.getLocalLibraryItemByLId(libraryItemId)) as any
+    const localLibraryItemCheck = (await db.getLocalLibraryItemByLId(libraryItemId)) as LibraryItem | null
     if (localLibraryItemCheck) {
       fetchedItem.localLibraryItem = localLibraryItemCheck
     }
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error('Failed to get local library item', e)
   }
 
@@ -717,7 +725,7 @@ onMounted(async () => {
   const libItemId = libraryItemId
 
   if (libItemId.startsWith('local')) {
-    const localItem = (await db.getLocalLibraryItem(libItemId)) as any
+    const localItem = (await db.getLocalLibraryItem(libItemId)) as LibraryItem | null
     if (!localItem) {
       await navigateTo('/?error=Failed to get downloaded library item', { replace: true })
       return
@@ -736,7 +744,7 @@ onMounted(async () => {
     }
 
     if (localItem && !localItem.isLocal) {
-      const localLi = (await db.getLocalLibraryItemByLId(localItem.id || libItemId)) as any
+      const localLi = (await db.getLocalLibraryItemByLId(localItem.id || libItemId)) as LibraryItem | null
       if (localLi) {
         localItem.localLibraryItem = localLi
       }
@@ -744,11 +752,11 @@ onMounted(async () => {
 
     libraryItem.value = localItem
   } else if (!userStore.serverConnectionConfig) {
-    let cachedItem = (await localStore.getCachedLibraryItem(libItemId)) as any
+    let cachedItem = (await localStore.getCachedLibraryItem(libItemId)) as LibraryItem | null
     if (cachedItem) {
       loadedFromCache.value = true
     } else {
-      const fallbackLocal = (await db.getLocalLibraryItemByLId(libItemId)) as any
+      const fallbackLocal = (await db.getLocalLibraryItemByLId(libItemId)) as LibraryItem | null
       if (fallbackLocal) {
         cachedItem = fallbackLocal
         loadedFromCache.value = true
@@ -759,7 +767,7 @@ onMounted(async () => {
     }
 
     if (cachedItem && !cachedItem.isLocal) {
-      const localLi = (await db.getLocalLibraryItemByLId(cachedItem.id || libItemId)) as any
+      const localLi = (await db.getLocalLibraryItemByLId(cachedItem.id || libItemId)) as LibraryItem | null
       if (localLi) {
         cachedItem.localLibraryItem = localLi
       }
@@ -789,8 +797,9 @@ onBeforeUnmount(() => {
   socket.$off('rss_feed_open', rssFeedOpen)
   socket.$off('rss_feed_closed', rssFeedClosed)
 
-  if ((window as any)['item-page']) {
-    appStore.setLastItemScrollData({ scrollTop: (window as any)['item-page'].scrollTop || 0, id: libraryItemId })
+  const scroller = document.getElementById('item-page')
+  if (scroller) {
+    appStore.setLastItemScrollData({ scrollTop: scroller.scrollTop || 0, id: libraryItemId })
   }
 })
 </script>

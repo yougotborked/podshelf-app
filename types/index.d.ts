@@ -63,3 +63,140 @@ export interface UserSettings {
   collapseSeries: boolean
   collapseBookSeries: boolean
 }
+
+// Library items, as the server sends them (expanded) and as the device stores local copies. The
+// two share a shape on purpose - a local item is a downloaded server item - so one type covers
+// both and the fields only one side has are optional.
+//
+// Only what the app reads is declared. Everything is optional except identity, because the
+// server omits fields (a podcast has no narrators, an item still scanning has no duration) and
+// the old `any` hid every one of those: a read of an absent field is now a type error that asks
+// what should happen, instead of a runtime `undefined` that decides for us.
+
+export interface AuthorRef {
+  id?: string
+  name: string
+}
+
+export interface SeriesRef {
+  id?: string
+  name: string
+  sequence?: string | null
+}
+
+export interface Chapter {
+  id?: number
+  start: number
+  end: number
+  title: string
+}
+
+export interface AudioTrack {
+  index?: number
+  startOffset?: number
+  duration?: number
+  title?: string
+  contentUrl?: string
+  mimeType?: string
+  [key: string]: unknown
+}
+
+export interface EbookFile {
+  ino?: string
+  ebookFormat?: string
+  metadata?: { filename?: string; ext?: string; size?: number }
+  [key: string]: unknown
+}
+
+export interface LibraryFile {
+  ino?: string
+  fileType?: string
+  metadata?: { filename?: string; ext?: string; size?: number; relPath?: string }
+  [key: string]: unknown
+}
+
+export interface MediaMetadata {
+  title?: string
+  subtitle?: string | null
+  // Books list several authors; a podcast has one `author` string.
+  authors?: AuthorRef[]
+  author?: string | null
+  narrators?: string[]
+  series?: SeriesRef[]
+  genres?: string[]
+  publishedYear?: string | null
+  description?: string | null
+  explicit?: boolean
+  abridged?: boolean
+  language?: string | null
+  // Podcast kind: 'episodic' or 'serial'.
+  type?: string | null
+  feedUrl?: string | null
+  [key: string]: unknown
+}
+
+export interface PodcastEpisode {
+  id: string
+  // Local episodes carry the server's id so progress can be matched across the two copies.
+  serverEpisodeId?: string | null
+  localEpisodeId?: string | null
+  libraryItemId?: string
+  title?: string
+  subtitle?: string | null
+  description?: string | null
+  season?: string | null
+  episode?: string | null
+  episodeType?: string | null
+  duration?: number
+  publishedAt?: number | null
+  size?: number
+  audioFile?: Record<string, unknown>
+  audioTrack?: AudioTrack
+  chapters?: Chapter[]
+  [key: string]: unknown
+}
+
+export interface LibraryItemMedia {
+  metadata: MediaMetadata
+  tags?: string[]
+  coverPath?: string | null
+  duration?: number
+  size?: number
+  numTracks?: number
+  tracks?: AudioTrack[]
+  chapters?: Chapter[]
+  ebookFile?: EbookFile | null
+  episodes?: PodcastEpisode[]
+  [key: string]: unknown
+}
+
+export interface LibraryItem {
+  id: string
+  libraryId?: string
+  mediaType?: 'book' | 'podcast' | string
+  media: LibraryItemMedia
+  libraryFiles?: LibraryFile[]
+  isMissing?: boolean
+  isInvalid?: boolean
+  // Local copies only.
+  isLocal?: boolean
+  libraryItemId?: string
+  serverAddress?: string
+  serverUserId?: string
+  serverConnectionConfigId?: string
+  localLibraryItem?: LibraryItem | null
+  rssFeed?: Record<string, unknown> | null
+  [key: string]: unknown
+}
+
+// A folder on the device that holds downloaded media (an Android document tree, or the app's own
+// storage under id `internal-<mediaType>`).
+export interface LocalFolder {
+  id: string
+  name?: string
+  mediaType?: string
+  contentUrl?: string
+  absolutePath?: string
+  basePath?: string
+  [key: string]: unknown
+}

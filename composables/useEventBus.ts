@@ -1,5 +1,5 @@
 import mitt from 'mitt'
-import type { PlayItemPayload } from '~/types'
+import type { LibraryItem, PlayItemPayload } from '~/types'
 
 export type AppEvents = {
   'play-item': PlayItemPayload
@@ -21,7 +21,7 @@ export type AppEvents = {
   'url-open': string
   'library-changed': string
   'change-lang': string
-  'new-local-library-item': Record<string, unknown>
+  'new-local-library-item': LibraryItem
   'bookshelf-total-entities': number
   'download-series-click': void
   /** Advance the play queue from outside the player's own controls, as minimal mode does. */
