@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { BookCoverAspectRatio } from '~/constants'
+import type { LocalMediaProgress } from '~/types'
 
 interface DownloadItem {
   id: string
@@ -17,15 +18,6 @@ interface DownloadItemPart {
   bytesDownloaded: number
   fileSize: number
   completed: boolean
-  [key: string]: unknown
-}
-
-interface LocalMediaProgress {
-  id: string
-  localLibraryItemId: string
-  localEpisodeId?: string | null
-  libraryItemId?: string
-  episodeId?: string | null
   [key: string]: unknown
 }
 

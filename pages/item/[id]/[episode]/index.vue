@@ -9,7 +9,7 @@
       </div>
       <div class="flex-grow px-2">
         <div class="-mt-0.5 mb-0.5">
-          <nuxt-link :to="`/item/${libraryItemId}`" class="text-sm text-md-on-surface underline">{{ podcast.metadata.title }}</nuxt-link>
+          <nuxt-link :to="`/item/${libraryItemId}`" class="text-sm text-md-on-surface underline">{{ podcast?.metadata.title }}</nuxt-link>
         </div>
         <p v-if="publishedAt" class="text-xs text-md-on-surface-variant">{{ $dateDistanceFromNow(publishedAt) }}</p>
       </div>
@@ -65,6 +65,7 @@ import { Capacitor } from '@capacitor/core'
 import { Dialog } from '@capacitor/dialog'
 import { AbsFileSystem, AbsDownloader, AbsLogger } from '@/plugins/capacitor'
 import { useCellularPermission } from '~/composables/useCellularPermission'
+import type { HttpError, LibraryItem, LocalFolder, LocalMediaProgress, PlayItemPayload, PodcastEpisode } from '~/types'
 
 const route = useRoute()
 const router = useRouter()
@@ -85,8 +86,8 @@ const episodeIdParam = route.params.episode as string
 const userStore = useUserStore()
 
 // State
-const libraryItem = ref<any>(null)
-const episode = ref<any>(null)
+const libraryItem = ref<LibraryItem | null>(null)
+const episode = ref<PodcastEpisode | null>(null)
 const loadedFromCache = ref(false)
 const showMoreMenu = ref(false)
 const processing = ref(false)
@@ -104,7 +105,7 @@ const localLibraryItem = computed(() => {
   if (isLocal.value) return libraryItem.value
   return libraryItem.value?.localLibraryItem
 })
-const libraryItemId = computed(() => libraryItem.value?.id)
+const libraryItemId = computed(() => libraryItem.value?.id ?? '')
 const isConnectedToServer = computed(() => {
   if (!isLocal.value) return true
   if (!libraryItem.value?.serverAddress) return false
@@ -145,8 +146,9 @@ const episodeType = computed(() => {
 })
 const coverUrl = computed(() => {
   if (isLocal.value) {
-    if (!libraryItem.value?.coverContentUrl) return '/book_placeholder.jpg'
-    return Capacitor.convertFileSrc(libraryItem.value.coverContentUrl)
+    const coverContentUrl = libraryItem.value?.coverContentUrl
+    if (typeof coverContentUrl !== 'string' || !coverContentUrl) return '/book_placeholder.jpg'
+    return Capacitor.convertFileSrc(coverContentUrl)
   }
   return globalsStore.getLibraryItemCoverSrcById(libraryItemId.value)
 })
@@ -177,9 +179,9 @@ const serverItemProgress = computed(() => {
   if (!serverLibraryItemId.value || !serverEpisodeId.value) return null
   return userStore.getUserMediaProgress(serverLibraryItemId.value, serverEpisodeId.value)
 })
-const progressPercent = computed(() => userItemProgress.value?.progress || 0)
+const progressPercent = computed(() => Number(userItemProgress.value?.progress) || 0)
 const userIsFinished = computed(() => !!userItemProgress.value?.isFinished)
-const userProgressFinishedAt = computed(() => userItemProgress.value?.finishedAt || 0)
+const userProgressFinishedAt = computed(() => Number(userItemProgress.value?.finishedAt) || 0)
 const playbackRate = computed(() => Number(userStore.getUserSetting('playbackRate')) || 1)
 const userTimeRemaining = computed(() => {
   if (!userItemProgress.value) return 0
@@ -194,7 +196,7 @@ const showDownload = computed(() => userCanDownload.value && !localEpisode.value
 const transformedDescription = computed(() => parseDescription(description.value))
 
 const moreMenuItems = computed(() => {
-  const items: any[] = []
+  const items: Array<{ text: string; value: string; icon?: string; [key: string]: unknown }> = []
 
   if (!userIsFinished.value) {
     items.push({
@@ -267,7 +269,7 @@ async function deleteLocalEpisode() {
   await hapticsImpact()
 
   const localEpisodeAudioTrack = localEpisode.value?.audioTrack
-  const localFile = localLibraryItem.value?.localFiles.find((lf: any) => lf.id === localEpisodeAudioTrack.localFileId)
+  const localFile = localLibraryItem.value?.localFiles?.find((lf) => lf.id === localEpisodeAudioTrack?.localFileId)
   if (!localFile) {
     toast.error('Audio track does not have matching local file..')
     return
@@ -275,10 +277,10 @@ async function deleteLocalEpisode() {
 
   const { value } = await Dialog.confirm({
     title: useNuxtApp().$strings.HeaderConfirm,
-    message: useNuxtApp().$getString('MessageConfirmDeleteLocalEpisode', [localFile.basePath])
+    message: useNuxtApp().$getString('MessageConfirmDeleteLocalEpisode', [localFile.basePath ?? ''])
   })
   if (value) {
-    const res = await AbsFileSystem.deleteTrackFromItem({ id: localLibraryItemId.value, trackLocalFileId: localFile.id, trackContentUrl: localEpisodeAudioTrack.contentUrl })
+    const res = await AbsFileSystem.deleteTrackFromItem({ id: localLibraryItemId.value, trackLocalFileId: localFile.id, trackContentUrl: localEpisodeAudioTrack?.contentUrl })
     if (res?.id) {
       if (isLocal.value) {
         if (serverEpisodeId.value) {
@@ -287,7 +289,7 @@ async function deleteLocalEpisode() {
           void router.replace(`/item/${localLibraryItemId.value}`)
         }
       } else {
-        libraryItem.value = { ...libraryItem.value, localLibraryItem: res }
+        if (libraryItem.value) libraryItem.value = { ...libraryItem.value, localLibraryItem: res as LibraryItem }
         if (episode.value) {
           const { localEpisode: _le, ...rest } = episode.value
           episode.value = rest
@@ -305,33 +307,34 @@ async function playClick() {
     eventBus.emit('pause-item')
   } else {
     appStore.playerIsStartingPlayback = true
-    appStore.playerStartingPlaybackMediaId = episode.value?.id
+    appStore.playerStartingPlaybackMediaId = episode.value?.id ?? null
 
     const playbackData = generatePlaybackData()
     emitPlayItemEvent(playbackData)
   }
 }
 
-async function clickPlaybackTime(event: any) {
-  const startTime = event.target.getAttribute('data-time')
+async function clickPlaybackTime(event: MouseEvent) {
+  const startTime = (event.target as HTMLElement | null)?.getAttribute('data-time')
   if (playerIsStartingPlayback.value) return
 
   await hapticsImpact()
 
   appStore.playerIsStartingPlayback = true
-  appStore.playerStartingPlaybackMediaId = episode.value?.id
+  appStore.playerStartingPlaybackMediaId = episode.value?.id ?? null
 
   const playbackData = generatePlaybackData(startTime)
   emitPlayItemEvent(playbackData)
 }
 
-function generatePlaybackData(startTime?: any) {
-  const playbackData: any = {
+function generatePlaybackData(startTime?: string | number | null) {
+  const playbackData: PlayItemPayload = {
     libraryItemId: libraryItemId.value,
     episodeId: episode.value?.id,
     serverLibraryItemId: serverLibraryItemId.value,
     serverEpisodeId: serverEpisodeId.value,
-    startTime
+    // The time marker's data-time attribute is a string.
+    startTime: startTime === null || startTime === undefined ? undefined : Number(startTime)
   }
 
   if (localEpisodeId.value && localLibraryItemId.value && !isLocal.value) {
@@ -342,16 +345,16 @@ function generatePlaybackData(startTime?: any) {
   return playbackData
 }
 
-function emitPlayItemEvent(playbackData: any) {
+function emitPlayItemEvent(playbackData: PlayItemPayload) {
   eventBus.emit('play-item', playbackData)
 }
 
 function bindTimeMarkerEvents() {
   const container = document.querySelector('.description-container')
   if (container) {
-    container.addEventListener('click', (event: any) => {
-      if (event.target.classList.contains('time-marker')) {
-        void clickPlaybackTime(event)
+    container.addEventListener('click', (event) => {
+      if ((event.target as HTMLElement | null)?.classList.contains('time-marker')) {
+        void clickPlaybackTime(event as MouseEvent)
       }
     })
   }
@@ -376,17 +379,17 @@ async function downloadClick() {
   }
 }
 
-async function download(selectedLocalFolder: any = null) {
+async function download(selectedLocalFolder: LocalFolder | null = null) {
   let localFolder = selectedLocalFolder
   if (!localFolder) {
     const localFolders = (await db.getLocalFolders()) || []
     console.log('Local folders loaded', localFolders.length)
-    const foldersWithMediaType = localFolders.filter((lf: any) => {
+    const foldersWithMediaType = localFolders.filter((lf) => {
       console.log('Checking local folder', lf.mediaType)
       return lf.mediaType == mediaType
     })
     console.log('Folders with media type', mediaType, foldersWithMediaType.length)
-    const internalStorageFolder = foldersWithMediaType.find((f: any) => f.id === `internal-${mediaType}`)
+    const internalStorageFolder = foldersWithMediaType.find((f) => f.id === `internal-${mediaType}`)
     if (!foldersWithMediaType.length) {
       localFolder = {
         id: `internal-${mediaType}`,
@@ -398,7 +401,7 @@ async function download(selectedLocalFolder: any = null) {
     } else {
       globalsStore.showSelectLocalFolderModalAction({
         mediaType,
-        callback: (folder: any) => {
+        callback: (folder: LocalFolder) => {
           void download(folder)
         }
       })
@@ -410,8 +413,8 @@ async function download(selectedLocalFolder: any = null) {
   void startDownload(localFolder)
 }
 
-async function startDownload(localFolder?: any) {
-  const payload: any = {
+async function startDownload(localFolder?: LocalFolder | null) {
+  const payload: { libraryItemId: string; episodeId?: string; localFolderId?: string } = {
     libraryItemId: libraryItemId.value,
     episodeId: episode.value?.id
   }
@@ -466,7 +469,7 @@ async function discardProgress() {
           toast.success(`Your progress was reset`)
           userStore.removeMediaProgress(serverItemProgressId)
         })
-        .catch((error: any) => {
+        .catch((error: HttpError) => {
           console.error('Progress reset failed', error)
         })
     }
@@ -491,14 +494,14 @@ async function toggleFinished() {
       const localMediaProgress = payload?.localMediaProgress
       console.log('toggleFinished localMediaProgress', JSON.stringify(localMediaProgress))
       if (localMediaProgress) {
-        globalsStore.updateLocalMediaProgress(localMediaProgress)
+        globalsStore.updateLocalMediaProgress(localMediaProgress as LocalMediaProgress)
       }
     }
   } else {
     const updatePayload = {
       isFinished: !userIsFinished.value
     }
-    nativeHttp.patch(`/api/me/progress/${libraryItemId.value}/${episode.value?.id}`, updatePayload, { connectTimeout: 10000 }).catch((error: any) => {
+    nativeHttp.patch(`/api/me/progress/${libraryItemId.value}/${episode.value?.id}`, updatePayload, { connectTimeout: 10000 }).catch((error: HttpError) => {
       console.error('Failed', error)
       toast.error(updatePayload.isFinished ? useNuxtApp().$strings.ToastItemMarkedAsFinishedFailed : useNuxtApp().$strings.ToastItemMarkedAsNotFinishedFailed)
     })
@@ -520,8 +523,8 @@ async function deleteEpisodeFromServerClick() {
       .then(() => {
         void router.replace(`/item/${serverLibraryItemId.value}`)
       })
-      .catch((error: any) => {
-        const errorMsg = error.response?.data || 'Failed to delete episode'
+      .catch((error: HttpError) => {
+        const errorMsg = String(error.response?.data || 'Failed to delete episode')
         console.error('Failed to delete episode', error)
         toast.error(errorMsg)
       })
@@ -531,14 +534,14 @@ async function deleteEpisodeFromServerClick() {
   }
 }
 
-function newLocalLibraryItem(item: any) {
+function newLocalLibraryItem(item: LibraryItem) {
   if (item.libraryItemId == libraryItemId.value) {
     console.log('New local library item', item.id)
-    libraryItem.value = { ...libraryItem.value, localLibraryItem: item }
+    if (libraryItem.value) libraryItem.value = { ...libraryItem.value, localLibraryItem: item }
 
-    const matchedEpisode = item.media.episodes.find((ep: any) => ep.serverEpisodeId === episode.value?.id)
+    const matchedEpisode = item.media.episodes?.find((ep) => ep.serverEpisodeId === episode.value?.id)
     if (matchedEpisode) {
-      episode.value = { ...episode.value, localEpisode: matchedEpisode }
+      if (episode.value) episode.value = { ...episode.value, localEpisode: matchedEpisode }
     }
   }
 }
@@ -547,9 +550,9 @@ onMounted(async () => {
   const libItemId = libraryItemIdParam
   const epId = episodeIdParam
 
-  let fetchedLibraryItem: any = null
-  let fetchedEpisode: any = null
-  let fetchedLocalEpisode: any = null
+  let fetchedLibraryItem: LibraryItem | null = null
+  let fetchedEpisode: PodcastEpisode | null | undefined = null
+  let fetchedLocalEpisode: PodcastEpisode | null | undefined = null
 
   if (libItemId.startsWith('local')) {
     fetchedLibraryItem = await db.getLocalLibraryItem(libItemId)
@@ -558,11 +561,11 @@ onMounted(async () => {
     const canRequest = !appStore.isOffline && userStore.serverConnectionConfig
 
     if (canRequest) {
-      fetchedLibraryItem = await nativeHttp.get(`/api/items/${libItemId}?expanded=1`, { connectTimeout: 10000 }).catch((error: any) => {
+      fetchedLibraryItem = (await nativeHttp.get(`/api/items/${libItemId}?expanded=1`, { connectTimeout: 10000 }).catch((error: HttpError) => {
         console.error('Failed', error)
         AbsLogger.error({ tag: 'EpisodePage', message: `Failed to fetch library item ${libItemId}: ${error?.message || error}` })
         return null
-      })
+      })) as LibraryItem | null
 
       if (fetchedLibraryItem) {
         await localStore.setCachedLibraryItem(fetchedLibraryItem)
@@ -570,7 +573,7 @@ onMounted(async () => {
     }
 
     if (!fetchedLibraryItem) {
-      fetchedLibraryItem = await localStore.getCachedLibraryItem(libItemId)
+      fetchedLibraryItem = (await localStore.getCachedLibraryItem(libItemId)) as LibraryItem | null
       loadedFromCache.value = !!fetchedLibraryItem
     }
 
@@ -580,11 +583,11 @@ onMounted(async () => {
     }
 
     if (fetchedLibraryItem) {
-      const localLibraryItemCheck = await db.getLocalLibraryItemByLId(libItemId) as any
+      const localLibraryItemCheck = await db.getLocalLibraryItemByLId(libItemId)
       if (localLibraryItemCheck) {
         console.log('Library item has local library item also', localLibraryItemCheck.id)
         fetchedLibraryItem.localLibraryItem = localLibraryItemCheck
-        fetchedLocalEpisode = localLibraryItemCheck.media.episodes.find((ep: any) => ep.serverEpisodeId === epId)
+        fetchedLocalEpisode = localLibraryItemCheck.media.episodes?.find((ep) => ep.serverEpisodeId === epId)
       }
     }
   }
@@ -596,8 +599,8 @@ onMounted(async () => {
     return
   }
 
-  fetchedEpisode = fetchedLibraryItem.media.episodes.find((ep: any) => ep.id === epId)
-  if (fetchedLocalEpisode) {
+  fetchedEpisode = fetchedLibraryItem.media.episodes?.find((ep) => ep.id === epId)
+  if (fetchedEpisode && fetchedLocalEpisode) {
     fetchedEpisode.localEpisode = fetchedLocalEpisode
   }
 

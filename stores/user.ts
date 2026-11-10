@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { Browser } from '@capacitor/browser'
 import { CapacitorHttp } from '@capacitor/core'
 import { AbsLogger } from '~/plugins/capacitor'
-import type { UserSettings, ServerConnectionConfig } from '~/types'
+import type { UserSettings, ServerConnectionConfig, MediaProgress } from '~/types'
 
 interface UserState {
   user: Record<string, unknown> | null
@@ -12,8 +12,8 @@ interface UserState {
 }
 
 interface UserMediaProgressIndex {
-  byItem: Map<string, Record<string, unknown>>
-  byEpisode: Map<string, Record<string, unknown>>
+  byItem: Map<string, MediaProgress>
+  byEpisode: Map<string, MediaProgress>
 }
 
 export const useUserStore = defineStore('user', {
@@ -46,9 +46,9 @@ export const useUserStore = defineStore('user', {
      * whenever mediaProgress changes and every row lookup is then O(1).
      */
     userMediaProgressIndex: (state): UserMediaProgressIndex => {
-      const byItem = new Map<string, Record<string, unknown>>()
-      const byEpisode = new Map<string, Record<string, unknown>>()
-      const mediaProgress = (state.user?.mediaProgress as Record<string, unknown>[]) || []
+      const byItem = new Map<string, MediaProgress>()
+      const byEpisode = new Map<string, MediaProgress>()
+      const mediaProgress = (state.user?.mediaProgress as MediaProgress[]) || []
 
       for (const mp of mediaProgress) {
         const libraryItemId = mp.libraryItemId as string | undefined
@@ -63,7 +63,7 @@ export const useUserStore = defineStore('user', {
 
       return { byItem, byEpisode }
     },
-    getUserMediaProgress(): (libraryItemId: string, episodeId?: string | null) => Record<string, unknown> | null {
+    getUserMediaProgress(): (libraryItemId: string, episodeId?: string | null) => MediaProgress | null {
       const { byItem, byEpisode } = this.userMediaProgressIndex
       return (libraryItemId: string, episodeId: string | null = null) => {
         if (!libraryItemId) return null
