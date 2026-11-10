@@ -98,6 +98,7 @@ export interface AudioTrack {
   title?: string
   contentUrl?: string
   mimeType?: string
+  localFileId?: string
   [key: string]: unknown
 }
 
@@ -152,6 +153,8 @@ export interface PodcastEpisode {
   size?: number
   audioFile?: Record<string, unknown>
   audioTrack?: AudioTrack
+  // The local copy of a server episode, attached by the episode page.
+  localEpisode?: PodcastEpisode | null
   chapters?: Chapter[]
   [key: string]: unknown
 }
@@ -176,6 +179,8 @@ export interface LibraryItem {
   mediaType?: 'book' | 'podcast' | string
   media: LibraryItemMedia
   libraryFiles?: LibraryFile[]
+  // Local copies: the files on the device, and which one each audio track plays from.
+  localFiles?: Array<{ id: string; basePath?: string; [key: string]: unknown }>
   isMissing?: boolean
   isInvalid?: boolean
   // Local copies only.
@@ -199,4 +204,36 @@ export interface LocalFolder {
   absolutePath?: string
   basePath?: string
   [key: string]: unknown
+}
+
+// What a rejected nativeHttp call carries: a thrown Error (no response) or the server's reply
+// (status and body). Annotating a catch handler with this instead of `any` makes
+// `error.response?.data` a checked read.
+export interface HttpError {
+  message?: string
+  status?: number
+  response?: { status?: number; data?: unknown }
+}
+
+// Where someone is in an item. The server's record and the device's copy share these fields; the
+// local one adds the local ids. Numbers are optional because an item nobody has started has no
+// record at all, and a book read only as an ebook has `ebookProgress` but no `progress`.
+export interface MediaProgress {
+  id: string
+  libraryItemId?: string
+  episodeId?: string | null
+  progress?: number
+  currentTime?: number
+  duration?: number
+  isFinished?: boolean
+  finishedAt?: number | null
+  lastUpdate?: number
+  ebookProgress?: number
+  ebookLocation?: string | null
+  [key: string]: unknown
+}
+
+export interface LocalMediaProgress extends MediaProgress {
+  localLibraryItemId: string
+  localEpisodeId?: string | null
 }
