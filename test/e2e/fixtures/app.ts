@@ -102,5 +102,5 @@ export async function settle(page: Page): Promise<void> {
  * what a cold deep link does, and not what someone tapping through the app sees.
  */
 export async function navigateInApp(page: Page, path: string): Promise<void> {
-  await page.evaluate((to) => (document.querySelector('#__nuxt') as any).__vue_app__.config.globalProperties.$router.push(to), path)
+  await page.evaluate((to) => (document.querySelector('#__nuxt') as unknown as { __vue_app__: { config: { globalProperties: { $router: { push(to: string): unknown } } } } }).__vue_app__.config.globalProperties.$router.push(to), path)
 }

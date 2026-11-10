@@ -60,7 +60,7 @@
             <ui-text-input v-model="password" type="password" :disabled="processing" :placeholder="$strings.LabelPassword" class="w-full mb-2 text-lg" />
 
             <div class="flex items-center pt-2">
-              <ui-icon-btn v-if="serverConfig.id" bg-color="error" icon="delete" type="button" @click="removeServerConfigClick(serverConfig)" />
+              <ui-icon-btn v-if="serverConfig.id" bg-color="error" icon="delete" type="button" @click="removeServerConfigClick(serverConfig as ServerConnectionConfig)" />
               <div class="flex-grow" />
               <ui-btn :disabled="processing || !networkConnected" type="submit" class="mt-1 h-10">{{ networkConnected ? $strings.ButtonSubmit : $strings.MessageNoNetworkConnection }}</ui-btn>
             </div>
@@ -88,6 +88,7 @@
 </template>
 
 <script setup lang="ts">
+import type { AuthorizePayload, DeviceData, HttpError, ServerConnectionConfig, ServerConnectionDraft } from '~/types'
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Browser } from '@capacitor/browser'
 import { CapacitorHttp } from '@capacitor/core'
@@ -129,7 +130,7 @@ const route = useRoute()
 const loggedIn = ref(false)
 const showAuth = ref(false)
 const processing = ref(false)
-const serverConfig = ref<Record<string, any>>({
+const serverConfig = ref<ServerConnectionDraft>({
   address: null,
   version: null,
   username: null,
@@ -150,13 +151,13 @@ const oauth = ref({
 
 // Computed
 const deviceData = computed(() => appStore.deviceData || {})
-const deviceSettings = computed(() => (deviceData.value as Record<string, any>).deviceSettings || {})
+const deviceSettings = computed(() => (deviceData.value as DeviceData).deviceSettings || {})
 const networkConnected = computed(() => appStore.networkConnected)
-const serverConnectionConfigs = computed(() => (deviceData.value as Record<string, any> | null | undefined)?.serverConnectionConfigs || [])
-const lastServerConnectionConfigId = computed(() => (deviceData.value as Record<string, any> | null | undefined)?.lastServerConnectionConfigId || null)
+const serverConnectionConfigs = computed(() => (deviceData.value as DeviceData | null | undefined)?.serverConnectionConfigs || [])
+const lastServerConnectionConfigId = computed(() => (deviceData.value as DeviceData | null | undefined)?.lastServerConnectionConfigId || null)
 const lastServerConnectionConfig = computed(() => {
   if (!lastServerConnectionConfigId.value || !serverConnectionConfigs.value.length) return null
-  return serverConnectionConfigs.value.find((s: Record<string, any>) => s.id == lastServerConnectionConfigId.value)
+  return serverConnectionConfigs.value.find((s) => s.id == lastServerConnectionConfigId.value)
 })
 const isLocalAuthEnabled = computed(() => authMethods.value.includes('local') || !authMethods.value.length)
 const isOpenIDAuthEnabled = computed(() => authMethods.value.includes('openid'))
@@ -181,11 +182,11 @@ async function showOldAuthWarningDialog() {
   }
 }
 
-function checkIdUuid(userId: string): boolean {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)
+function checkIdUuid(userId: string | undefined): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId ?? '')
 }
 
-function checkIsUsingOldAuth(config: Record<string, any>): boolean {
+function checkIsUsingOldAuth(config: ServerConnectionConfig): boolean {
   if (!config.version) return true
   return !isValidVersion(config.version, '2.26.0')
 }
@@ -209,14 +210,14 @@ function checkIsUsingOldAuth(config: Record<string, any>): boolean {
  */
 async function clickLoginWithOpenId() {
   // oauth standard requires https explicitly
-  if (!serverConfig.value.address.startsWith('https') && oauth.value.enforceHTTPs) {
+  if (!(serverConfig.value.address ?? '').startsWith('https') && oauth.value.enforceHTTPs) {
     console.warn(`[SSO] Oauth2 requires HTTPS`)
     toast.error(`SSO: The URL to the server must be https:// secured`)
     return
   }
 
   // First request that we want to do oauth/openid and get the URL which a browser window should open
-  const redirectUrl = await oauthRequest(serverConfig.value.address)
+  const redirectUrl = await oauthRequest(serverConfig.value.address ?? '')
   if (!redirectUrl) {
     // error message handled by oauthRequest
     return
@@ -331,9 +332,10 @@ async function oauthRequest(url: string): Promise<URL | null> {
 
     const parsedUrl = new URL(locationHeader)
     return parsedUrl
-  } catch (err: any) {
-    console.error(`[SSO] ${err.message}`)
-    toast.error(`SSO Error: ${err.message}`)
+  } catch (err: unknown) {
+    const message = (err as Error | null)?.message
+    console.error(`[SSO] ${message}`)
+    toast.error(`SSO Error: ${message}`)
     return null
   }
 }
@@ -433,8 +435,8 @@ async function oauthExchangeCodeForToken(code: string, state: string) {
       throw new Error('Authentication failed with the provided token.')
     }
 
-    const _payload = payload as { user: Record<string, any>; userDefaultLibraryId?: string; serverSettings: Record<string, any>; ereaderDevices?: unknown[] }
-    const duplicateConfig = serverConnectionConfigs.value.find((scc: Record<string, any>) => scc.address === serverConfig.value.address && scc.username === _payload.user.username && scc.id !== serverConfig.value.id)
+    const _payload = payload as AuthorizePayload
+    const duplicateConfig = serverConnectionConfigs.value.find((scc) => scc.address === serverConfig.value.address && scc.username === _payload.user.username && scc.id !== serverConfig.value.id)
     if (duplicateConfig) {
       throw new Error('Config already exists for this address and username.')
     }
@@ -446,9 +448,9 @@ async function oauthExchangeCodeForToken(code: string, state: string) {
     }
 
     void setUserAndConnection(_payload)
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[SSO] Error in exchangeCodeForToken: ', err)
-    toast.error(`SSO error: ${err.message || err}`)
+    toast.error(`SSO error: ${(err as Error | null)?.message || err}`)
   } finally {
     // We don't need the oauth verifier any more
     oauth.value.verifier = null
@@ -467,7 +469,7 @@ function showServerList() {
   }
 }
 
-async function connectToServer(config: Record<string, any>) {
+async function connectToServer(config: ServerConnectionConfig) {
   await hapticsImpact()
   console.log('[ServerConnectForm] connectToServer', config.address)
   processing.value = true
@@ -490,7 +492,7 @@ async function connectToServer(config: Record<string, any>) {
 
   if (payload) {
     // Will NOT include access token and refresh token
-    void setUserAndConnection(payload as { user: Record<string, any>; userDefaultLibraryId?: string; serverSettings: Record<string, any>; ereaderDevices?: unknown[] })
+    void setUserAndConnection(payload as AuthorizePayload)
   } else {
     let savedError = error.value
     if (await submit(true)) {
@@ -500,7 +502,7 @@ async function connectToServer(config: Record<string, any>) {
   }
 }
 
-async function removeServerConfigClick(config: Record<string, any>) {
+async function removeServerConfigClick(config: ServerConnectionConfig) {
   if (!config.id) return
   await hapticsImpact()
 
@@ -511,9 +513,9 @@ async function removeServerConfigClick(config: Record<string, any>) {
   if (value) {
     processing.value = true
     await db.removeServerConnectionConfig(config.id)
-    const updatedDeviceData = { ...(deviceData.value as Record<string, any>) }
-    updatedDeviceData.serverConnectionConfigs = (deviceData.value as Record<string, any>).serverConnectionConfigs.filter((scc: Record<string, any>) => scc.id != config.id)
-    appStore.setDeviceData(updatedDeviceData as any)
+    const updatedDeviceData = { ...(deviceData.value as DeviceData) }
+    updatedDeviceData.serverConnectionConfigs = ((deviceData.value as DeviceData).serverConnectionConfigs ?? []).filter((scc) => scc.id != config.id)
+    appStore.setDeviceData(updatedDeviceData as DeviceData)
 
     serverConfig.value = {
       address: null,
@@ -528,7 +530,7 @@ async function removeServerConfigClick(config: Record<string, any>) {
   }
 }
 
-async function editServerConfig(config: Record<string, any>) {
+async function editServerConfig(config: ServerConnectionConfig) {
   serverConfig.value = {
     ...config
   }
@@ -604,14 +606,15 @@ async function getRequest(url: string, headers?: Record<string, string>, connect
       return response
     } else {
       // Put the HTTP error code inside the cause
-      let errorObj: any = new Error(response.data)
+      const errorObj: Error & { code?: unknown } = new Error(response.data)
       errorObj.code = response.status
       throw errorObj
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     // Put the error name inside the cause (a string)
-    let errorObj: any = new Error(err.message)
-    errorObj.code = err.code
+    const caught = err as { message?: string; code?: unknown }
+    const errorObj: Error & { code?: unknown } = new Error(caught.message)
+    errorObj.code = caught.code
     throw errorObj
   }
 }
@@ -722,7 +725,7 @@ async function submit(preventAutoLogin = false): Promise<boolean> {
       return false
     }
   } catch (err) {
-    handleLoginFormError(err)
+    handleLoginFormError(err as { code?: unknown })
     return false
   } finally {
     processing.value = false
@@ -739,10 +742,14 @@ async function submit(preventAutoLogin = false): Promise<boolean> {
  *
  * @returns {boolean} - Returns `true` if the response is valid, otherwise `false` and sets error.value.
  */
-function validateLoginFormResponse(statusData: any, initialAddressWithProtocol: string, protocolProvided: boolean): boolean {
+function validateLoginFormResponse(statusData: { url: string; data?: unknown } | null | undefined, initialAddressWithProtocol: string, protocolProvided: boolean): boolean {
   // We have a 200 status code at this point
 
   // Check if we got redirected to a different hostname, we don't allow this
+  if (!statusData) {
+    error.value = 'The server did not answer'
+    return false
+  }
   const initialAddressUrl = new URL(initialAddressWithProtocol)
   const currentAddressUrl = new URL(statusData.url)
   if (initialAddressUrl.hostname !== currentAddressUrl.hostname) {
@@ -761,7 +768,7 @@ function validateLoginFormResponse(statusData: any, initialAddressWithProtocol: 
     error.value = 'Response from server was empty' // Usually some kind of config error on server side
     console.error('[ServerConnectForm] Received empty response')
     return false
-  } else if (!('isInit' in statusData.data) || !('language' in statusData.data)) {
+  } else if (!('isInit' in (statusData.data as Record<string, unknown>)) || !('language' in (statusData.data as Record<string, unknown>))) {
     error.value = 'This does not seem to be a Audiobookshelf server'
     console.error('[ServerConnectForm] Received as response from Server:\n', statusData)
     return false
@@ -774,7 +781,7 @@ function validateLoginFormResponse(statusData: any, initialAddressWithProtocol: 
     //      error.value = `Server version is below minimum required version of ${requiredServerVersion} (${statusData.data.serverVersion})`
     //      console.error('[ServerConnectForm] Server version is too low: ', statusData.data.serverVersion)
     //      return false
-  } else if (!statusData.data.isInit) {
+  } else if (!(statusData.data as { isInit?: boolean }).isInit) {
     error.value = 'Server is not initialized'
     return false
   }
@@ -782,7 +789,7 @@ function validateLoginFormResponse(statusData: any, initialAddressWithProtocol: 
   // If we got redirected from http to https, we allow this
   // Also there is the possibility that https was tried (with protocolProvided false) but only http was successfull
   // So set the correct protocol for the config
-  const configUrl = new URL(serverConfig.value.address)
+  const configUrl = new URL(serverConfig.value.address ?? '')
   configUrl.protocol = currentAddressUrl.protocol
   // Remove trailing slash
   serverConfig.value.address = configUrl.toString().replace(/\/$/, '')
@@ -795,7 +802,7 @@ function validateLoginFormResponse(statusData: any, initialAddressWithProtocol: 
  *
  * @param {Object} err - The error object received from a failed login attempt.
  */
-function handleLoginFormError(err: any) {
+function handleLoginFormError(err: { code?: unknown }) {
   console.error('[ServerConnectForm] Received invalid status', err)
 
   if (err.code === 404) {
@@ -827,11 +834,11 @@ async function tryServerUrl(address: string, shouldRetryWithHttp: boolean) {
 
   try {
     return await getServerAddressStatus(validatedUrl)
-  } catch (err: any) {
+  } catch (err: unknown) {
     // We only retry when the user did not specify a protocol
     // Also for security reasons, we only retry when the https request did not
     //      return a http status code (so only retry when the TCP connection could not be established)
-    if (shouldRetryWithHttp && typeof err.code !== 'number') {
+    if (shouldRetryWithHttp && typeof (err as { code?: unknown }).code !== 'number') {
       console.log('[ServerConnectForm] https failed, trying to connect with http...')
       const validatedHttpUrl = validateServerUrl(address, 'http:')
       if (validatedHttpUrl) {
@@ -861,7 +868,7 @@ async function submitAuth() {
     return
   }
 
-  const duplicateConfig = serverConnectionConfigs.value.find((scc: Record<string, any>) => scc.address === serverConfig.value.address && scc.username === serverConfig.value.username && serverConfig.value.id !== scc.id)
+  const duplicateConfig = serverConnectionConfigs.value.find((scc) => scc.address === serverConfig.value.address && scc.username === serverConfig.value.username && serverConfig.value.id !== scc.id)
   if (duplicateConfig) {
     error.value = 'Config already exists for this address and username'
     return
@@ -878,19 +885,19 @@ async function submitAuth() {
   }
 }
 
-async function setUserAndConnection({ user, userDefaultLibraryId, serverSettings, ereaderDevices }: { user: Record<string, any>; userDefaultLibraryId?: string; serverSettings: Record<string, any>; ereaderDevices?: unknown[] }) {
+async function setUserAndConnection({ user, userDefaultLibraryId, serverSettings, ereaderDevices }: AuthorizePayload) {
   if (!user) return
 
   console.log('Successfully logged in', JSON.stringify(user))
 
   appStore.setServerSettings(serverSettings)
   librariesStore.ereaderDevices = ereaderDevices || []
-  setServerLanguageCode(serverSettings.language)
+  setServerLanguageCode(serverSettings.language ?? '')
 
   serverConfig.value.userId = user.id
   serverConfig.value.username = user.username
 
-  if (isValidVersion(serverSettings.version, '2.26.0')) {
+  if (isValidVersion(serverSettings.version ?? '', '2.26.0')) {
     // Tokens only returned from /login endpoint
     if (user.accessToken) {
       serverConfig.value.token = user.accessToken
@@ -910,7 +917,7 @@ async function setUserAndConnection({ user, userDefaultLibraryId, serverSettings
     serverConfig.value.token = user.token
   }
 
-  serverConfig.value.version = serverSettings.version
+  serverConfig.value.version = serverSettings.version ?? null
 
   var serverConnectionConfig = await db.setServerConnectionConfig(serverConfig.value)
 
@@ -922,27 +929,27 @@ async function setUserAndConnection({ user, userDefaultLibraryId, serverSettings
     }
     const updatedDeviceData = await db.updateDeviceSettings(updatedDeviceSettings as Record<string, unknown>)
     if (updatedDeviceData) {
-      appStore.setDeviceData(updatedDeviceData as any)
-      void setLanguageCode((updatedDeviceData as Record<string, any>).deviceSettings?.languageCode || 'en-us')
+      appStore.setDeviceData(updatedDeviceData as DeviceData)
+      void setLanguageCode((updatedDeviceData as DeviceData).deviceSettings?.languageCode || 'en-us')
     }
   }
 
   // Set library - Use last library if set and available fallback to default user library
   const lastLibraryId = await localStore.getLastLibraryId()
-  if (lastLibraryId && (!user.librariesAccessible.length || user.librariesAccessible.includes(lastLibraryId))) {
+  if (lastLibraryId && (!user.librariesAccessible?.length || user.librariesAccessible.includes(lastLibraryId))) {
     librariesStore.currentLibraryId = lastLibraryId
   } else if (userDefaultLibraryId) {
     librariesStore.currentLibraryId = userDefaultLibraryId
   }
 
   userStore.user = user
-  userStore.accessToken = (serverConnectionConfig as Record<string, any>).token
-  userStore.serverConnectionConfig = serverConnectionConfig as any
+  userStore.accessToken = (serverConnectionConfig as ServerConnectionConfig).token
+  userStore.serverConnectionConfig = serverConnectionConfig as ServerConnectionConfig
 
-  useLocalStore().setUserId((user as Record<string, any>).id)
+  useLocalStore().setUserId(user.id)
   await userStore.loadUserSettings()
 
-  socket.connect(serverConfig.value.address, serverConfig.value.token)
+  socket.connect(serverConfig.value.address ?? '', serverConfig.value.token ?? '')
   void router.replace('/bookshelf')
 }
 
@@ -962,7 +969,7 @@ async function authenticateToken() {
     },
     serverConnectionConfig: serverConfig.value as { id: string; address: string; token?: string; refreshToken?: string }
   }
-  const authRes = await nativeHttp.post(`${serverConfig.value.address}/api/authorize`, null, { ...nativeHttpOptions, connectTimeout: 10000 }).catch((err: any) => {
+  const authRes = await nativeHttp.post(`${serverConfig.value.address}/api/authorize`, null, { ...nativeHttpOptions, connectTimeout: 10000 }).catch((err: HttpError) => {
     console.error('[ServerConnectForm] Server auth failed', err)
     const errorMsg = err.message || err
     error.value = 'Failed to authorize'
@@ -995,7 +1002,7 @@ async function setForceRelogin(err: string) {
 function init() {
   if (route.query.serverConnectionConfigId) {
     // Handle force re-login for servers using new JWT auth but still using an old token OR refresh token failed
-    const _serverConfig = serverConnectionConfigs.value.find((scc: Record<string, any>) => scc.id === route.query.serverConnectionConfigId)
+    const _serverConfig = serverConnectionConfigs.value.find((scc) => scc.id === route.query.serverConnectionConfigId)
     if (_serverConfig) {
       serverConfig.value = { ..._serverConfig }
       void setForceRelogin(route.query.error as string)

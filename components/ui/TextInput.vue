@@ -38,7 +38,7 @@
 import { ref, computed } from 'vue'
 
 const props = defineProps<{
-  modelValue?: string | number
+  modelValue?: string | number | null
   placeholder?: string
   type?: string
   disabled?: boolean

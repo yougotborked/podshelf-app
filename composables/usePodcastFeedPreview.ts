@@ -61,6 +61,12 @@ export interface ParsedFeedEpisode {
   title: string
   pubDate: string
   description: string
+  /** pubDate as milliseconds since the epoch; absent when the feed's date will not parse. */
+  publishedAt?: number
+  /** Length in seconds, from itunes:duration; absent when the feed gives none or garbage. */
+  duration?: number
+  /** The audio file's URL, which is what tells two episodes with the same title apart. */
+  enclosureUrl?: string
 }
 
 export interface ParsedFeed {
@@ -77,6 +83,23 @@ function decodeEntities(value: string): string {
     .replace(/&apos;/g, "'")
     // Ampersand last, or an &amp;lt; sequence decodes twice and invents a tag.
     .replace(/&amp;/g, '&')
+}
+
+/**
+ * An itunes:duration value as seconds.
+ *
+ * Feeds write it three ways: bare seconds ("3600"), minutes and seconds ("45:30"), and hours,
+ * minutes and seconds ("1:02:03"). Anything else - empty, words, a negative - is not a length, and
+ * is left undefined rather than guessed at: the preview's "typical episode" hint takes the median
+ * of these, and a wrong number there would be believed.
+ */
+export function parseItunesDuration(value: string | undefined | null): number | undefined {
+  const text = (value ?? '').trim()
+  if (!text) return undefined
+  const parts = text.split(':')
+  if (parts.length > 3 || parts.some((p) => !/^\d+(\.\d+)?$/.test(p))) return undefined
+  const seconds = parts.reduce((total, p) => total * 60 + Number(p), 0)
+  return seconds > 0 ? seconds : undefined
 }
 
 function stripTags(value: string): string {
@@ -123,10 +146,16 @@ export function parsePodcastFeed(xml: string, maxEpisodes = 20): ParsedFeed {
   for (const item of items.slice(0, maxEpisodes)) {
     const title = tagText(item, ['title'])
     if (!title) continue
+    const pubDate = tagText(item, ['pubDate'])
+    const published = Date.parse(pubDate)
+    const enclosure = item.match(/<enclosure\s[^>]*url=["']([^"']+)["']/i)?.[1]
     episodes.push({
       title,
-      pubDate: tagText(item, ['pubDate']),
-      description: tagText(item, ['itunes:summary', 'description'])
+      pubDate,
+      description: tagText(item, ['itunes:summary', 'description']),
+      publishedAt: Number.isNaN(published) ? undefined : published,
+      duration: parseItunesDuration(tagText(item, ['itunes:duration'])),
+      enclosureUrl: enclosure ? decodeEntities(enclosure) : undefined
     })
   }
 

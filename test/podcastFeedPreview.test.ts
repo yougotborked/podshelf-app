@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { normalizeFeedUrl, isSameFeed, indexLibraryByFeed, parsePodcastFeed } from '../composables/usePodcastFeedPreview'
+import { normalizeFeedUrl, isSameFeed, indexLibraryByFeed, parseItunesDuration, parsePodcastFeed } from '../composables/usePodcastFeedPreview'
 
 describe('normalizeFeedUrl', () => {
   it('ignores the scheme', () => {
@@ -158,5 +158,42 @@ describe('parsePodcastFeed', () => {
     const xml = `<rss><channel><description>Fine</description><item><title>Ep</title></channel></rss>`
     const parsed = parsePodcastFeed(xml)
     expect(parsed.description).toBe('Fine')
+  })
+})
+
+describe('parseItunesDuration', () => {
+  it('reads the three shapes feeds use', () => {
+    expect(parseItunesDuration('3600')).toBe(3600)
+    expect(parseItunesDuration('45:30')).toBe(2730)
+    expect(parseItunesDuration('1:02:03')).toBe(3723)
+  })
+
+  it('leaves anything that is not a length undefined rather than guessing', () => {
+    for (const bad of ['', '  ', 'soon', '1:2:3:4', '-5', '12:xx', '0', undefined, null]) {
+      expect(parseItunesDuration(bad)).toBeUndefined()
+    }
+  })
+})
+
+describe('parsePodcastFeed episode details', () => {
+  const feed = `<rss><channel><description>Show</description>
+    <item><title>One</title><pubDate>Mon, 03 Nov 2025 08:00:00 GMT</pubDate><itunes:duration>45:30</itunes:duration>
+      <enclosure url="https://cdn.example/one.mp3?a=1&amp;b=2" length="1" type="audio/mpeg"/></item>
+    <item><title>Two</title><pubDate>not a date</pubDate></item></channel></rss>`
+
+  it('reads the date, length and audio url the preview shows', () => {
+    // The preview template reads these; the parser used to return only title, date text and
+    // description, so no date or length was ever shown and the length-fit hint never appeared.
+    const [one] = parsePodcastFeed(feed).episodes
+    expect(one?.publishedAt).toBe(Date.parse('Mon, 03 Nov 2025 08:00:00 GMT'))
+    expect(one?.duration).toBe(2730)
+    expect(one?.enclosureUrl).toBe('https://cdn.example/one.mp3?a=1&b=2')
+  })
+
+  it('omits what the feed does not give', () => {
+    const two = parsePodcastFeed(feed).episodes[1]
+    expect(two?.publishedAt).toBeUndefined()
+    expect(two?.duration).toBeUndefined()
+    expect(two?.enclosureUrl).toBeUndefined()
   })
 })

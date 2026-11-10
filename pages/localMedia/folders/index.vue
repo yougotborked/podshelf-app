@@ -37,6 +37,7 @@
 </template>
 
 <script setup lang="ts">
+import type { LibraryItem, LocalFolder } from '~/types'
 import { ref, computed } from 'vue'
 import { AbsFileSystem } from '@/plugins/capacitor'
 import { Dialog } from '@capacitor/dialog'
@@ -48,8 +49,8 @@ const strings = useStrings()
 const { getAndroidSDKVersion } = useUtils()
 
 // State
-const localFolders = ref<any[]>([])
-const localLibraryItems = ref<any[]>([])
+const localFolders = ref<LocalFolder[]>([])
+const localLibraryItems = ref<LibraryItem[]>([])
 const newFolderMediaType = ref<string | null>(null)
 const mediaTypeItems = [
   {
