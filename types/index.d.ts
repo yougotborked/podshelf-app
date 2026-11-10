@@ -14,9 +14,9 @@ export interface QueueItem {
   episodeId: string | null
   serverLibraryItemId?: string | null
   serverEpisodeId?: string | null
-  episode?: Record<string, unknown>
+  episode?: Record<string, unknown> | null
   localEpisode?: Record<string, unknown> | null
-  localLibraryItem?: Record<string, unknown>
+  localLibraryItem?: Record<string, unknown> | null
   [key: string]: unknown
 }
 
@@ -42,6 +42,7 @@ export interface DeviceData {
     streamingUsingCellular?: string
     autoCacheUnplayedEpisodes?: boolean
     hapticFeedback?: string
+    autoContinuePlaylists?: boolean
   }
   lastPlaybackSession?: PlaybackSession
   [key: string]: unknown
@@ -141,6 +142,7 @@ export interface PodcastEpisode {
   // Local episodes carry the server's id so progress can be matched across the two copies.
   serverEpisodeId?: string | null
   localEpisodeId?: string | null
+  localLibraryItemId?: string | null
   libraryItemId?: string
   title?: string
   subtitle?: string | null
@@ -236,4 +238,33 @@ export interface MediaProgress {
 export interface LocalMediaProgress extends MediaProgress {
   localLibraryItemId: string
   localEpisodeId?: string | null
+}
+
+// One entry of a playlist: a server item (and episode) the server resolved, plus - when the
+// device has a download of it - the local copy, which playback prefers.
+export interface PlaylistItem {
+  id?: string
+  libraryItemId?: string
+  episodeId?: string | null
+  serverLibraryItemId?: string | null
+  serverEpisodeId?: string | null
+  localLibraryItemId?: string | null
+  localEpisodeId?: string | null
+  libraryItem?: LibraryItem
+  episode?: PodcastEpisode | null
+  localLibraryItem?: LibraryItem | null
+  localEpisode?: PodcastEpisode | null
+  [key: string]: unknown
+}
+
+export interface Playlist {
+  id: string
+  name?: string
+  description?: string | null
+  libraryId?: string
+  items: PlaylistItem[]
+  totalItems?: number
+  // The "unfinished" playlist the app builds itself rather than the server storing.
+  isAutoPlaylist?: boolean
+  [key: string]: unknown
 }

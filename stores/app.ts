@@ -495,6 +495,8 @@ export const useAppStore = defineStore('app', {
 
     reorderQueue({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) {
       const item = this.playQueue.splice(oldIndex, 1)[0]
+      // An index outside the queue removes nothing; there is nothing to put back.
+      if (!item) return
       this.playQueue.splice(newIndex, 0, item)
       if (this.queueIndex === oldIndex) {
         this.queueIndex = newIndex

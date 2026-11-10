@@ -35,13 +35,15 @@ import {
   type AutoPlaylistPodcastRule
 } from '~/composables/useAutoPlaylist'
 
+import type { LibraryItem, Playlist, PodcastEpisode } from '~/types'
+
 const props = defineProps<{
   modelValue: boolean
   processing?: boolean
-  libraryItem: Record<string, unknown>
-  episode?: Record<string, unknown>
+  libraryItem: LibraryItem
+  episode?: PodcastEpisode
   rssFeed?: Record<string, unknown> | null
-  playlist?: Record<string, unknown> | null
+  playlist?: Playlist | null
   hideRssFeedOption?: boolean
 }>()
 const emit = defineEmits<{
