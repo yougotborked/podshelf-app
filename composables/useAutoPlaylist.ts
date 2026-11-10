@@ -159,6 +159,7 @@ async function fetchServerEpisodesInBatches(
     )
     responses.forEach((result, index) => {
       const context = batch[index]
+      if (!context) return
       if (result.status !== 'fulfilled') { context.useLocalEpisodesFallback(); return }
       const serverItem = result.value as Record<string, unknown>
       const serverEpisodes = (serverItem?.media as Record<string, unknown> | null | undefined)?.episodes as Record<string, unknown>[] | undefined

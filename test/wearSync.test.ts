@@ -38,18 +38,18 @@ describe('toWearQueueEntries', () => {
   it('sends the server ids even when the phone has the episode downloaded', () => {
     const localFor = () => ({ id: 'local-ep', localLibraryItemId: 'local-li' })
     const queue = items([episode()], localFor)
-    expect(queue[0].libraryItemId).toBe('local-li')
+    expect(queue[0]?.libraryItemId).toBe('local-li')
 
     const [entry] = toWearQueueEntries(queue)
-    expect(entry.libraryItemId).toBe('li-1')
-    expect(entry.episodeId).toBe('ep-1')
-    expect(entry.coverPath).toBe('/api/items/li-1/cover')
+    expect(entry?.libraryItemId).toBe('li-1')
+    expect(entry?.episodeId).toBe('ep-1')
+    expect(entry?.coverPath).toBe('/api/items/li-1/cover')
   })
 
   it('carries resume position from the progress lookup', () => {
     const lookup = { server: () => ({ currentTime: 420, duration: 1800 }) }
     const [entry] = toWearQueueEntries(items([episode()]), lookup)
-    expect(entry.currentTimeSeconds).toBe(420)
+    expect(entry?.currentTimeSeconds).toBe(420)
   })
 
   // The watch compares its own listening against this before reporting it to the server.
@@ -58,13 +58,13 @@ describe('toWearQueueEntries', () => {
   it('carries when the phone last wrote that position', () => {
     const lookup = { server: () => ({ currentTime: 420, lastUpdate: 1700000000000 }) }
     const [entry] = toWearQueueEntries(items([episode()]), lookup)
-    expect(entry.progressUpdatedAtMs).toBe(1700000000000)
+    expect(entry?.progressUpdatedAtMs).toBe(1700000000000)
   })
 
   it('reports an unknown write time as zero rather than now', () => {
     // Defaulting to the current time would make every episode look freshly played on the
     // phone, which would stop the watch reporting anything at all.
-    expect(toWearQueueEntries(items([episode()]))[0].progressUpdatedAtMs).toBe(0)
+    expect(toWearQueueEntries(items([episode()]))[0]?.progressUpdatedAtMs).toBe(0)
   })
 
   it('drops finished episodes', () => {
@@ -79,22 +79,22 @@ describe('toWearQueueEntries', () => {
 
   it('treats a negative or missing position as the start', () => {
     const lookup = { server: () => ({ currentTime: -5 }) }
-    expect(toWearQueueEntries(items([episode()]), lookup)[0].currentTimeSeconds).toBe(0)
-    expect(toWearQueueEntries(items([episode()]))[0].currentTimeSeconds).toBe(0)
+    expect(toWearQueueEntries(items([episode()]), lookup)[0]?.currentTimeSeconds).toBe(0)
+    expect(toWearQueueEntries(items([episode()]))[0]?.currentTimeSeconds).toBe(0)
   })
 
   it('falls back to a flat podcast title, then to blank', () => {
-    expect(toWearQueueEntries(items([episode({ podcastTitle: 'Flat' })]))[0].podcastTitle).toBe('Flat')
-    expect(toWearQueueEntries(items([episode()]))[0].podcastTitle).toBe('')
+    expect(toWearQueueEntries(items([episode({ podcastTitle: 'Flat' })]))[0]?.podcastTitle).toBe('Flat')
+    expect(toWearQueueEntries(items([episode()]))[0]?.podcastTitle).toBe('')
   })
 
   it('names an untitled episode rather than sending an empty row', () => {
-    expect(toWearQueueEntries(items([episode({ title: '' })]))[0].title).toBe('Untitled episode')
+    expect(toWearQueueEntries(items([episode({ title: '' })]))[0]?.title).toBe('Untitled episode')
   })
 
   it('reports an unknown duration as zero rather than something made up', () => {
-    expect(toWearQueueEntries(items([episode({ duration: undefined })]))[0].durationSeconds).toBe(0)
-    expect(toWearQueueEntries(items([episode({ duration: -1 })]))[0].durationSeconds).toBe(0)
+    expect(toWearQueueEntries(items([episode({ duration: undefined })]))[0]?.durationSeconds).toBe(0)
+    expect(toWearQueueEntries(items([episode({ duration: -1 })]))[0]?.durationSeconds).toBe(0)
   })
 
   // A catch-up queue runs to 200. The watch will download these onto a device whose storage is
@@ -117,7 +117,7 @@ describe('toWearQueueEntries', () => {
     const lookup = { server: (_li: string, epId: string | null) => (epId && finishedIds.has(epId) ? { isFinished: true } : null) }
     const entries = toWearQueueEntries(items(many), lookup)
     expect(entries).toHaveLength(WEAR_QUEUE_LIMIT)
-    expect(entries[0].episodeId).toBe('ep-30')
+    expect(entries[0]?.episodeId).toBe('ep-30')
   })
 
   it('skips an item with no episode or no ids', () => {

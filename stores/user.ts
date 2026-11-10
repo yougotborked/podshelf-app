@@ -113,7 +113,7 @@ export const useUserStore = defineStore('user', {
       }
     },
 
-    async updateUserSettings(payload: Partial<UserSettings> | null | undefined) {
+    async updateUserSettings(payload: Partial<UserSettings> | null | undefined): Promise<boolean> {
       if (!payload) return false
       let hasChanges = false
       const existingSettings = { ...this.settings }
@@ -130,6 +130,7 @@ export const useUserStore = defineStore('user', {
         await localStore.setUserSettings(existingSettings)
         useEventBus().emit('user-settings', this.settings)
       }
+      return hasChanges
     },
 
     async loadUserSettings() {

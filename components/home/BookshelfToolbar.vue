@@ -25,6 +25,7 @@
 </template>
 
 <script setup lang="ts">
+import type { UserSettings } from '~/types'
 import { formatNumber } from '@/composables/useStrings'
 
 const strings = useStrings()
@@ -38,7 +39,7 @@ const route = useRoute()
 
 const showSortModal = ref(false)
 const showFilterModal = ref(false)
-const settings = ref<Record<string, unknown>>({})
+const settings = ref<Partial<UserSettings>>({})
 const totalEntities = ref(0)
 const showMoreMenuDialog = ref(false)
 
@@ -136,7 +137,7 @@ async function init() {
 
 function settingsUpdated(newSettings: Record<string, unknown>) {
   for (const key in newSettings) {
-    settings.value[key] = newSettings[key]
+    ;(settings.value as Record<string, unknown>)[key] = newSettings[key]
   }
 }
 

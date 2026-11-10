@@ -100,8 +100,8 @@ describe('parsePodcastFeed', () => {
 
   it('carries each episode its own date and description', () => {
     const [first] = parsePodcastFeed(feed).episodes
-    expect(first.pubDate).toBe('Tue, 27 Oct 2026 00:00:00 GMT')
-    expect(first.description).toBe('Second')
+    expect(first?.pubDate).toBe('Tue, 27 Oct 2026 00:00:00 GMT')
+    expect(first?.description).toBe('Second')
   })
 
   // The channel description is the one before the first <item>. Taking the document's first

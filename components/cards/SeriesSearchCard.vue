@@ -10,7 +10,7 @@
 <script setup lang="ts">
 const props = defineProps<{
   series?: Record<string, unknown>
-  bookItems?: unknown[]
+  bookItems?: Record<string, unknown>[]
 }>()
 
 const globalsStore = useGlobalsStore()

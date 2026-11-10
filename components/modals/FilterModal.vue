@@ -171,7 +171,7 @@ const sublistItems = computed(() => {
       return { text: item, value: utils.encode(item) }
     } else {
       const obj = item as Record<string, string>
-      return { text: obj.name, value: utils.encode(obj.id) }
+      return { text: obj.name, value: utils.encode(obj.id ?? '') }
     }
   })
   if (sublist.value === 'series') {

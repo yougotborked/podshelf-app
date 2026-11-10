@@ -24,7 +24,7 @@
         </div>
         <div class="w-full h-full" v-else>
           <template v-for="bookmark in bookmarks" :key="bookmark.id">
-            <modals-bookmarks-bookmark-item :highlight="currentTime === bookmark.time" :bookmark="bookmark" :playback-rate="_playbackRate" @click="clickBookmark" @edit="editBookmark" @delete="deleteBookmark" />
+            <modals-bookmarks-bookmark-item :highlight="currentTime === bookmark.time" :bookmark="bookmark as BookmarkRow" :playback-rate="_playbackRate" @click="clickBookmark" @edit="editBookmark" @delete="deleteBookmark" />
           </template>
           <div v-if="!bookmarks.length" class="flex h-32 items-center justify-center">
             <p class="text-xl">{{ strings.MessageNoBookmarks }}</p>
@@ -49,6 +49,8 @@ import { useNativeHttp } from '~/composables/useNativeHttp'
 import { useToast } from '~/composables/useToast'
 import { useUtils } from '~/composables/useUtils'
 import { useUserStore } from '~/stores/user'
+
+type BookmarkRow = { time: number; [key: string]: unknown }
 
 const props = defineProps<{
   modelValue: boolean
@@ -113,7 +115,7 @@ async function deleteBookmark(bm: Record<string, unknown>) {
   nativeHttp
     .delete(`/api/me/item/${props.libraryItemId}/bookmark/${bm.time}`)
     .then(() => {
-      userStore.deleteBookmark({ libraryItemId: props.libraryItemId, time: bm.time as number })
+      userStore.deleteBookmark({ libraryItemId: props.libraryItemId ?? '', time: bm.time as number })
     })
     .catch((error) => {
       toast.error(strings.ToastBookmarkRemoveFailed)

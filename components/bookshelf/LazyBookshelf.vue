@@ -246,14 +246,17 @@ async function fetchEntities(page: number) {
 
     for (let i = 0; i < payload.results.length; i++) {
       const index = i + startIndex
-      entities.value[index] = payload.results[i]
-      if (entityComponentRefs[index]) {
-        entityComponentRefs[index].setEntity(entities.value[index])
+      const result = payload.results[i]
+      if (!result) continue
+      entities.value[index] = result
+      const cardRef = entityComponentRefs[index]
+      if (cardRef) {
+        cardRef.setEntity(result)
 
         if (isBookEntity.value) {
-          const localLibraryItem = localLibraryItemMap.value?.get(entities.value[index].id as string)
+          const localLibraryItem = localLibraryItemMap.value?.get(result.id as string)
           if (localLibraryItem) {
-            entityComponentRefs[index].setLocalLibraryItem(localLibraryItem)
+            cardRef.setLocalLibraryItem(localLibraryItem)
           }
         }
       }
@@ -404,7 +407,7 @@ async function init() {
   if (appStore.lastBookshelfScrollData[props.page]) {
     const bookshelfWrapper = document.getElementById('bookshelf-wrapper')
     if (bookshelfWrapper) {
-      const { path, scrollTop } = appStore.lastBookshelfScrollData[props.page]
+      const { path, scrollTop } = appStore.lastBookshelfScrollData[props.page] ?? { path: '', scrollTop: 0 }
       if (path === routeFullPath.value) {
         // Exact path match with query so use scroll position
         bookshelfWrapper.scrollTop = scrollTop
@@ -504,13 +507,14 @@ function libraryItemUpdated(libraryItem: Record<string, unknown>) {
     var indexOf = entities.value.findIndex((ent) => ent && ent.id === libraryItem.id)
     if (indexOf >= 0) {
       entities.value[indexOf] = libraryItem
-      if (entityComponentRefs[indexOf]) {
-        entityComponentRefs[indexOf].setEntity(libraryItem)
+      const cardRef = entityComponentRefs[indexOf]
+      if (cardRef) {
+        cardRef.setEntity(libraryItem)
 
         if (isBookEntity.value) {
           const localLibraryItem = localLibraryItemMap.value?.get(libraryItem.id as string)
           if (localLibraryItem) {
-            entityComponentRefs[indexOf].setLocalLibraryItem(localLibraryItem)
+            cardRef.setLocalLibraryItem(localLibraryItem)
           }
         }
       }

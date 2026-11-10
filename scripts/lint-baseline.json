@@ -1,6 +1,6 @@
 {
   "recordedAt": "2026-11-10",
-  "totalFindings": 261,
+  "totalFindings": 260,
   "entries": {
     "components/app/Appbar.vue|@typescript-eslint/no-unnecessary-condition|Unnecessary optional chain on a non-nullish value.": 2,
     "components/app/AudioPlayer.vue|@typescript-eslint/no-unnecessary-condition|Unnecessary conditional, value is always falsy.": 7,
@@ -20,7 +20,6 @@
     "components/modals/Modal.vue|@typescript-eslint/no-unnecessary-condition|Unnecessary optional chain on a non-nullish value.": 1,
     "components/modals/playlists/AddCreateModal.vue|@typescript-eslint/no-unnecessary-condition|Unnecessary conditional, value is always truthy.": 2,
     "components/modals/PodcastEpisodesFeedModal.vue|@typescript-eslint/no-unnecessary-condition|Unnecessary conditional, value is always falsy.": 1,
-    "components/modals/PodcastEpisodesFeedModal.vue|@typescript-eslint/no-unnecessary-condition|Unnecessary conditional, value is always truthy.": 1,
     "components/modals/QueueModal.vue|@typescript-eslint/no-unnecessary-condition|Unnecessary conditional, value is always truthy.": 2,
     "components/modals/QueueModal.vue|@typescript-eslint/no-unnecessary-condition|Unnecessary optional chain on a non-nullish value.": 2,
     "components/readers/ComicReader.vue|@typescript-eslint/no-unnecessary-condition|Unnecessary optional chain on a non-nullish value.": 1,

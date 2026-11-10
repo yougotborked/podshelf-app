@@ -49,7 +49,7 @@ const sizeMultiplier = computed(() => {
   return (props.width || 0) / 240
 })
 const title = computed(() => series.value ? series.value.name as string : '')
-const books = computed(() => series.value ? (series.value.books as unknown[] | null | undefined) || [] : [])
+const books = computed(() => series.value ? (series.value.books as Record<string, unknown>[] | null | undefined) || [] : [])
 const seriesBookProgress = computed(() => {
   return (books.value as Record<string, unknown>[])
     .map((libraryItem) => userStore.getUserMediaProgress(libraryItem.id as string))
@@ -65,7 +65,7 @@ const seriesPercentInProgress = computed(() => {
   return Math.min(1, Math.max(0, totalFinishedAndInProgress / books.value.length))
 })
 const isSeriesFinished = computed(() => books.value.length === seriesBooksFinished.value.length)
-const seriesId = computed(() => series.value ? series.value.id as string : null)
+const seriesId = computed(() => series.value ? series.value.id as string : undefined)
 
 // Methods
 function setEntity(_series: Record<string, unknown>) {

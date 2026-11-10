@@ -270,6 +270,7 @@ function startQueueAt(index: number) {
   if (!items.length) return
   const start = Math.min(Math.max(index, 0), items.length - 1)
   const first = items[start]
+  if (!first) return
   const startTime = queueItemStartTime(first, progressLookup.value)
 
   appStore.setPlayQueue(items)

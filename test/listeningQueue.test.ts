@@ -188,23 +188,23 @@ describe('toPlayQueueItems', () => {
     // Getting this backwards streams a file that is already on disk, or reports progress against
     // an id the server has never heard of
     const [item] = toPlayQueueItems([episode('a-1', DAY)], () => ({ id: 'local-ep', localLibraryItemId: 'local-item' }))
-    expect(item.libraryItemId).toBe('local-item')
-    expect(item.episodeId).toBe('local-ep')
-    expect(item.serverLibraryItemId).toBe('show-a')
-    expect(item.serverEpisodeId).toBe('a-1')
+    expect(item?.libraryItemId).toBe('local-item')
+    expect(item?.episodeId).toBe('local-ep')
+    expect(item?.serverLibraryItemId).toBe('show-a')
+    expect(item?.serverEpisodeId).toBe('a-1')
   })
 
   it('streams when there is no download', () => {
     const [item] = toPlayQueueItems([episode('a-1', DAY)])
-    expect(item.libraryItemId).toBe('show-a')
-    expect(item.episodeId).toBe('a-1')
-    expect(item.localEpisode).toBeNull()
+    expect(item?.libraryItemId).toBe('show-a')
+    expect(item?.episodeId).toBe('a-1')
+    expect(item?.localEpisode).toBeNull()
   })
 
   it('streams when a local record exists but carries no library item of its own', () => {
     const [item] = toPlayQueueItems([episode('a-1', DAY)], () => ({ id: 'local-ep' }))
-    expect(item.libraryItemId).toBe('show-a')
-    expect(item.episodeId).toBe('a-1')
+    expect(item?.libraryItemId).toBe('show-a')
+    expect(item?.episodeId).toBe('a-1')
   })
 
   it('skips episodes with no server identity, which cannot be played or reported', () => {
@@ -249,14 +249,14 @@ describe('localEpisodesAsQueueCandidates', () => {
 
   it('lifts the parent library item id onto the episode, so it can be played and reported', () => {
     const [episode] = localEpisodesAsQueueCandidates(downloads)
-    expect(episode.libraryItemId).toBe('li-1')
-    expect(episode.id).toBe('ep-1')
+    expect(episode?.libraryItemId).toBe('li-1')
+    expect(episode?.id).toBe('ep-1')
   })
 
   it('keeps the local ids, so the file on disk is what plays', () => {
     const [episode] = localEpisodesAsQueueCandidates(downloads)
-    expect(episode.localEpisodeId).toBe('local-ep-1')
-    expect(episode.localLibraryItemId).toBe('local-item-1')
+    expect(episode?.localEpisodeId).toBe('local-ep-1')
+    expect(episode?.localLibraryItemId).toBe('local-item-1')
   })
 
   it('produces episodes the queue actually accepts', () => {

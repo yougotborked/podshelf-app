@@ -181,6 +181,7 @@ export function useUtils() {
     const json: Record<string, unknown> = {}
     for (const res of xml.matchAll(/(?:<(\w*)(?:\s[^>]*)*>)((?:(?!<\1).)*)(?:<\/\1>)|<(\w*)(?:\s*)*\/>/gm)) {
       const key = res[1] || res[3]
+      if (!key) continue
       const value = res[2] && xmlToJson(res[2])
       json[key] = (value && Object.keys(value).length ? value : res[2]) || null
     }
@@ -232,8 +233,10 @@ export function useUtils() {
     const currentParts = currentVersion.split('.').map(Number)
     const minParts = minVersion.split('.').map(Number)
     for (let i = 0; i < minParts.length; i++) {
-      if (currentParts[i] > minParts[i]) return true
-      if (currentParts[i] < minParts[i]) return false
+      const current = currentParts[i] ?? 0
+      const minimum = minParts[i] ?? 0
+      if (current > minimum) return true
+      if (current < minimum) return false
     }
     return true
   }

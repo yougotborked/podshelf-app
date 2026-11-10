@@ -146,7 +146,7 @@ function openFeed() {
     })
     .catch((error) => {
       console.error('Failed to open RSS Feed', error)
-      const errorMsg = (error as Record<string, Record<string, string>>).response ? (error as Record<string, Record<string, string>>).response.data : null
+      const errorMsg = (error as Record<string, Record<string, string> | undefined>).response?.data ?? null
       toast.error((errorMsg as string) || 'Failed to open RSS Feed')
     })
 }

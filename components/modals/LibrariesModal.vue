@@ -12,7 +12,7 @@
           >
             <div v-show="currentLibraryId === library.id" class="absolute top-0 left-0 w-0.5 bg-md-primary rounded-l-md-md h-full" />
             <div class="flex items-center px-3 py-3">
-              <ui-library-icon :icon="library.icon" />
+              <ui-library-icon :icon="library.icon as string" />
               <span class="text-md-body-l text-md-on-surface font-normal block truncate ml-4">{{ library.name }}</span>
             </div>
           </li>

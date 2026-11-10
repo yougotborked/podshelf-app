@@ -9,7 +9,7 @@
 import { computed } from 'vue'
 
 const props = defineProps<{
-  modelValue?: string | number
+  modelValue?: string | number | null
   label?: string
   type?: string
   disabled?: boolean

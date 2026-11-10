@@ -100,6 +100,7 @@ async function initCanvas() {
         const coverIndex = index % booksAddedWithCovers.length
         const libraryItemId = booksAddedWithCovers[coverIndex]
         index++
+        if (!libraryItemId) continue
 
         await new Promise<void>((resolve) => {
           const img = new Image()
@@ -182,6 +183,7 @@ async function initCanvas() {
 
       for (let i = 0; i < Math.min(5, imgsArr.length); i++) {
         const imgToAdd = imgsArr[i]
+        if (!imgToAdd) continue
         ctx.drawImage(imgToAdd.img, imgToAdd.sx, imgToAdd.sy, imgToAdd.sw, imgToAdd.sw, 40 + 145 * i, 580, 140, 140)
       }
     }
@@ -192,7 +194,7 @@ async function initCanvas() {
     if (topAuthors.length) {
       addText('TOP AUTHORS', '24px', 'normal', tanColor, '1px', 70, 549)
       for (let i = 0; i < topAuthors.length; i++) {
-        addText(topAuthors[i].name, '36px', 'bolder', 'white', '0px', 70, 609 + i * 60, 330)
+        addText(topAuthors[i]?.name ?? '', '36px', 'bolder', 'white', '0px', 70, 609 + i * 60, 330)
       }
     }
 
@@ -200,7 +202,7 @@ async function initCanvas() {
     if (topNarrators.length) {
       addText('TOP NARRATORS', '24px', 'normal', tanColor, '1px', 430, 549)
       for (let i = 0; i < topNarrators.length; i++) {
-        addText(topNarrators[i].name, '36px', 'bolder', 'white', '0px', 430, 609 + i * 60, 330)
+        addText(topNarrators[i]?.name ?? '', '36px', 'bolder', 'white', '0px', 430, 609 + i * 60, 330)
       }
     }
   } else if (props.variant === 2) {
@@ -210,7 +212,7 @@ async function initCanvas() {
     if (topAuthors.length) {
       addText('TOP AUTHORS', '24px', 'normal', tanColor, '1px', 70, 549)
       for (let i = 0; i < topAuthors.length; i++) {
-        addText(topAuthors[i].name, '36px', 'bolder', 'white', '0px', 70, 609 + i * 60, 330)
+        addText(topAuthors[i]?.name ?? '', '36px', 'bolder', 'white', '0px', 70, 609 + i * 60, 330)
       }
     }
 
@@ -218,7 +220,7 @@ async function initCanvas() {
     if (topGenres.length) {
       addText('TOP GENRES', '24px', 'normal', tanColor, '1px', 430, 549)
       for (let i = 0; i < topGenres.length; i++) {
-        addText(topGenres[i].genre, '36px', 'bolder', 'white', '0px', 430, 609 + i * 60, 330)
+        addText(topGenres[i]?.genre ?? '', '36px', 'bolder', 'white', '0px', 430, 609 + i * 60, 330)
       }
     }
   }

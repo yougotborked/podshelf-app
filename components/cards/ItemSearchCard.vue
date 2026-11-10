@@ -14,7 +14,7 @@ import { getString } from '~/composables/useStrings'
 
 const props = defineProps<{
   libraryItem?: Record<string, unknown>
-  search?: string
+  search?: string | null
 }>()
 
 const globalsStore = useGlobalsStore()

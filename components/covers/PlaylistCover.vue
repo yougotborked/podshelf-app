@@ -25,14 +25,16 @@ const itemCoverWidth = computed(() => {
 const libraryItemCovers = computed(() => {
   const itemList = props.items || []
   if (!itemList.length) return []
-  if (itemList.length === 1) return [itemList[0].libraryItem as Record<string, unknown>]
+  const only = itemList[0]
+  if (itemList.length === 1 && only) return [only.libraryItem as Record<string, unknown>]
 
   const covers: Record<string, unknown>[] = []
   for (let i = 0; i < 4; i++) {
     let index = i % itemList.length
     if (itemList.length === 2 && i >= 2) index = (i + 1) % 2
 
-    covers.push(itemList[index].libraryItem as Record<string, unknown>)
+    const picked = itemList[index]
+    if (picked) covers.push(picked.libraryItem as Record<string, unknown>)
   }
   return covers
 })

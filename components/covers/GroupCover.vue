@@ -147,7 +147,9 @@ async function init() {
   for (let i = 0; i < validCovers.length; i++) {
     offsetLeft = widthPer * i
     const zIdx = validCovers.length - i
-    const img = await buildCoverImg(validCovers[i], cw, offsetLeft, zIdx, validCovers.length === 1)
+    const cover = validCovers[i]
+    if (!cover) continue
+    const img = await buildCoverImg(cover, cw, offsetLeft, zIdx, validCovers.length === 1)
     outerdiv.appendChild(img)
     els.push(img)
   }

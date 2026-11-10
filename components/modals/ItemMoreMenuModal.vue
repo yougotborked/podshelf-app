@@ -163,7 +163,7 @@ const ereaderDeviceItems = computed(() => {
   if (!ebookFile.value || !librariesStore.ereaderDevices?.length) return []
   return librariesStore.ereaderDevices.map((d) => {
     const device = d as Record<string, string>
-    return { text: device.name, value: device.name }
+    return { text: device.name ?? '', value: device.name ?? '' }
   })
 })
 
@@ -770,7 +770,7 @@ async function setLocalProgressFinished({ isEpisode, isFinished }: { isEpisode: 
   if (payload?.localMediaProgress) {
     globalsStore.updateLocalMediaProgress(payload.localMediaProgress as Parameters<typeof globalsStore.updateLocalMediaProgress>[0])
     const message = isFinished ? strings.ToastItemMarkedAsFinished : strings.ToastItemMarkedAsNotFinished
-    toast.success(message)
+    toast.success(message ?? '')
     return true
   }
 

@@ -75,9 +75,9 @@ import { AbsDownloader } from '@/plugins/capacitor'
 import { getString } from '@/composables/useStrings'
 
 const props = defineProps<{
-  libraryItemId?: string
+  libraryItemId?: string | null
   episode: Record<string, unknown>
-  localLibraryItemId?: string
+  localLibraryItemId?: string | null
   localEpisode?: Record<string, unknown>
   isLocal?: boolean
   sortKey?: string

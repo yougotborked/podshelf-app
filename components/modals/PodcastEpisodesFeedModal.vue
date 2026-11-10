@@ -11,7 +11,7 @@
           <div class="relative" :class="itemEpisodeMap[(episode as any).enclosure.url] ? 'bg-md-surface-3/40' : selectedEpisodes[String(index)] ? 'bg-md-primary/10' : index % 2 == 0 ? 'bg-md-surface-3/25' : 'bg-md-surface-3/5'" @click="selectEpisode(episode, index)">
             <div class="absolute top-0 left-0 h-full flex items-center p-2">
               <span v-if="itemEpisodeMap[(episode as any).enclosure.url]" class="material-symbols text-md-primary text-xl">download_done</span>
-              <ui-checkbox v-else v-model="selectedEpisodes[String(index)]" small checkbox-bg="md-surface-3" border-color="gray-600" />
+              <ui-checkbox v-else :model-value="!!selectedEpisodes[String(index)]" small @update:model-value="selectedEpisodes[String(index)] = $event" checkbox-bg="md-surface-3" border-color="gray-600" />
             </div>
             <div class="pl-9 pr-2 py-2 border-b border-white/10">
               <p v-if="(episode as any).episode" class="font-semibold text-md-on-surface text-xs">#{{ (episode as any).episode }}</p>
@@ -68,8 +68,8 @@ const itemEpisodes = computed(() => {
 const itemEpisodeMap = computed(() => {
   const map: Record<string, boolean> = {}
   itemEpisodes.value.forEach((item) => {
-    const enc = item.enclosure as Record<string, string>
-    if (enc) map[enc.url] = true
+    const enc = item.enclosure as Record<string, string> | undefined
+    if (enc?.url) map[enc.url] = true
   })
   return map
 })
@@ -110,8 +110,8 @@ function downloadEpisodes() {
 }
 
 function selectEpisode(episode: Record<string, unknown>, index: number) {
-  const enc = episode.enclosure as Record<string, string>
-  if (itemEpisodeMap.value[enc.url]) return
+  const enc = episode.enclosure as Record<string, string> | undefined
+  if (enc?.url && itemEpisodeMap.value[enc.url]) return
   selectedEpisodes.value[String(index)] = !selectedEpisodes.value[String(index)]
 }
 
