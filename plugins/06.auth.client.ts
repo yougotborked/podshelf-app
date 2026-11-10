@@ -12,14 +12,14 @@ import { AbsDatabase } from '@/plugins/capacitor'
 export default defineNuxtPlugin(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   AbsDatabase.addListener('onTokenRefresh', (data: any) => {
-    const accessToken = (data as { accessToken?: string })?.accessToken
+    const accessToken = (data as { accessToken?: string } | null | undefined)?.accessToken
     if (!accessToken) return
     useUserStore().accessToken = accessToken
   })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   AbsDatabase.addListener('onTokenRefreshFailure', async (data: any) => {
-    const serverConnectionConfigId = (data as { serverConnectionConfigId?: string })?.serverConnectionConfigId || ''
+    const serverConnectionConfigId = (data as { serverConnectionConfigId?: string } | null | undefined)?.serverConnectionConfigId || ''
     console.warn('[auth] Native token refresh was rejected, logging out', serverConnectionConfigId)
     // The native side has already cleared its own credentials, so do not ask the server again
     await useUserStore().logout()

@@ -80,7 +80,7 @@ const isLocal = computed(() => !!props.libraryItem?.isLocal)
 
 const localLibraryItem = computed(() => {
   if (isLocal.value) return props.libraryItem
-  return (props.libraryItem?.localLibraryItem as Record<string, unknown>) || null
+  return (props.libraryItem?.localLibraryItem as Record<string, unknown> | null | undefined) || null
 })
 
 const localLibraryItemId = computed(() => (localLibraryItem.value?.id as string) || null)
@@ -101,7 +101,7 @@ const isConnectedToServer = computed(() => {
 
 const localEpisode = computed(() => {
   if (isLocal.value) return props.episode
-  return (props.episode?.localEpisode as Record<string, unknown>) || undefined
+  return (props.episode?.localEpisode as Record<string, unknown> | null | undefined) || undefined
 })
 
 const localEpisodeId = computed(() => (localEpisode.value?.id as string) || null)
@@ -116,11 +116,11 @@ const serverEpisodeId = computed(() => {
 
 const mediaType = computed(() => props.libraryItem?.mediaType as string)
 const isPodcast = computed(() => mediaType.value == 'podcast')
-const media = computed(() => (props.libraryItem?.media as Record<string, unknown>) || {})
-const mediaMetadata = computed(() => (media.value.metadata as Record<string, unknown>) || {})
+const media = computed(() => (props.libraryItem?.media as Record<string, unknown> | null | undefined) || {})
+const mediaMetadata = computed(() => (media.value.metadata as Record<string, unknown> | null | undefined) || {})
 const title = computed(() => mediaMetadata.value.title as string)
-const tracks = computed(() => (media.value.tracks as unknown[]) || [])
-const episodes = computed(() => (media.value.episodes as unknown[]) || [])
+const tracks = computed(() => (media.value.tracks as unknown[] | null | undefined) || [])
+const episodes = computed(() => (media.value.episodes as unknown[] | null | undefined) || [])
 const ebookFile = computed(() => media.value.ebookFile)
 
 const localItemProgress = computed(() => {
@@ -145,7 +145,7 @@ const userItemProgress = computed(() => {
 })
 
 const userIsFinished = computed(() => {
-  if ((userItemProgress.value as Record<string, unknown>)?.isFinished) return true
+  if ((userItemProgress.value as Record<string, unknown> | null | undefined)?.isFinished) return true
   return progressPercent.value >= FINISHED_PROGRESS_THRESHOLD
 })
 
@@ -156,7 +156,7 @@ const useEBookProgress = computed(() => {
 
 const progressPercent = computed(() => {
   if (useEBookProgress.value) return Math.max(Math.min(1, (userItemProgress.value as Record<string, unknown>).ebookProgress as number), 0)
-  return Math.max(Math.min(1, ((userItemProgress.value as Record<string, unknown>)?.progress as number) || 0), 0)
+  return Math.max(Math.min(1, ((userItemProgress.value as Record<string, unknown> | null | undefined)?.progress as number) || 0), 0)
 })
 
 const ereaderDeviceItems = computed(() => {
@@ -513,7 +513,7 @@ async function clearProgressClick() {
   })
   if (value) {
     emit('update:processing', true)
-    const serverMediaProgressId = (serverItemProgress.value as Record<string, unknown>)?.id as string
+    const serverMediaProgressId = (serverItemProgress.value as Record<string, unknown> | null | undefined)?.id as string
     if (localItemProgress.value) {
       await db.removeLocalMediaProgress((localItemProgress.value as Record<string, unknown>).id as string)
       globalsStore.removeLocalMediaProgressForItem((localItemProgress.value as Record<string, unknown>).id as string)
@@ -541,7 +541,7 @@ async function deleteLocalEpisode() {
 
   const localEp = localEpisode.value as Record<string, unknown>
   const localEpisodeAudioTrack = localEp.audioTrack as Record<string, unknown>
-  const localFile = (localLibraryItem.value?.localFiles as Record<string, unknown>[])?.find((lf) => lf.id === localEpisodeAudioTrack.localFileId)
+  const localFile = (localLibraryItem.value?.localFiles as Record<string, unknown>[] | null | undefined)?.find((lf) => lf.id === localEpisodeAudioTrack.localFileId)
   if (!localFile) {
     toast.error('Audio track does not have matching local file..')
     return
@@ -642,7 +642,7 @@ async function removeFromPlaylistClick() {
         userIsFinished: userIsFinished.value
       })}`
     })
-    if ((userItemProgress.value as Record<string, unknown>)?.isFinished) {
+    if ((userItemProgress.value as Record<string, unknown> | null | undefined)?.isFinished) {
       toast.success('Item removed from playlist')
       emit('removed-from-auto-playlist')
       return
@@ -686,7 +686,7 @@ async function forceMarkFinished() {
   let markFinishedSucceeded = false
 
   if (props.episode) {
-    if ((userItemProgress.value as Record<string, unknown>)?.isFinished) return
+    if ((userItemProgress.value as Record<string, unknown> | null | undefined)?.isFinished) return
     if (isLocal.value || localEpisode.value) {
       const payload = await db.updateLocalMediaProgressFinished({
         localLibraryItemId: localLibraryItemId.value,
@@ -717,7 +717,7 @@ async function forceMarkFinished() {
       }
     }
   } else {
-    if ((userItemProgress.value as Record<string, unknown>)?.isFinished) return
+    if ((userItemProgress.value as Record<string, unknown> | null | undefined)?.isFinished) return
     if (isLocal.value) {
       const payload = await db.updateLocalMediaProgressFinished({
         localLibraryItemId: localLibraryItemId.value,
@@ -748,7 +748,7 @@ async function forceMarkFinished() {
     }
   }
 
-  if (markFinishedSucceeded && props.playlist?.id === 'unfinished' && !(userItemProgress.value as Record<string, unknown>)?.isFinished) {
+  if (markFinishedSucceeded && props.playlist?.id === 'unfinished' && !(userItemProgress.value as Record<string, unknown> | null | undefined)?.isFinished) {
     emit('removed-from-auto-playlist', { refresh: true })
   }
 }

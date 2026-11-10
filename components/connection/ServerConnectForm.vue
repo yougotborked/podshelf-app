@@ -152,8 +152,8 @@ const oauth = ref({
 const deviceData = computed(() => appStore.deviceData || {})
 const deviceSettings = computed(() => (deviceData.value as Record<string, any>).deviceSettings || {})
 const networkConnected = computed(() => appStore.networkConnected)
-const serverConnectionConfigs = computed(() => (deviceData.value as Record<string, any>)?.serverConnectionConfigs || [])
-const lastServerConnectionConfigId = computed(() => (deviceData.value as Record<string, any>)?.lastServerConnectionConfigId || null)
+const serverConnectionConfigs = computed(() => (deviceData.value as Record<string, any> | null | undefined)?.serverConnectionConfigs || [])
+const lastServerConnectionConfigId = computed(() => (deviceData.value as Record<string, any> | null | undefined)?.lastServerConnectionConfigId || null)
 const lastServerConnectionConfig = computed(() => {
   if (!lastServerConnectionConfigId.value || !serverConnectionConfigs.value.length) return null
   return serverConnectionConfigs.value.find((s: Record<string, any>) => s.id == lastServerConnectionConfigId.value)

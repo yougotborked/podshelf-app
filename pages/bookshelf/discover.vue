@@ -204,7 +204,7 @@ const addProcessing = ref(false)
  * about the person. It reads progress the user store already holds, so it costs no request, and
  * it stays silent until there is enough finished listening to mean something.
  */
-const listeningProfile = computed(() => buildListeningProfile(((userStore.user?.mediaProgress as Record<string, unknown>[]) || []) as never[], libraryGenresById.value))
+const listeningProfile = computed(() => buildListeningProfile(((userStore.user?.mediaProgress as Record<string, unknown>[] | null | undefined) || []) as never[], libraryGenresById.value))
 
 const rankedTrending = computed(() => rankCandidates(trendingResults.value, listeningProfile.value))
 

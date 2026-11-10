@@ -56,7 +56,7 @@ const onCastSupportUpdateListener = ref<{ remove(): void } | null>(null)
 
 const currentLibrary = computed(() => librariesStore.getCurrentLibrary)
 const currentLibraryName = computed(() => currentLibrary.value?.name || '')
-const currentLibraryIcon = computed(() => (currentLibrary.value as Record<string, unknown>)?.icon as string || 'database')
+const currentLibraryIcon = computed(() => (currentLibrary.value as Record<string, unknown> | null | undefined)?.icon as string || 'database')
 const showBack = computed(() => {
   if (!route.name) return true
   const name = String(route.name)

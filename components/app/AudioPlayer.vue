@@ -38,7 +38,7 @@
 
     <div class="cover-wrapper absolute z-30 pointer-events-auto" @click="clickContainer">
       <div class="w-full h-full flex justify-center">
-        <covers-book-cover v-if="libraryItem || localLibraryItemCoverSrc" ref="cover" :library-item="libraryItem" :download-cover="localLibraryItemCoverSrc" :width="bookCoverWidth" :book-cover-aspect-ratio="bookCoverAspectRatio" raw @imageLoaded="coverImageLoaded" />
+        <covers-book-cover v-if="libraryItem || localLibraryItemCoverSrc" ref="cover" :library-item="libraryItem ?? undefined" :download-cover="localLibraryItemCoverSrc ?? undefined" :width="bookCoverWidth" :book-cover-aspect-ratio="bookCoverAspectRatio" raw @imageLoaded="coverImageLoaded" />
       </div>
 
       <div v-if="syncStatus === SyncStatus.FAILED" class="absolute top-0 left-0 w-full h-full flex items-center justify-center z-30" @click.stop="showSyncsFailedDialog">
@@ -120,6 +120,7 @@
 </template>
 
 <script setup lang="ts">
+import type { Chapter } from '~/types'
 import { Capacitor } from '@capacitor/core'
 import { App } from '@capacitor/app'
 import { AbsAudioPlayer } from '~/plugins/capacitor'
@@ -381,9 +382,9 @@ const isCasting = computed(() => mediaPlayer.value === 'cast-player')
 const mediaPlayer = computed(() => (playbackSession.value?.mediaPlayer as string) || null)
 const mediaType = computed(() => (playbackSession.value?.mediaType as string) || null)
 const isPodcast = computed(() => mediaType.value === 'podcast')
-const mediaMetadata = computed(() => (playbackSession.value?.mediaMetadata as Record<string, unknown>) || null)
-const libraryItem = computed(() => (playbackSession.value?.libraryItem as Record<string, unknown>) || null)
-const localLibraryItem = computed(() => (playbackSession.value?.localLibraryItem as Record<string, unknown>) || null)
+const mediaMetadata = computed(() => (playbackSession.value?.mediaMetadata as Record<string, unknown> | null | undefined) || null)
+const libraryItem = computed(() => (playbackSession.value?.libraryItem as Record<string, unknown> | null | undefined) || null)
+const localLibraryItem = computed(() => (playbackSession.value?.localLibraryItem as Record<string, unknown> | null | undefined) || null)
 
 const localLibraryItemCoverSrc = computed(() => {
   const localItemCover = (localLibraryItem.value?.coverContentUrl as string) || null
@@ -397,12 +398,12 @@ const isDirectPlayMethod = computed(() => playMethod.value == PlayMethod.DIRECTP
 
 const currentChapter = computed(() => {
   if (!chapters.value.length) return null
-  return chapters.value.find((ch: Record<string, unknown>) => Number(Number(ch.start).toFixed(2)) <= currentTime.value && Number(Number(ch.end).toFixed(2)) > currentTime.value) ?? null
+  return chapters.value.find((ch) => Number(Number(ch.start).toFixed(2)) <= currentTime.value && Number(Number(ch.end).toFixed(2)) > currentTime.value) ?? null
 })
 
 const nextChapter = computed(() => {
   if (!chapters.value.length) return undefined
-  return chapters.value.find((c: Record<string, unknown>) => Number(Number(c.start).toFixed(2)) > currentTime.value)
+  return chapters.value.find((c) => Number(Number(c.start).toFixed(2)) > currentTime.value)
 })
 
 const currentChapterTitle = computed(() => (currentChapter.value?.title as string) || '')
@@ -421,7 +422,7 @@ const authorName = computed(() => {
   return (mediaMetadata.value?.authorName as string) || 'Author'
 })
 
-const chapters = computed(() => (playbackSession.value?.chapters as Record<string, unknown>[]) || [])
+const chapters = computed(() => (playbackSession.value?.chapters as Chapter[] | null | undefined) || [])
 
 const currentChapterDuration = computed(() => {
   if (currentChapter.value) {
@@ -597,7 +598,7 @@ function clickTitleAndAuthor() {
   }
 }
 
-async function selectChapter(chapter: Record<string, unknown>) {
+async function selectChapter(chapter: Chapter) {
   await hapticsImpact()
   seek(chapter.start as number)
   showChapterModal.value = false
@@ -638,7 +639,7 @@ async function jumpNextChapterOrQueue() {
   await hapticsImpact()
   if (showLoadingState.value) return
   if (nextChapter.value) {
-    seek((nextChapter.value as Record<string, unknown>).start as number)
+    seek(nextChapter.value.start)
   } else if (nextQueueItem.value) {
     emit('skipNextQueue')
   }
@@ -653,7 +654,7 @@ async function jumpChapterStart() {
 
   // If 4 seconds or less into current chapter, then go to previous
   if (currentTime.value - (currentChapter.value.start as number) <= 4) {
-    const currChapterIndex = chapters.value.findIndex((ch: Record<string, unknown>) => Number(ch.start) <= currentTime.value && Number(ch.end) >= currentTime.value)
+    const currChapterIndex = chapters.value.findIndex((ch) => Number(ch.start) <= currentTime.value && Number(ch.end) >= currentTime.value)
     if (currChapterIndex > 0) {
       const prevChapter = chapters.value[currChapterIndex - 1]
       seek(prevChapter.start as number)

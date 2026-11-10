@@ -628,7 +628,7 @@ async function saveSettings() {
 }
 
 function setDeviceSettings() {
-  const ds = (deviceData.value?.deviceSettings as Record<string, unknown>) || {}
+  const ds = (deviceData.value?.deviceSettings as Record<string, unknown> | null | undefined) || {}
   settings.disableAutoRewind = !!ds.disableAutoRewind
   settings.enableAltView = !!ds.enableAltView
   settings.allowSeekingOnMediaControls = !!ds.allowSeekingOnMediaControls

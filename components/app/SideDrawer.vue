@@ -60,7 +60,7 @@ const show = computed({
 const user = computed(() => userStore.user)
 const serverConnectionConfig = computed(() => userStore.serverConnectionConfig)
 const serverSettings = computed(() => appStore.serverSettings || {})
-const username = computed(() => (user.value as Record<string, unknown>)?.username as string || '')
+const username = computed(() => (user.value as Record<string, unknown> | null | undefined)?.username as string || '')
 
 const navItems = computed(() => {
   const items: { icon: string; text: string; to?: string; action?: string; iconOutlined?: boolean }[] = [

@@ -40,7 +40,7 @@ const show = computed({
   set(val: boolean) { globalsStore.showSelectLocalFolderModal = val }
 })
 
-const modalData = computed(() => (globalsStore.localFolderSelectData as Record<string, unknown>) || {})
+const modalData = computed(() => (globalsStore.localFolderSelectData as Record<string, unknown> | null | undefined) || {})
 const callback = computed(() => modalData.value.callback as ((folder: Record<string, unknown>) => void) | undefined)
 const mediaType = computed(() => modalData.value.mediaType as string)
 

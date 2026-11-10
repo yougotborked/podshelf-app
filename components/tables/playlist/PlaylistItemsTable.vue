@@ -77,7 +77,7 @@ const totalDuration = computed(() => {
   props.items.forEach((item) => {
     const ep = item.episode as Record<string, unknown> | undefined
     if (ep) _total += (ep.duration as number) || 0
-    else _total += ((item.libraryItem as Record<string, unknown>)?.media as Record<string, unknown>)?.duration as number || 0
+    else _total += ((item.libraryItem as Record<string, unknown> | null | undefined)?.media as Record<string, unknown> | null | undefined)?.duration as number || 0
   })
   return _total
 })
@@ -88,7 +88,7 @@ function itemKey(item: Record<string, unknown>) {
   if (item?.id) return item.id as string
   const ep = item?.episode as Record<string, unknown> | undefined
   const episodeId = (item?.episodeId as string) || (ep?.serverEpisodeId as string) || (ep?.id as string) || 'book'
-  const libraryItemId = (item?.libraryItemId as string) || ((item?.libraryItem as Record<string, unknown>)?.id as string) || 'unknown'
+  const libraryItemId = (item?.libraryItemId as string) || ((item?.libraryItem as Record<string, unknown> | null | undefined)?.id as string) || 'unknown'
   return `${libraryItemId}_${episodeId}`
 }
 

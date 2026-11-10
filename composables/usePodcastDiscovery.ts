@@ -82,7 +82,7 @@ type ChartEntry = { id: string; title: string; author: string; artwork: string }
  * throws in production and never in testing.
  */
 export function parseChartEntries(payload: unknown): ChartEntry[] {
-  const feed = (payload as { feed?: { entry?: unknown } })?.feed
+  const feed = (payload as { feed?: { entry?: unknown } } | null | undefined)?.feed
   if (!feed?.entry) return []
 
   const entries = Array.isArray(feed.entry) ? feed.entry : [feed.entry]
@@ -175,7 +175,7 @@ export function usePodcastDiscovery() {
 
       return { ok: true, feeds: mergeChartWithLookup(entries, lookup?.results ?? []) }
     } catch (error) {
-      const status = (error as { status?: number })?.status
+      const status = (error as { status?: number } | null | undefined)?.status
       console.error('[discovery] Apple charts request failed', error)
       // No status means it never got there - no signal, captive portal, DNS.
       return { ok: false, reason: status ? describeDiscoveryFailure(status) : 'unreachable' }

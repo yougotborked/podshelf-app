@@ -146,8 +146,8 @@ async function attemptConnection() {
   const deviceData = await useDb().getDeviceData() as Record<string, unknown> | null
   let serverConfig: Record<string, unknown> | null = null
   if (deviceData) {
-    globalsStore.hapticFeedback = (deviceData.deviceSettings as Record<string, unknown>)?.hapticFeedback as string || 'LIGHT'
-    if (deviceData.lastServerConnectionConfigId && (deviceData.serverConnectionConfigs as unknown[])?.length) {
+    globalsStore.hapticFeedback = (deviceData.deviceSettings as Record<string, unknown> | null | undefined)?.hapticFeedback as string || 'LIGHT'
+    if (deviceData.lastServerConnectionConfigId && (deviceData.serverConnectionConfigs as unknown[] | null | undefined)?.length) {
       serverConfig = (deviceData.serverConnectionConfigs as Record<string, unknown>[]).find(
         (scc) => scc.id == deviceData.lastServerConnectionConfigId
       ) || null
@@ -193,7 +193,7 @@ async function attemptConnection() {
   }
 
   const lastLibraryId = await useLocalStore().getLastLibraryId()
-  const userLibrariesAccessible = (userObj.librariesAccessible as string[]) || []
+  const userLibrariesAccessible = (userObj.librariesAccessible as string[] | null | undefined) || []
   if (lastLibraryId && (!userLibrariesAccessible.length || userLibrariesAccessible.includes(lastLibraryId))) {
     librariesStore.currentLibraryId = lastLibraryId
   } else if (userDefaultLibraryId) {
@@ -281,7 +281,7 @@ async function userMediaProgressUpdated(payload: Record<string, unknown>) {
     const localLibraryItem = await useDb().getLocalLibraryItemByLId(prog.libraryItemId as string) as Record<string, unknown> | null
     if (localLibraryItem) {
       if (prog.episodeId) {
-        const lliEpisodes = ((localLibraryItem.media as Record<string, unknown>)?.episodes as Record<string, unknown>[]) || []
+        const lliEpisodes = ((localLibraryItem.media as Record<string, unknown> | null | undefined)?.episodes as Record<string, unknown>[] | null | undefined) || []
         const localEpisode = lliEpisodes.find((ep) => ep.serverEpisodeId === prog.episodeId)
         if (localEpisode) {
           newLocalMediaProgress = await useDb().syncServerMediaProgressWithLocalMediaProgress({
@@ -435,8 +435,8 @@ async function retryConnectionIfNeeded() {
   }
 
   const socket = useSocket()
-  const socketIsConnected = (socket as unknown as Record<string, unknown>)?.socket
-    ? ((socket as unknown as Record<string, unknown>).socket as Record<string, unknown>)?.connected
+  const socketIsConnected = (socket as unknown as Record<string, unknown> | null | undefined)?.socket
+    ? ((socket as unknown as Record<string, unknown>).socket as Record<string, unknown> | null | undefined)?.connected
     : false
 
   if (!socketIsConnected) {
@@ -497,7 +497,7 @@ onMounted(async () => {
     const deviceData = await useDb().getDeviceData() as Record<string, unknown> | null
     appStore.setDeviceData(deviceData)
 
-    if (deviceData?.lastServerConnectionConfigId && (deviceData.serverConnectionConfigs as unknown[])?.length) {
+    if (deviceData?.lastServerConnectionConfigId && (deviceData.serverConnectionConfigs as unknown[] | null | undefined)?.length) {
       const scc = (deviceData.serverConnectionConfigs as Record<string, unknown>[]).find(
         (s) => s.id == deviceData.lastServerConnectionConfigId
       )

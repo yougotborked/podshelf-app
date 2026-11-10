@@ -40,7 +40,7 @@ const show = computed({
 })
 
 const _libraryItem = computed(() => props.libraryItem || {})
-const media = computed(() => (_libraryItem.value.media as Record<string, unknown>) || {})
-const mediaMetadata = computed(() => (media.value.metadata as Record<string, unknown>) || {})
+const media = computed(() => (_libraryItem.value.media as Record<string, unknown> | null | undefined) || {})
+const mediaMetadata = computed(() => (media.value.metadata as Record<string, unknown> | null | undefined) || {})
 const size = computed(() => media.value.size as number | undefined)
 </script>

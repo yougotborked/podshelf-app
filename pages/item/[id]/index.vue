@@ -673,7 +673,7 @@ async function loadServerLibraryItem() {
   if (!appStore.isOffline && userStore.serverConnectionConfig) {
     fetchedItem = (await nativeHttp.get(`/api/items/${libraryItemId}?expanded=1&include=rssfeed`, { connectTimeout: 10000 }).catch((error: unknown) => {
       console.error('Failed to fetch library item', error)
-      AbsLogger.error({ tag: 'ItemPage', message: `Failed to fetch library item ${libraryItemId}: ${(error as Error)?.message || error}` })
+      AbsLogger.error({ tag: 'ItemPage', message: `Failed to fetch library item ${libraryItemId}: ${(error as Error | null | undefined)?.message || error}` })
       return null
     })) as LibraryItem | null
 

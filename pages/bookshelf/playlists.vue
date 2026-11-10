@@ -44,7 +44,7 @@ if (enabled) {
   if (cached) {
     autoPlaylist.value = {
       ...(cached as any),
-      totalItems: (cached.totalItems as number) || ((cached.items as any[])?.length ?? 0)
+      totalItems: (cached.totalItems as number) || ((cached.items as any[] | null | undefined)?.length ?? 0)
     }
   }
 }

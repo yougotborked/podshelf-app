@@ -49,7 +49,7 @@ const selectedFile = ref<Record<string, unknown> | null>(null)
 
 const libraryItemId = computed(() => props.libraryItem.id as string)
 const ebookFiles = computed(() =>
-  ((props.libraryItem.libraryFiles as Record<string, unknown>[]) || []).filter((lf) => lf.fileType === 'ebook')
+  ((props.libraryItem.libraryFiles as Record<string, unknown>[] | null | undefined) || []).filter((lf) => lf.fileType === 'ebook')
 )
 const userCanUpdate = computed(() => userStore.getUserCanUpdate)
 const libraryIsAudiobooksOnly = computed(() => librariesStore.getLibraryIsAudiobooksOnly)

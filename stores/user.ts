@@ -48,7 +48,7 @@ export const useUserStore = defineStore('user', {
     userMediaProgressIndex: (state): UserMediaProgressIndex => {
       const byItem = new Map<string, MediaProgress>()
       const byEpisode = new Map<string, MediaProgress>()
-      const mediaProgress = (state.user?.mediaProgress as MediaProgress[]) || []
+      const mediaProgress = (state.user?.mediaProgress as MediaProgress[] | null | undefined) || []
 
       for (const mp of mediaProgress) {
         const libraryItemId = mp.libraryItemId as string | undefined
@@ -76,10 +76,10 @@ export const useUserStore = defineStore('user', {
       return (state.user.bookmarks as Record<string, unknown>[]).filter((bm) => bm.libraryItemId === libraryItemId)
     },
     getUserSetting: (state) => (key: keyof UserSettings) => state.settings?.[key] ?? null,
-    getUserCanUpdate: (state) => !!(state.user?.permissions as Record<string, unknown>)?.update,
-    getUserCanDelete: (state) => !!(state.user?.permissions as Record<string, unknown>)?.delete,
-    getUserCanDownload: (state) => !!(state.user?.permissions as Record<string, unknown>)?.download,
-    getUserCanAccessExplicitContent: (state) => !!(state.user?.permissions as Record<string, unknown>)?.accessExplicitContent
+    getUserCanUpdate: (state) => !!(state.user?.permissions as Record<string, unknown> | null | undefined)?.update,
+    getUserCanDelete: (state) => !!(state.user?.permissions as Record<string, unknown> | null | undefined)?.delete,
+    getUserCanDownload: (state) => !!(state.user?.permissions as Record<string, unknown> | null | undefined)?.download,
+    getUserCanAccessExplicitContent: (state) => !!(state.user?.permissions as Record<string, unknown> | null | undefined)?.accessExplicitContent
   },
 
   actions: {

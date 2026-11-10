@@ -54,7 +54,7 @@ const ereaderSettings = ref({
 const libraryItemId = computed(() => props.libraryItem?.id as string)
 const localLibraryItem = computed(() => {
   if (props.isLocal) return props.libraryItem
-  return (props.libraryItem.localLibraryItem as Record<string, unknown>) || null
+  return (props.libraryItem.localLibraryItem as Record<string, unknown> | null | undefined) || null
 })
 const localLibraryItemId = computed(() => localLibraryItem.value?.id as string)
 const serverLibraryItemId = computed(() => {
@@ -67,7 +67,7 @@ const serverLibraryItemId = computed(() => {
 })
 const isPlayerOpen = computed(() => appStore.getIsPlayerOpen)
 const readerHeightOffset = computed(() => isPlayerOpen.value ? 204 : 104)
-const chapters = computed(() => (book.value as unknown as { navigation?: { toc?: unknown[] } })?.navigation?.toc || [])
+const chapters = computed(() => (book.value as unknown as { navigation?: { toc?: unknown[] } } | null | undefined)?.navigation?.toc || [])
 const userItemProgress = computed(() => props.isLocal ? localItemProgress.value : serverItemProgress.value)
 const localItemProgress = computed(() => globalsStore.getLocalMediaProgressById(localLibraryItemId.value))
 const serverItemProgress = computed(() => userStore.getUserMediaProgress(serverLibraryItemId.value || ''))
@@ -142,7 +142,7 @@ async function updateProgress(payload: { ebookLocation: string; ebookProgress?: 
       ...payload
     }
     const localResponse = await db.updateLocalEbookProgress(localPayload)
-    if ((localResponse as Record<string, unknown>)?.localMediaProgress) {
+    if ((localResponse as Record<string, unknown> | null | undefined)?.localMediaProgress) {
       globalsStore.updateLocalMediaProgress((localResponse as Record<string, unknown>).localMediaProgress as Parameters<typeof globalsStore.updateLocalMediaProgress>[0])
     }
   }
@@ -267,7 +267,7 @@ function relocated(location: { start: { cfi: string; location: number }; end: { 
 }
 
 function initEpub() {
-  progress.value = Math.round(((userItemProgress.value as Record<string, unknown>)?.ebookProgress as number || 0) * 100)
+  progress.value = Math.round(((userItemProgress.value as Record<string, unknown> | null | undefined)?.ebookProgress as number || 0) * 100)
 
   const customRequest = async (url: string) => {
     try {

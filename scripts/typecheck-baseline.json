@@ -1,13 +1,10 @@
 {
   "recordedAt": "2026-11-10",
-  "totalErrors": 208,
+  "totalErrors": 205,
   "entries": {
     "components/app/AudioPlayer.vue|TS18048|'chunk' is possibly 'undefined'.": 1,
     "components/app/AudioPlayer.vue|TS18048|'prevChapter' is possibly 'undefined'.": 1,
     "components/app/AudioPlayer.vue|TS2322|Type 'number | undefined' is not assignable to type 'number'.": 2,
-    "components/app/AudioPlayer.vue|TS2322|Type 'Record<string, unknown> | null' is not assignable to type 'ChapterItem | null'.": 1,
-    "components/app/AudioPlayer.vue|TS2322|Type 'Record<string, unknown>[]' is not assignable to type 'ChapterItem[]'.": 1,
-    "components/app/AudioPlayer.vue|TS2322|Type 'string | null' is not assignable to type 'string | undefined'.": 1,
     "components/app/AudioPlayer.vue|TS2532|Object is possibly 'undefined'.": 5,
     "components/bookshelf/LazyBookshelf.vue|TS2322|Type 'Record<string, unknown> | undefined' is not assignable to type 'Record<string, unknown>'.": 1,
     "components/bookshelf/LazyBookshelf.vue|TS2339|Property 'path' does not exist on type '{ scrollTop: number; path: string; } | undefined'.": 1,

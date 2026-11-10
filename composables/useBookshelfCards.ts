@@ -101,7 +101,7 @@ export function useBookshelfCards(options: BookshelfCardsOptions) {
     }
 
     const componentRef = {
-      $el: container.firstElementChild as HTMLElement || container,
+      $el: container.firstElementChild as HTMLElement | null | undefined || container,
       setSelectionMode: instance.setSelectionMode?.bind(instance) || (() => {}),
       get isHovering() { return instance.isHovering },
       set isHovering(v: boolean) { instance.isHovering = v },

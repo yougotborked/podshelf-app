@@ -150,8 +150,8 @@ watch(() => props.bookMount, (newVal) => {
 // Computed
 const _libraryItem = computed(() => libraryItem.value || {})
 const isLocal = computed(() => !!_libraryItem.value.isLocal)
-const media = computed(() => (_libraryItem.value.media as Record<string, unknown>) || {})
-const mediaMetadata = computed(() => (media.value.metadata as Record<string, unknown>) || {})
+const media = computed(() => (_libraryItem.value.media as Record<string, unknown> | null | undefined) || {})
+const mediaMetadata = computed(() => (media.value.metadata as Record<string, unknown> | null | undefined) || {})
 const mediaType = computed(() => _libraryItem.value.mediaType as string | undefined)
 const isPodcast = computed(() => mediaType.value === 'podcast')
 const placeholderUrl = computed(() => '/book_placeholder.jpg')
@@ -228,7 +228,7 @@ const localLibraryItemId = computed(() => {
 })
 const localEpisode = computed(() => {
   if (!recentEpisode.value || !localLibraryItem.value) return null
-  const episodes = (localLibraryItem.value.media as Record<string, unknown>)?.episodes as Record<string, unknown>[] || []
+  const episodes = (localLibraryItem.value.media as Record<string, unknown> | null | undefined)?.episodes as Record<string, unknown>[] | null | undefined || []
   return episodes.find((ep) => ep.serverEpisodeId === recentEpisode.value?.id)
 })
 const episodeProgress = computed(() => {
@@ -247,9 +247,9 @@ const useEBookProgress = computed(() => {
 })
 const userProgressPercent = computed(() => {
   if (useEBookProgress.value) return Math.max(Math.min(1, (userProgress.value as Record<string, unknown>).ebookProgress as number), 0)
-  return Math.max(Math.min(1, ((userProgress.value as Record<string, unknown>)?.progress as number) || 0), 0) || 0
+  return Math.max(Math.min(1, ((userProgress.value as Record<string, unknown> | null | undefined)?.progress as number) || 0), 0) || 0
 })
-const itemIsFinished = computed(() => !!(userProgress.value as Record<string, unknown>)?.isFinished)
+const itemIsFinished = computed(() => !!(userProgress.value as Record<string, unknown> | null | undefined)?.isFinished)
 const showError = computed(() => isMissing.value || isInvalid.value)
 const isStreaming = computed(() => appStore.getIsMediaStreaming(libraryItemId.value, recentEpisode.value?.id as string))
 const streamIsPlaying = computed(() => appStore.playerIsPlaying && isStreaming.value)

@@ -86,7 +86,7 @@ export interface SeriesRef {
 }
 
 export interface Chapter {
-  id?: number
+  id?: number | string
   start: number
   end: number
   title: string

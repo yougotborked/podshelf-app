@@ -62,7 +62,7 @@ const episodesSelected = computed(() => Object.keys(selectedEpisodes.value).filt
 
 const itemEpisodes = computed(() => {
   if (!props.libraryItem) return []
-  return ((props.libraryItem.media as Record<string, unknown>).episodes as Record<string, unknown>[]) || []
+  return ((props.libraryItem.media as Record<string, unknown>).episodes as Record<string, unknown>[] | null | undefined) || []
 })
 
 const itemEpisodeMap = computed(() => {
