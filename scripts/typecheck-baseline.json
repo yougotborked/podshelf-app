@@ -1,6 +1,6 @@
 {
-  "recordedAt": "2026-11-09",
-  "totalErrors": 224,
+  "recordedAt": "2026-11-10",
+  "totalErrors": 217,
   "entries": {
     "components/app/AudioPlayer.vue|TS18048|'chunk' is possibly 'undefined'.": 1,
     "components/app/AudioPlayer.vue|TS18048|'prevChapter' is possibly 'undefined'.": 1,
@@ -84,13 +84,6 @@
     "pages/item/[id]/[episode]/index.vue|TS2362|The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.": 1,
     "pages/item/[id]/[episode]/index.vue|TS2365|Operator '<' cannot be applied to types '{}' and 'number'.": 1,
     "pages/item/[id]/[episode]/index.vue|TS2365|Operator '>' cannot be applied to types '{}' and 'number'.": 2,
-    "pages/item/[id]/index.vue|TS18046|'userItemProgress.value.ebookProgress' is of type 'unknown'.": 1,
-    "pages/item/[id]/index.vue|TS18049|'userItemProgress.value' is possibly 'null' or 'undefined'.": 1,
-    "pages/item/[id]/index.vue|TS2345|Argument of type '{ style: true; class: string; id: string; }' is not assignable to parameter of type 'HTMLAttributes & ReservedProps & Record<string, unknown>'.": 1,
-    "pages/item/[id]/index.vue|TS2345|Argument of type '{}' is not assignable to parameter of type 'number | Date | null'.": 1,
-    "pages/item/[id]/index.vue|TS2345|Argument of type '{}' is not assignable to parameter of type 'number'.": 1,
-    "pages/item/[id]/index.vue|TS2345|Argument of type 'unknown' is not assignable to parameter of type 'number'.": 1,
-    "pages/item/[id]/index.vue|TS7030|Not all code paths return a value.": 1,
     "pages/localMedia/folders/index.vue|TS2322|Type 'string | null' is not assignable to type 'string | number | undefined'.": 1,
     "pages/localMedia/folders/index.vue|TS7030|Not all code paths return a value.": 1,
     "pages/media/[id]/history.vue|TS2532|Object is possibly 'undefined'.": 5,

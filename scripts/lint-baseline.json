@@ -1,6 +1,6 @@
 {
-  "recordedAt": "2026-11-09",
-  "totalFindings": 695,
+  "recordedAt": "2026-11-10",
+  "totalFindings": 674,
   "entries": {
     "components/app/Appbar.vue|@typescript-eslint/no-unnecessary-condition|Unnecessary optional chain on a non-nullish value.": 3,
     "components/app/AudioPlayer.vue|@typescript-eslint/no-unnecessary-condition|Unnecessary conditional, value is always falsy.": 7,
@@ -114,8 +114,9 @@
     "pages/downloads.vue|@typescript-eslint/no-unnecessary-condition|Unnecessary conditional, value is always truthy.": 3,
     "pages/item/[id]/[episode]/index.vue|@typescript-eslint/no-explicit-any|Unexpected any. Specify a different type.": 27,
     "pages/item/[id]/[episode]/index.vue|@typescript-eslint/no-unnecessary-condition|Unnecessary optional chain on a non-nullish value.": 1,
-    "pages/item/[id]/index.vue|@typescript-eslint/no-explicit-any|Unexpected any. Specify a different type.": 31,
     "pages/item/[id]/index.vue|@typescript-eslint/no-unnecessary-condition|Unnecessary conditional, the types have no overlap.": 1,
+    "pages/item/[id]/index.vue|@typescript-eslint/no-unnecessary-condition|Unnecessary conditional, value is always truthy.": 3,
+    "pages/item/[id]/index.vue|@typescript-eslint/no-unnecessary-condition|Unnecessary optional chain on a non-nullish value.": 7,
     "pages/localMedia/folders/[id].vue|@typescript-eslint/no-explicit-any|Unexpected any. Specify a different type.": 5,
     "pages/localMedia/folders/[id].vue|@typescript-eslint/no-unnecessary-condition|Unnecessary conditional, value is always truthy.": 1,
     "pages/localMedia/folders/index.vue|@typescript-eslint/no-explicit-any|Unexpected any. Specify a different type.": 2,

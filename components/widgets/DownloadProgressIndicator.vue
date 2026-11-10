@@ -8,6 +8,7 @@
 import { computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { AbsDownloader } from '@/plugins/capacitor'
+import type { LibraryItem } from '~/types'
 import { useGlobalsStore } from '~/stores/globals'
 import { useEventBus } from '~/composables/useEventBus'
 import { useToast } from '~/composables/useToast'
@@ -60,7 +61,7 @@ function onItemDownloadComplete(data: Record<string, unknown>) {
   if (!data.localLibraryItem) {
     toast.error(strings.MessageItemDownloadCompleteFailedToCreate)
   } else {
-    eventBus.emit('new-local-library-item', data.localLibraryItem as Record<string, unknown>)
+    eventBus.emit('new-local-library-item', data.localLibraryItem as LibraryItem)
   }
 
   if (data.localMediaProgress) {

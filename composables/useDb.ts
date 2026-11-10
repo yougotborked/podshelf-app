@@ -1,4 +1,5 @@
 import { AbsDatabase } from '~/plugins/capacitor'
+import type { LibraryItem, LocalFolder } from '~/types'
 
 class DbService {
   getDeviceData(): Promise<unknown> {
@@ -36,35 +37,35 @@ class DbService {
     return AbsDatabase.logout()
   }
 
-  getLocalFolders(): Promise<unknown[] | null> {
+  getLocalFolders(): Promise<LocalFolder[] | null> {
     return AbsDatabase.getLocalFolders()
-      .then((data: { value: unknown[] }) => data.value)
+      .then((data: { value: LocalFolder[] }) => data.value)
       .catch((error: Error) => {
         console.error('Failed to load', error)
         return null
       })
   }
 
-  getLocalFolder(folderId: string): Promise<unknown> {
+  getLocalFolder(folderId: string): Promise<LocalFolder | null> {
     return AbsDatabase.getLocalFolder({ folderId }).then((data: unknown) => {
       console.log('Got local folder', JSON.stringify(data))
       return data
     })
   }
 
-  getLocalLibraryItemsInFolder(folderId: string): Promise<unknown[]> {
-    return AbsDatabase.getLocalLibraryItemsInFolder({ folderId }).then((data: { value: unknown[] }) => data.value)
+  getLocalLibraryItemsInFolder(folderId: string): Promise<LibraryItem[]> {
+    return AbsDatabase.getLocalLibraryItemsInFolder({ folderId }).then((data: { value: LibraryItem[] }) => data.value)
   }
 
-  getLocalLibraryItems(mediaType: string | null = null): Promise<unknown[]> {
-    return AbsDatabase.getLocalLibraryItems({ mediaType }).then((data: { value: unknown[] }) => data.value)
+  getLocalLibraryItems(mediaType: string | null = null): Promise<LibraryItem[]> {
+    return AbsDatabase.getLocalLibraryItems({ mediaType }).then((data: { value: LibraryItem[] }) => data.value)
   }
 
-  getLocalLibraryItem(id: string): Promise<unknown> {
+  getLocalLibraryItem(id: string): Promise<LibraryItem | null> {
     return AbsDatabase.getLocalLibraryItem({ id })
   }
 
-  getLocalLibraryItemByLId(libraryItemId: string): Promise<unknown> {
+  getLocalLibraryItemByLId(libraryItemId: string): Promise<LibraryItem | null> {
     return AbsDatabase.getLocalLibraryItemByLId({ libraryItemId })
   }
 
