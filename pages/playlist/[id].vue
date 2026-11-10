@@ -39,8 +39,8 @@
 
     <modals-item-more-menu-modal
       v-model="showMoreMenu"
-      :library-item="selectedLibraryItem"
-      :episode="selectedEpisode"
+      :library-item="selectedLibraryItem ?? NO_LIBRARY_ITEM"
+      :episode="selectedEpisode ?? undefined"
       :playlist="playlist"
       hide-rss-feed-option
       v-model:processing="processing"
@@ -54,6 +54,7 @@
 </template>
 
 <script setup lang="ts">
+import type { LibraryItem, Playlist, PlaylistItem, PodcastEpisode } from '~/types'
 import { ref, shallowRef, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { AbsDownloader, AbsLogger } from '@/plugins/capacitor'
 import {
@@ -65,7 +66,7 @@ import {
 const MAX_QUEUE_ITEMS = 400
 const MAX_LOG_LENGTH = 2000
 
-function formatForLog(payload: any) {
+function formatForLog(payload: unknown) {
   try {
     const json = JSON.stringify(payload)
     if (json.length > MAX_LOG_LENGTH) {
@@ -96,12 +97,14 @@ const id = route.params.id as string
 // shallowRef: the auto playlist holds hundreds of items, each with a nested library item and
 // episode. Deep reactivity would proxy every one of those objects on assignment for no benefit -
 // the list is always replaced wholesale, never mutated in place.
-const playlist = shallowRef<any>({ id, name: '', description: '', items: [], totalItems: 0 })
+const playlist = shallowRef<Playlist>({ id, name: '', description: '', items: [], totalItems: 0 })
 const showMoreMenu = ref(false)
 const processing = ref(false)
-const selectedLibraryItem = ref<any>(null)
+// What the more-menu modal is given while nothing is selected; it is closed then.
+const NO_LIBRARY_ITEM: LibraryItem = { id: '', media: { metadata: {} } }
+const selectedLibraryItem = ref<LibraryItem | null>(null)
 const selectedLibraryItemId = ref<string | null>(null)
-const selectedEpisode = ref<any>(null)
+const selectedEpisode = ref<PodcastEpisode | null>(null)
 const selectedEpisodeId = ref<string | null>(null)
 const mediaIdStartingPlayback = ref<string | null>(null)
 const downloadedEpisodeKeys = ref<Set<string> | null>(null)
@@ -112,7 +115,7 @@ const playlistItems = computed(() => playlist.value.items || [])
 const playlistTotalItems = computed(() => playlist.value.totalItems || playlistItems.value.length)
 const playlistName = computed(() => playlist.value.name || '')
 const description = computed(() => playlist.value.description || '')
-const playableItems = computed(() => playlistItems.value.filter((item: any) => {
+const playableItems = computed(() => playlistItems.value.filter((item) => {
   const libraryItem = item.libraryItem || item.localLibraryItem
   if (!libraryItem) return false
 
@@ -128,9 +131,9 @@ const playableItems = computed(() => playlistItems.value.filter((item: any) => {
 }))
 const playerIsPlaying = computed(() => appStore.playerIsPlaying && isOpenInPlayer.value)
 const isOpenInPlayer = computed(() => {
-  return !!playableItems.value.find((i: any) => {
+  return !!playableItems.value.find((i) => {
     if (i.localLibraryItem && appStore.getIsMediaStreaming(i.localLibraryItem.id, i.localEpisode?.id)) return true
-    return appStore.getIsMediaStreaming(i.libraryItemId, i.episodeId)
+    return appStore.getIsMediaStreaming(i.libraryItemId ?? '', i.episodeId)
   })
 })
 const autoContinuePlaylists = computed(() => appStore.deviceData?.deviceSettings?.autoContinuePlaylists)
@@ -172,11 +175,20 @@ watch(autoCacheUnplayedEpisodes, (newVal) => {
 })
 
 // Methods
-function isLocalId(id: any) {
+function isLocalId(id: unknown) {
   return typeof id === 'string' && id.startsWith('local')
 }
 
-function resolveQueueItemIds(item: any) {
+interface QueueItemIds {
+  serverLibraryItemId: string | null
+  localLibraryItemId: string | null
+  fallbackLibraryItemId: string | null
+  serverEpisodeId: string | null
+  localEpisodeId: string | null
+  fallbackEpisodeId: string | null
+}
+
+function resolveQueueItemIds(item: PlaylistItem | null | undefined): QueueItemIds {
   if (!item || typeof item !== 'object') {
     return {
       serverLibraryItemId: null,
@@ -188,7 +200,7 @@ function resolveQueueItemIds(item: any) {
     }
   }
 
-  const libraryItem = item.libraryItem || {}
+  const libraryItem: Partial<LibraryItem> = item.libraryItem ?? {}
   const rawLibraryItemId =
     item.libraryItemId ??
     libraryItem.libraryItemId ??
@@ -209,7 +221,7 @@ function resolveQueueItemIds(item: any) {
     (isLocalId(libraryItem.id) ? libraryItem.id : null) ??
     null
 
-  const episode = item.episode || {}
+  const episode: Partial<PodcastEpisode> = item.episode ?? {}
   const rawEpisodeId =
     item.episodeId ??
     episode.id ??
@@ -247,10 +259,10 @@ function resolveQueueItemIds(item: any) {
   }
 }
 
-function normalizeQueueItem(item: any) {
+function normalizeQueueItem(item: PlaylistItem | null | undefined) {
   if (!item) return null
 
-  const libraryItem = item.libraryItem || {}
+  const libraryItem: Partial<LibraryItem> = item.libraryItem ?? {}
   const rawLibraryItemId =
     item.libraryItemId ??
     libraryItem.libraryItemId ??
@@ -271,7 +283,7 @@ function normalizeQueueItem(item: any) {
     (isLocalId(libraryItem.id) ? libraryItem.id : null) ??
     null
 
-  const episode = item.episode || {}
+  const episode: Partial<PodcastEpisode> = item.episode ?? {}
   const rawEpisodeId =
     item.episodeId ??
     episode.id ??
@@ -313,11 +325,11 @@ function normalizeQueueItem(item: any) {
 }
 
 function getNormalizedPlayableItems() {
-  const normalized = playableItems.value.map(normalizeQueueItem).filter(Boolean)
+  const normalized = playableItems.value.map(normalizeQueueItem).filter((n): n is NonNullable<typeof n> => n !== null)
   const normalizedDetails = {
     totalPlayable: playableItems.value.length,
     normalizedCount: normalized.length,
-    sample: normalized.slice(0, 5).map((item: any) => ({
+    sample: normalized.slice(0, 5).map((item) => ({
       libraryItemId: item.libraryItemId,
       episodeId: item.episodeId,
       serverLibraryItemId: item.serverLibraryItemId,
@@ -338,7 +350,7 @@ function getNormalizedPlayableItems() {
 function buildQueueItems() {
   const normalized = getNormalizedPlayableItems()
   const queueItems = normalized
-    .map((item: any) => {
+    .map((item) => {
       const ids = resolveQueueItemIds(item)
       const playbackLibraryItemId =
         item.playbackLibraryItemId || ids.localLibraryItemId || ids.serverLibraryItemId || ids.fallbackLibraryItemId
@@ -349,7 +361,7 @@ function buildQueueItems() {
 
       return {
         ...item,
-        libraryItemId: ids.fallbackLibraryItemId,
+        libraryItemId: ids.fallbackLibraryItemId ?? playbackLibraryItemId,
         episodeId: ids.fallbackEpisodeId,
         serverLibraryItemId: ids.serverLibraryItemId,
         serverEpisodeId: ids.serverEpisodeId,
@@ -359,9 +371,9 @@ function buildQueueItems() {
         playbackEpisodeId
       }
     })
-    .filter(Boolean)
+    .filter((q): q is NonNullable<typeof q> => q !== null)
 
-  const queueSample = queueItems.slice(0, 5).map((item: any) => ({
+  const queueSample = queueItems.slice(0, 5).map((item) => ({
     libraryItemId: item.libraryItemId,
     episodeId: item.episodeId,
     serverLibraryItemId: item.serverLibraryItemId,
@@ -393,7 +405,7 @@ async function fetchPlaylist() {
     })}`
   })
   const playlistId = route.params.id as string
-  let fetchedPlaylist: any
+  let fetchedPlaylist: Playlist
   if (playlistId === 'unfinished') {
     if (!autoCacheUnplayedEpisodes.value) {
       fetchedPlaylist = {
@@ -425,8 +437,9 @@ async function fetchPlaylist() {
       void checkAutoDownload()
       return
     }
-    fetchedPlaylist = await nativeHttp.get(`/api/playlists/${playlistId}`, { connectTimeout: 10000 }).catch(() => null)
-    if (!fetchedPlaylist) return
+    const serverPlaylist = (await nativeHttp.get(`/api/playlists/${playlistId}`, { connectTimeout: 10000 }).catch(() => null)) as Playlist | null
+    if (!serverPlaylist) return
+    fetchedPlaylist = serverPlaylist
   }
 
   AbsLogger.info({
@@ -440,12 +453,12 @@ async function fetchPlaylist() {
   })
 
   if (fetchedPlaylist.items.length) {
-    const localLibraryItems = (await db.getLocalLibraryItems(fetchedPlaylist.items[0].libraryItem.mediaType)) || []
+    const localLibraryItems = (await db.getLocalLibraryItems(fetchedPlaylist.items[0]?.libraryItem?.mediaType ?? null)) || []
     if (localLibraryItems.length) {
       const localLibraryItemMap = new Map()
       const localEpisodesByLibraryItemId = new Map()
 
-      localLibraryItems.forEach((localItem: any) => {
+      localLibraryItems.forEach((localItem) => {
         const libraryItemId = localItem?.libraryItemId
         if (!libraryItemId) return
         localLibraryItemMap.set(libraryItemId, localItem)
@@ -453,7 +466,7 @@ async function fetchPlaylist() {
         const episodes = localItem?.media?.episodes || []
         if (episodes.length) {
           const episodeMap = new Map()
-          episodes.forEach((episode: any) => {
+          episodes.forEach((episode) => {
             const key = episode?.serverEpisodeId || episode?.id
             if (key) {
               episodeMap.set(key, episode)
@@ -465,7 +478,7 @@ async function fetchPlaylist() {
         }
       })
 
-      fetchedPlaylist.items.forEach((playlistItem: any) => {
+      fetchedPlaylist.items.forEach((playlistItem) => {
         const libraryItemId =
           playlistItem.libraryItemId ||
           playlistItem.libraryItem?.id ||
@@ -531,7 +544,7 @@ async function fetchPlaylist() {
   void checkAutoDownload()
 }
 
-function showMore(playlistItem: any) {
+function showMore(playlistItem: PlaylistItem) {
   AbsLogger.info({
     tag: 'PlaylistPage',
     message: `Show more requested: ${formatForLog({
@@ -571,7 +584,7 @@ function showMore(playlistItem: any) {
     ? {
         ...episode,
         serverEpisodeId: playlistEpisodeId || episode?.serverEpisodeId,
-        id: playlistEpisodeId || episode?.id || episode?.serverEpisodeId,
+        id: playlistEpisodeId || episode.id,
         localEpisode: useLocal ? playlistItem.localEpisode || episode?.localEpisode : episode?.localEpisode
       }
     : null
@@ -620,6 +633,7 @@ function playAll() {
   }
 
   const nextItem = queue[0]
+  if (!nextItem) return
   const queueDetails = {
     normalizedCount: normalizedQueue.length,
     queueCount: queue.length,
@@ -632,7 +646,7 @@ function playAll() {
       localLibraryItemId: nextItem.localLibraryItemId,
       localEpisodeId: nextItem.localEpisodeId
     },
-    queueSample: queue.slice(0, 5).map((item: any) => ({
+    queueSample: queue.slice(0, 5).map((item) => ({
       playbackLibraryItemId: item.playbackLibraryItemId,
       playbackEpisodeId: item.playbackEpisodeId,
       serverLibraryItemId: item.serverLibraryItemId,
@@ -668,14 +682,14 @@ function playAll() {
 
 function playNextItem() {
   const normalizedQueue = buildQueueItems()
-  const nowIndex = normalizedQueue.findIndex((i: any) => {
+  const nowIndex = normalizedQueue.findIndex((i) => {
     return appStore.getIsMediaStreaming(
       i.playbackLibraryItemId,
       i.playbackEpisodeId
     )
   })
 
-  const nextItem = normalizedQueue.slice(nowIndex + 1).find((i: any) => {
+  const nextItem = normalizedQueue.slice(nowIndex + 1).find((i) => {
     const prog = userStore.getUserMediaProgress(
       i.serverLibraryItemId || i.playbackLibraryItemId,
       i.serverEpisodeId || i.playbackEpisodeId
@@ -684,7 +698,7 @@ function playNextItem() {
   })
 
   if (nextItem) {
-    const nextIndex = normalizedQueue.findIndex((i: any) => i === nextItem)
+    const nextIndex = normalizedQueue.findIndex((i) => i === nextItem)
     mediaIdStartingPlayback.value = nextItem.playbackEpisodeId || nextItem.playbackLibraryItemId
     appStore.playerIsStartingPlayback = true
     appStore.playerStartingPlaybackMediaId = mediaIdStartingPlayback.value
@@ -710,13 +724,13 @@ function onPlaybackEnded() {
   playNextItem()
 }
 
-function playlistUpdated(updatedPlaylist: any) {
+function playlistUpdated(updatedPlaylist: Playlist) {
   if (playlist.value.id !== updatedPlaylist.id) return
   playlist.value = updatedPlaylist
   void localStore.setCachedPlaylist(toCacheablePlaylist(updatedPlaylist))
 }
 
-async function onAutoPlaylistItemRemoved(options: any = {}) {
+async function onAutoPlaylistItemRemoved(options: Record<string, unknown> = {}) {
   if (playlist.value.id !== 'unfinished') return
 
   const libraryItemId =
@@ -724,7 +738,7 @@ async function onAutoPlaylistItemRemoved(options: any = {}) {
   const episodeId = selectedEpisodeId.value || selectedEpisode.value?.serverEpisodeId || selectedEpisode.value?.id || null
   if (!libraryItemId) return
 
-  const index = playlist.value.items.findIndex((item: any) => {
+  const index = playlist.value.items.findIndex((item) => {
     const itemLibraryId = item.libraryItemId || item.libraryItem?.id
     const itemEpisodeId = item.episodeId || item.episode?.serverEpisodeId || item.episode?.id || null
     return itemLibraryId === libraryItemId && itemEpisodeId === episodeId
@@ -761,7 +775,7 @@ function libraryChanged() {
   void router.replace('/bookshelf/playlists')
 }
 
-function playlistRemoved(removedPlaylist: any) {
+function playlistRemoved(removedPlaylist: Playlist) {
   if (playlist.value.id === removedPlaylist.id) {
     void localStore.removeCachedPlaylist(removedPlaylist.id)
     void router.replace('/bookshelf/playlists')
@@ -811,8 +825,8 @@ onMounted(async () => {
 
   if (cached) {
     playlist.value = {
-      ...(cached as any),
-      totalItems: (cached.totalItems as number) || ((cached.items as any[])?.length ?? 0)
+      ...(cached as Playlist),
+      totalItems: (cached.totalItems as number) || ((cached.items as unknown[] | undefined)?.length ?? 0)
     }
   }
 
