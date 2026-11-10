@@ -22,7 +22,7 @@
           <p class="text-base text-md-on-surface">{{ description }}</p>
         </div>
 
-        <tables-collection-books-table :books="bookItems" :collection-id="collection.id" />
+        <tables-collection-books-table :books="bookItems" :collection-id="collection?.id" />
       </div>
     </div>
     <div v-show="processingRemove" class="absolute top-0 left-0 w-full h-full z-10 bg-black/40 flex items-center justify-center">
@@ -32,6 +32,7 @@
 </template>
 
 <script setup lang="ts">
+import type { Collection, LibraryItem } from '~/types'
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
 const route = useRoute()
@@ -47,7 +48,7 @@ const userStore = useUserStore()
 
 const id = route.params.id as string
 
-const collection = ref<any>(null)
+const collection = ref<Collection | null>(null)
 const loadedFromCache = ref(false)
 const mediaIdStartingPlayback = ref<string | null>(null)
 const processingRemove = ref(false)
@@ -56,14 +57,14 @@ const bookCoverAspectRatio = computed(() => globalsStore.getBookCoverAspectRatio
 const bookItems = computed(() => collection.value?.books || [])
 const collectionName = computed(() => collection.value?.name || '')
 const description = computed(() => collection.value?.description || '')
-const playableItems = computed(() => bookItems.value.filter((book: any) => {
-  return !book.isMissing && !book.isInvalid && book.media.tracks.length
+const playableItems = computed(() => bookItems.value.filter((book) => {
+  return !book.isMissing && !book.isInvalid && (book.media.tracks?.length ?? 0) > 0
 }))
 const playerIsPlaying = computed(() => {
   return appStore.playerIsPlaying && isOpenInPlayer.value
 })
 const isOpenInPlayer = computed(() => {
-  return !!playableItems.value.find((i: any) => {
+  return !!playableItems.value.find((i) => {
     if (i.localLibraryItem && appStore.getIsMediaStreaming(i.localLibraryItem.id)) return true
     return appStore.getIsMediaStreaming(i.id)
   })
@@ -94,10 +95,10 @@ async function playClick() {
 }
 
 function playNextItem() {
-  const nowIndex = playableItems.value.findIndex((i: any) => {
+  const nowIndex = playableItems.value.findIndex((i) => {
     return appStore.getIsMediaStreaming(i.localLibraryItem?.id || i.id)
   })
-  const nextBookNotRead = playableItems.value.slice(nowIndex + 1).find((pb: any) => {
+  const nextBookNotRead = playableItems.value.slice(nowIndex + 1).find((pb) => {
     const prog = userStore.getUserMediaProgress(pb.id)
     return !prog?.isFinished
   })
@@ -134,7 +135,7 @@ onMounted(async () => {
   if (!user && !networkConnected) {
     const cachedOfflineCollection = await localStore.getCachedCollection(id)
     if (cachedOfflineCollection) {
-      collection.value = cachedOfflineCollection
+      collection.value = cachedOfflineCollection as Collection
       loadedFromCache.value = true
     } else {
       await navigateTo('/bookshelf')
@@ -142,13 +143,13 @@ onMounted(async () => {
     }
   } else {
     const isNetworkAvailable = networkConnected && !!user
-    let fetchedCollection: Record<string, unknown> | null = null
+    let fetchedCollection: Collection | null = null
 
     if (isNetworkAvailable) {
-      fetchedCollection = await nativeHttp.get(`/api/collections/${id}`, { connectTimeout: 10000 }).catch((error: any) => {
+      fetchedCollection = await nativeHttp.get(`/api/collections/${id}`, { connectTimeout: 10000 }).catch((error: unknown) => {
         console.error('Failed to fetch collection', error)
         return null
-      }) as Record<string, unknown> | null
+      }) as Collection | null
 
       if (fetchedCollection) {
         await localStore.setCachedCollection(fetchedCollection)
@@ -156,7 +157,7 @@ onMounted(async () => {
     }
 
     if (!fetchedCollection) {
-      fetchedCollection = await localStore.getCachedCollection(id)
+      fetchedCollection = (await localStore.getCachedCollection(id)) as Collection | null
       loadedFromCache.value = !!fetchedCollection
     }
 
@@ -166,17 +167,17 @@ onMounted(async () => {
     }
 
     // Lookup matching local items and attach to collection items
-    if ((fetchedCollection.books as unknown[]).length) {
-      const localLibraryItems: any[] = (await db.getLocalLibraryItems('book') as any) || []
+    if (fetchedCollection.books.length) {
+      const localLibraryItems = (await db.getLocalLibraryItems('book')) || []
       if (localLibraryItems.length) {
-        const localLibraryItemMap = new Map()
-        localLibraryItems.forEach((item: any) => {
+        const localLibraryItemMap = new Map<string, LibraryItem>()
+        localLibraryItems.forEach((item) => {
           if (item?.libraryItemId) {
             localLibraryItemMap.set(item.libraryItemId, item)
           }
         })
 
-        ;(fetchedCollection.books as any[]).forEach((collectionItem: any) => {
+        fetchedCollection.books.forEach((collectionItem) => {
           const matchingLocalLibraryItem = localLibraryItemMap.get(collectionItem.id)
           if (!matchingLocalLibraryItem) return
           collectionItem.localLibraryItem = matchingLocalLibraryItem

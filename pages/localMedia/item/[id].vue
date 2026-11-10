@@ -60,8 +60,8 @@
                 <p class="text-xs">{{ episode.title }}</p>
               </div>
               <div class="w-20 text-center text-md-on-surface-variant" style="min-width: 80px">
-                <p class="text-xs">{{ episode.audioTrack.mimeType }}</p>
-                <p class="text-sm">{{ $elapsedPretty(episode.audioTrack.duration) }}</p>
+                <p class="text-xs">{{ episode.audioTrack?.mimeType }}</p>
+                <p class="text-sm">{{ $elapsedPretty(episode.audioTrack?.duration ?? 0) }}</p>
               </div>
               <div class="w-12 h-12 flex items-center justify-center" style="min-width: 48px">
                 <span class="material-symbols text-2xl" @click="showTrackDialog(episode)">more_vert</span>
@@ -75,14 +75,14 @@
 
           <div class="flex items-center my-1">
             <div class="w-10 h-12 flex items-center justify-center" style="min-width: 40px">
-              <p class="font-mono font-bold text-sm">{{ ebookFile.ebookFormat }}</p>
+              <p class="font-mono font-bold text-sm">{{ ebookFile?.ebookFormat }}</p>
             </div>
             <div class="flex-grow px-2">
               <p class="text-xs">{{ localFileForEbook.filename }}</p>
             </div>
             <div class="w-24 text-center text-md-on-surface-variant" style="min-width: 96px">
               <p class="text-xs">{{ localFileForEbook.mimeType }}</p>
-              <p class="text-sm">{{ $bytesPretty(localFileForEbook.size) }}</p>
+              <p class="text-sm">{{ $bytesPretty(localFileForEbook.size ?? 0) }}</p>
             </div>
           </div>
         </div>
@@ -95,7 +95,7 @@
           <template v-for="file in otherFiles" :key="file.id">
             <div class="flex items-center my-1">
               <div class="w-12 h-12 flex items-center justify-center">
-                <img v-if="(file.mimeType || '').startsWith('image')" :src="getCapImageSrc(file.contentUrl)" class="w-full h-full object-contain" />
+                <img v-if="(file.mimeType || '').startsWith('image')" :src="getCapImageSrc(file.contentUrl ?? '')" class="w-full h-full object-contain" />
                 <span v-else class="material-symbols">music_note</span>
               </div>
               <div class="flex-grow px-2">
@@ -103,7 +103,7 @@
               </div>
               <div class="w-24 text-center text-md-on-surface-variant" style="min-width: 96px">
                 <p class="text-xs">{{ file.mimeType }}</p>
-                <p class="text-sm">{{ $bytesPretty(file.size) }}</p>
+                <p class="text-sm">{{ $bytesPretty(file.size ?? 0) }}</p>
               </div>
             </div>
           </template>
@@ -126,6 +126,7 @@
 </template>
 
 <script setup lang="ts">
+import type { AudioTrack, LibraryItem, LocalFolder, PodcastEpisode } from '~/types'
 import { ref, computed, onMounted } from 'vue'
 import draggable from 'vuedraggable'
 import { Capacitor } from '@capacitor/core'
@@ -154,13 +155,13 @@ const dragOptions = {
   delayOnTouchOnly: true
 }
 const failed = ref(false)
-const localLibraryItem = ref<any>(null)
-const audioTracksCopy = ref<any[]>([])
+const localLibraryItem = ref<LibraryItem | null>(null)
+const audioTracksCopy = ref<AudioTrack[]>([])
 const folderId = ref<string | null>(null)
-const folder = ref<any>(null)
+const folder = ref<LocalFolder | null>(null)
 const showDialog = ref(false)
-const selectedAudioTrack = ref<any>(null)
-const selectedEpisode = ref<any>(null)
+const selectedAudioTrack = ref<AudioTrack | null>(null)
+const selectedEpisode = ref<PodcastEpisode | null>(null)
 const orderChanged = ref(false)
 
 // Computed
@@ -172,9 +173,9 @@ const otherFiles = computed(() => {
     console.error('Invalid local files', localFiles.value)
     return []
   }
-  return localFiles.value.filter((lf: any) => {
+  return localFiles.value.filter((lf) => {
     if (localFileForEbook.value?.id === lf.id) return false
-    return !audioTracks.value.find((at: any) => at.localFileId == lf.id)
+    return !audioTracks.value.find((at) => at.localFileId == lf.id)
   })
 })
 const folderName = computed(() => folder.value?.name)
@@ -187,7 +188,7 @@ const mediaMetadata = computed(() => media.value?.metadata || {})
 const ebookFile = computed(() => media.value?.ebookFile)
 const localFileForEbook = computed(() => {
   if (!ebookFile.value) return null
-  return localFiles.value.find((lf: any) => lf.id == ebookFile.value.localFileId)
+  return localFiles.value.find((lf) => lf.id == ebookFile.value?.localFileId)
 })
 const episodes = computed(() => media.value?.episodes || [])
 const audioTracks = computed(() => {
@@ -195,12 +196,12 @@ const audioTracks = computed(() => {
   if (mediaType.value == 'book') {
     return media.value.tracks || []
   } else {
-    return (media.value.episodes || []).map((ep: any) => ep.audioTrack)
+    return (media.value.episodes || []).map((ep) => ep.audioTrack).filter((t): t is AudioTrack => !!t)
   }
 })
 const dialogItems = computed(() => {
   if (selectedAudioTrack.value || selectedEpisode.value) {
-    const items: any[] = [
+    const items: Array<{ text: string; value: string; icon: string }> = [
       {
         text: strings.ButtonDeleteLocalFile,
         value: 'track-delete',
@@ -226,17 +227,17 @@ const dialogItems = computed(() => {
   }
 })
 const playerIsStartingPlayback = computed(() => appStore.playerIsStartingPlayback)
-const totalAudioSize = computed(() => audioTracks.value.reduce((acc: number, item: any) => (item.metadata ? acc + item.metadata.size : acc), 0))
-const totalEpisodesSize = computed(() => episodes.value.reduce((acc: number, item: any) => acc + item.size, 0))
-const totalOtherFilesSize = computed(() => otherFiles.value.reduce((acc: number, item: any) => acc + item.size, 0))
-const totalLibraryItemSize = computed(() => localFiles.value.reduce((acc: number, item: any) => acc + item.size, 0))
+const totalAudioSize = computed(() => audioTracks.value.reduce((acc: number, item) => (item.metadata ? acc + (item.metadata.size ?? 0) : acc), 0))
+const totalEpisodesSize = computed(() => episodes.value.reduce((acc: number, item) => acc + (item.size ?? 0), 0))
+const totalOtherFilesSize = computed(() => otherFiles.value.reduce((acc: number, item) => acc + (item.size ?? 0), 0))
+const totalLibraryItemSize = computed(() => localFiles.value.reduce((acc: number, item) => acc + (item.size ?? 0), 0))
 
 // Methods
 function draggableUpdate() {
   for (let i = 0; i < audioTracksCopy.value.length; i++) {
     const trackCopy = audioTracksCopy.value[i]
     const track = audioTracks.value[i]
-    if (track.localFileId !== trackCopy.localFileId) {
+    if (track?.localFileId !== trackCopy?.localFileId) {
       orderChanged.value = true
       return
     }
@@ -245,7 +246,7 @@ function draggableUpdate() {
 }
 
 async function saveTrackOrder() {
-  const copyOfCopy = audioTracksCopy.value.map((at: any) => ({ ...at }))
+  const copyOfCopy = audioTracksCopy.value.map((at) => ({ ...at }))
   const payload = {
     localLibraryItemId,
     tracks: copyOfCopy
@@ -254,8 +255,8 @@ async function saveTrackOrder() {
   if (response) {
     toast.success('Library item updated')
     console.log('updateLocal track order response', JSON.stringify(response))
-    localLibraryItem.value = response
-    audioTracksCopy.value = audioTracks.value.map((at: any) => ({ ...at }))
+    localLibraryItem.value = response as LibraryItem
+    audioTracksCopy.value = audioTracks.value.map((at) => ({ ...at }))
   } else {
     toast.info(strings.MessageNoUpdatesWereNecessary)
   }
@@ -268,13 +269,13 @@ function showItemDialog() {
   showDialog.value = true
 }
 
-function showTrackDialog(track: any) {
+function showTrackDialog(track: AudioTrack | PodcastEpisode) {
   if (isPodcast.value) {
     selectedAudioTrack.value = null
-    selectedEpisode.value = track
+    selectedEpisode.value = track as PodcastEpisode
   } else {
     selectedEpisode.value = null
-    selectedAudioTrack.value = track
+    selectedAudioTrack.value = track as AudioTrack
   }
   showDialog.value = true
 }
@@ -296,7 +297,7 @@ async function playEpisode() {
   if (playerIsStartingPlayback.value) return
   await hapticsImpact()
   appStore.playerIsStartingPlayback = true
-  appStore.playerStartingPlaybackMediaId = selectedEpisode.value.serverEpisodeId
+  appStore.playerStartingPlaybackMediaId = selectedEpisode.value.serverEpisodeId ?? null
 
   eventBus.emit('play-item', {
     libraryItemId: localLibraryItemId,
@@ -321,13 +322,13 @@ async function dialogAction(action: string) {
   showDialog.value = false
 }
 
-function getLocalFileForTrack(localFileId: string) {
-  return localFiles.value.find((lf: any) => lf.id == localFileId)
+function getLocalFileForTrack(localFileId: string | undefined) {
+  return localFiles.value.find((lf) => lf.id == localFileId)
 }
 
 async function deleteEpisode() {
   if (!selectedEpisode.value) return
-  const localFile = getLocalFileForTrack(selectedEpisode.value.audioTrack.localFileId)
+  const localFile = getLocalFileForTrack(selectedEpisode.value.audioTrack?.localFileId)
   if (!localFile) {
     toast.error('Audio track does not have matching local file..')
     return
@@ -342,7 +343,7 @@ async function deleteEpisode() {
     message: confirmMessage
   })
   if (value) {
-    const res = await AbsFileSystem.deleteTrackFromItem({ id: localLibraryItem.value.id, trackLocalFileId: localFile.id, trackContentUrl: selectedEpisode.value.audioTrack.contentUrl })
+    const res = await AbsFileSystem.deleteTrackFromItem({ id: localLibraryItem.value?.id, trackLocalFileId: localFile.id, trackContentUrl: selectedEpisode.value.audioTrack?.contentUrl })
     if (res && res.id) {
       toast.success('Deleted track successfully')
       localLibraryItem.value = res
@@ -369,7 +370,7 @@ async function deleteTrack() {
     message: confirmMessage
   })
   if (value) {
-    const res = await AbsFileSystem.deleteTrackFromItem({ id: localLibraryItem.value.id, trackLocalFileId: selectedAudioTrack.value.localFileId, trackContentUrl: selectedAudioTrack.value.contentUrl })
+    const res = await AbsFileSystem.deleteTrackFromItem({ id: localLibraryItem.value?.id, trackLocalFileId: selectedAudioTrack.value.localFileId, trackContentUrl: selectedAudioTrack.value.contentUrl })
     if (res && res.id) {
       toast.success('Deleted track successfully')
       localLibraryItem.value = res
@@ -404,7 +405,7 @@ async function init() {
     return
   }
 
-  audioTracksCopy.value = audioTracks.value.map((at: any) => ({ ...at }))
+  audioTracksCopy.value = audioTracks.value.map((at) => ({ ...at }))
 
   folderId.value = localLibraryItem.value.folderId as string | null
   folder.value = await db.getLocalFolder(folderId.value || '')

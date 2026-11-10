@@ -100,12 +100,15 @@ export interface AudioTrack {
   contentUrl?: string
   mimeType?: string
   localFileId?: string
+  metadata?: { size?: number; [key: string]: unknown }
   [key: string]: unknown
 }
 
 export interface EbookFile {
   ino?: string
   ebookFormat?: string
+  // Local copies: which of the item's local files holds the book.
+  localFileId?: string
   metadata?: { filename?: string; ext?: string; size?: number }
   [key: string]: unknown
 }
@@ -182,7 +185,7 @@ export interface LibraryItem {
   media: LibraryItemMedia
   libraryFiles?: LibraryFile[]
   // Local copies: the files on the device, and which one each audio track plays from.
-  localFiles?: Array<{ id: string; basePath?: string; [key: string]: unknown }>
+  localFiles?: LocalFile[]
   isMissing?: boolean
   isInvalid?: boolean
   // Local copies only.
@@ -266,5 +269,26 @@ export interface Playlist {
   totalItems?: number
   // The "unfinished" playlist the app builds itself rather than the server storing.
   isAutoPlaylist?: boolean
+  [key: string]: unknown
+}
+
+// A collection: an ordered set of books the server groups under a name.
+export interface Collection {
+  id: string
+  name?: string
+  description?: string | null
+  libraryId?: string
+  books: LibraryItem[]
+  [key: string]: unknown
+}
+
+// A file on the device belonging to a downloaded item (an audio track, the ebook, a cover).
+export interface LocalFile {
+  id: string
+  filename?: string
+  basePath?: string
+  contentUrl?: string
+  mimeType?: string
+  size?: number
   [key: string]: unknown
 }
