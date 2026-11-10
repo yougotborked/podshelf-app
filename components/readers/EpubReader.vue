@@ -11,6 +11,7 @@
 </template>
 
 <script setup lang="ts">
+import { getScreenOrientation } from '~/composables/useScreenOrientation'
 import { ref, shallowRef, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import ePub, { type Book, type Contents, type Rendition } from 'epubjs'
 import type { BookOptions } from 'epubjs/types/book'
@@ -407,8 +408,8 @@ defineExpose({ updateSettings, goToChapter, prev, next, chapters })
 onMounted(() => {
   initEpub()
 
-  if (screen.orientation) {
-    screen.orientation.addEventListener('change', screenOrientationChangeListener)
+  if (getScreenOrientation()) {
+    getScreenOrientation()?.addEventListener('change', screenOrientationChangeListener)
   } else {
     document.addEventListener('orientationchange', screenOrientationChangeListener)
   }
@@ -418,8 +419,8 @@ onMounted(() => {
 onBeforeUnmount(() => {
   ;book.value?.destroy()
 
-  if (screen.orientation) {
-    screen.orientation.removeEventListener('change', screenOrientationChangeListener)
+  if (getScreenOrientation()) {
+    getScreenOrientation()?.removeEventListener('change', screenOrientationChangeListener)
   } else {
     document.removeEventListener('orientationchange', screenOrientationChangeListener)
   }

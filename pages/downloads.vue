@@ -36,7 +36,7 @@ type LocalMediaItem = { id: string; size: number; coverPathSrc: string | null; m
 
 const localLibraryItems = ref<LocalMediaItem[]>([])
 
-function getSize(item: Record<string, unknown>): number {
+function getSize(item: Record<string, unknown> | null | undefined): number {
   if (!item || !item.localFiles) return 0
   const files = item.localFiles as { size: number }[]
   let size = 0
@@ -46,7 +46,7 @@ function getSize(item: Record<string, unknown>): number {
   return size
 }
 
-function newLocalLibraryItem(item: Record<string, unknown>) {
+function newLocalLibraryItem(item: Record<string, unknown> | null | undefined) {
   if (!item) return
   const itemIndex = localLibraryItems.value.findIndex((li) => li.id === item.id)
   const newItemObj: LocalMediaItem = {

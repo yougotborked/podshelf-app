@@ -168,7 +168,7 @@ export const useLibrariesStore = defineStore('libraries', {
       this.libraries = this.libraries.filter((a) => a.id !== library.id)
     },
 
-    updateFilterDataWithAudiobook(audiobook: Record<string, unknown>) {
+    updateFilterDataWithAudiobook(audiobook: Record<string, unknown> | null | undefined) {
       if (!audiobook || !audiobook.book || !this.filterData) return
       if (this.currentLibraryId !== audiobook.libraryId) return
       const book = audiobook.book as Record<string, unknown>

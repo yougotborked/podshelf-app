@@ -179,7 +179,7 @@ async function fetchServerEpisodesInBatches(
   if (metadataWrites.length) await Promise.allSettled(metadataWrites)
 }
 
-function getEpisodeSortDate(episode: Record<string, unknown>): number {
+function getEpisodeSortDate(episode: Record<string, unknown> | null | undefined): number {
   if (!episode) return 0
   let value = episode.publishedAt ?? episode.pubDate
   if (!value) return 0
@@ -230,7 +230,7 @@ function stripDescriptions(source: Record<string, unknown>): Record<string, unkn
   return rest
 }
 
-function createPlaylistEpisode(episode: Record<string, unknown>): Record<string, unknown> | null {
+function createPlaylistEpisode(episode: Record<string, unknown> | null | undefined): Record<string, unknown> | null {
   if (!episode) return null
   const { localEpisode: _localEpisode, chapters: _chapters, waveform: _waveform, ...rest } = episode as {
     localEpisode?: unknown; chapters?: unknown; waveform?: unknown; [k: string]: unknown

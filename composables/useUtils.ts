@@ -1,3 +1,4 @@
+import { getScreenOrientation } from '~/composables/useScreenOrientation'
 import { formatDistance, format, addDays, isDate, setDefaultOptions } from 'date-fns'
 import * as locales from 'date-fns/locale'
 import { StatusBar } from '@capacitor/status-bar'
@@ -197,9 +198,8 @@ export function useUtils() {
   }
 
   const setOrientationLock = (orientationLockSetting: string | undefined): void => {
-    if (!window.screen?.orientation) return
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const orientation = window.screen.orientation as any
+    const orientation = getScreenOrientation()
+    if (!orientation) return
     if (orientationLockSetting === 'PORTRAIT') {
       orientation.lock?.('portrait')?.catch(console.error)
     } else if (orientationLockSetting === 'LANDSCAPE') {

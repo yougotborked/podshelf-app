@@ -113,7 +113,7 @@ export const useUserStore = defineStore('user', {
       }
     },
 
-    async updateUserSettings(payload: Partial<UserSettings>) {
+    async updateUserSettings(payload: Partial<UserSettings> | null | undefined) {
       if (!payload) return false
       let hasChanges = false
       const existingSettings = { ...this.settings }
@@ -258,7 +258,7 @@ export const useUserStore = defineStore('user', {
       this.user.mediaProgress = mediaProgress
     },
 
-    updateUserMediaProgress(data: Record<string, unknown>) {
+    updateUserMediaProgress(data: Record<string, unknown> | null | undefined) {
       if (!data || !this.user) return
       const progress = this.user.mediaProgress as Record<string, unknown>[]
       const idx = progress.findIndex((mp) => mp.id === data.id)

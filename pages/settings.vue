@@ -217,6 +217,7 @@
 </template>
 
 <script setup lang="ts">
+import { getScreenOrientation } from '~/composables/useScreenOrientation'
 import { Dialog } from '@capacitor/dialog'
 import { useAppStore } from '~/stores/app'
 import { useGlobalsStore } from '~/stores/globals'
@@ -582,8 +583,7 @@ async function showConfirmMp3IndexSeeking() {
 }
 
 function getCurrentOrientation(): string {
-  const orientation = window.screen?.orientation || {}
-  const type = (orientation as ScreenOrientation).type || ''
+  const type = getScreenOrientation()?.type || ''
 
   if (type.includes('landscape')) return 'LANDSCAPE'
   return 'PORTRAIT' // default
