@@ -51,7 +51,7 @@ const show = computed({
 })
 
 const itemsToShow = computed((): DialogItem[] => {
-  return (props.items || []).map((i) => {
+  return (props.items).map((i) => {
     if (typeof i === 'string') {
       return { text: i, value: i }
     }

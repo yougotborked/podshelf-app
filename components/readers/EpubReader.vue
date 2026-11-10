@@ -58,7 +58,7 @@ const ereaderSettings = ref({
   spread: undefined as string | undefined
 })
 
-const libraryItemId = computed(() => props.libraryItem?.id as string)
+const libraryItemId = computed(() => props.libraryItem.id as string)
 const localLibraryItem = computed(() => {
   if (props.isLocal) return props.libraryItem
   return (props.libraryItem.localLibraryItem as Record<string, unknown> | null | undefined) || null

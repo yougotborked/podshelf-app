@@ -137,7 +137,7 @@ const streamIsPlaying = computed(() => appStore.playerIsPlaying && isStreaming.v
 const playerIsStartingPlayback = computed(() => appStore.playerIsStartingPlayback)
 const playerIsStartingForThisMedia = computed(() => {
   if (!appStore.playerIsStartingPlayback) return false
-  if (!props.episode?.id) return false
+  if (!props.episode.id) return false
   const mediaId = appStore.playerStartingPlaybackMediaId
   return mediaId === props.episode.id
 })
@@ -283,19 +283,19 @@ async function toggleFinished() {
     const isFinished = !userIsFinished.value
     const localLibraryItemId = props.isLocal ? props.libraryItemId : props.localLibraryItemId
     const localEpisodeId = props.isLocal ? (props.episode.id as string) : (props.localEpisode?.id as string)
-    const payload = (await db.updateLocalMediaProgressFinished({
+    const payload = await db.updateLocalMediaProgressFinished({
       localLibraryItemId,
       localEpisodeId,
       isFinished
-    })) as Record<string, unknown>
+    })
     console.log('toggleFinished payload', JSON.stringify(payload))
     if (payload?.error) {
-      toast.error((payload?.error as string) || 'Unknown error')
+      toast.error(payload?.error || 'Unknown error')
     } else {
-      const localMediaProg = payload.localMediaProgress
+      const localMediaProg = payload?.localMediaProgress
       console.log('toggleFinished localMediaProgress', JSON.stringify(localMediaProg))
       if (localMediaProg) {
-        globalsStore.updateLocalMediaProgress(localMediaProg as Parameters<typeof globalsStore.updateLocalMediaProgress>[0])
+        globalsStore.updateLocalMediaProgress(localMediaProg)
       }
     }
     isProcessingReadUpdate.value = false

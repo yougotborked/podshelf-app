@@ -1,5 +1,5 @@
 import { AbsDatabase } from '~/plugins/capacitor'
-import type { LibraryItem, LocalFolder, MediaItemHistory } from '~/types'
+import type { LibraryItem, LocalFolder, LocalMediaProgress, MediaItemHistory } from '~/types'
 
 class DbService {
   getDeviceData(): Promise<unknown> {
@@ -93,7 +93,8 @@ class DbService {
     return AbsDatabase.updateLocalTrackOrder(payload)
   }
 
-  updateLocalMediaProgressFinished(payload: Record<string, unknown>): Promise<unknown> {
+  /** `error` is set when the native layer could not record it; the progress record comes back on success. */
+  updateLocalMediaProgressFinished(payload: Record<string, unknown>): Promise<{ error?: string; localMediaProgress?: LocalMediaProgress | null } | null> {
     return AbsDatabase.updateLocalMediaProgressFinished(payload)
   }
 

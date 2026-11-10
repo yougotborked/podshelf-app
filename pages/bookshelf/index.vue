@@ -129,7 +129,7 @@ function getShelfLabel(shelf: Shelf) {
 
 function getLocalMediaItemCategories() {
   const localMedia = localLibraryItems.value
-  if (!localMedia?.length) return []
+  if (!localMedia.length) return []
 
   const categories: Shelf[] = []
   const books: LibraryItem[] = []
@@ -246,7 +246,7 @@ async function fetchCategories() {
   localLibraryItems.value = await db.getLocalLibraryItems()
   const localLibraryItemsById = new Map()
   localLibraryItems.value.forEach((item) => {
-    if (item?.libraryItemId) {
+    if (item.libraryItemId) {
       localLibraryItemsById.set(item.libraryItemId, item)
     }
   })

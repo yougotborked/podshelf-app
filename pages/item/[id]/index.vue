@@ -225,11 +225,11 @@ const localLibraryItemId = computed(() => localLibraryItem.value?.id || null)
 const localLibraryItemEpisodes = computed(() => {
   if (!isPodcast.value || !localLibraryItem.value) return []
   const podcastMedia = localLibraryItem.value.media
-  return podcastMedia?.episodes || []
+  return podcastMedia.episodes || []
 })
 const serverLibraryItemId = computed(() => {
   if (!isLocal.value) return libraryItem.value?.id
-  if (!libraryItem.value?.serverAddress || !libraryItem.value?.libraryItemId) return null
+  if (!libraryItem.value?.serverAddress || !libraryItem.value.libraryItemId) return null
   if (currentServerAddress.value === libraryItem.value.serverAddress) {
     return libraryItem.value.libraryItemId
   }
@@ -259,7 +259,7 @@ const isPodcast = computed(() => mediaType.value == 'podcast')
 const EMPTY_MEDIA: LibraryItemMedia = { metadata: {} }
 const media = computed(() => libraryItem.value?.media ?? EMPTY_MEDIA)
 const tags = computed(() => media.value.tags || [])
-const mediaMetadata = computed(() => media.value.metadata || {})
+const mediaMetadata = computed(() => media.value.metadata)
 const title = computed(() => mediaMetadata.value.title)
 const subtitle = computed(() => mediaMetadata.value.subtitle)
 const genres = computed(() => mediaMetadata.value.genres || [])
@@ -393,7 +393,7 @@ function moreButtonPress() {
 }
 
 function readBook() {
-  if (localLibraryItem.value?.media?.ebookFile) {
+  if (localLibraryItem.value?.media.ebookFile) {
     appStore.selectedLibraryItem = localLibraryItem.value
     appStore.ereaderKeepProgress = true
     appStore.showReader = true
@@ -731,9 +731,9 @@ onMounted(async () => {
       return
     }
 
-    if (localItem?.libraryItemId?.startsWith('li_')) {
+    if (localItem.libraryItemId?.startsWith('li_')) {
       console.error('Local library item has old server library item id', localItem.libraryItemId)
-    } else if (query.noredirect !== '1' && localItem?.libraryItemId && localItem?.serverAddress === userStore.getServerAddress && appStore.socketConnected) {
+    } else if (query.noredirect !== '1' && localItem.libraryItemId && localItem.serverAddress === userStore.getServerAddress && appStore.socketConnected) {
       const queryParams = new URLSearchParams()
       queryParams.set('localLibraryItemId', libItemId)
       if (localItem.mediaType === 'podcast') {

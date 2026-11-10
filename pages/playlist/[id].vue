@@ -111,7 +111,7 @@ const downloadedEpisodeKeys = ref<Set<string> | null>(null)
 
 // Computed
 const networkConnected = computed(() => !appStore.isOffline)
-const playlistItems = computed(() => playlist.value.items || [])
+const playlistItems = computed(() => playlist.value.items)
 const playlistTotalItems = computed(() => playlist.value.totalItems || playlistItems.value.length)
 const playlistName = computed(() => playlist.value.name || '')
 const description = computed(() => playlist.value.description || '')
@@ -126,7 +126,7 @@ const playableItems = computed(() => playlistItems.value.filter((item) => {
 
   if (item.episode || item.localEpisode) return true
 
-  const tracks = item.localLibraryItem?.media?.tracks || libraryItem.media?.tracks || []
+  const tracks = item.localLibraryItem?.media.tracks || libraryItem.media.tracks || []
   return tracks.length
 }))
 const playerIsPlaying = computed(() => appStore.playerIsPlaying && isOpenInPlayer.value)
@@ -446,7 +446,7 @@ async function fetchPlaylist() {
     tag: 'PlaylistPage',
     message: `Playlist fetched: ${formatForLog({
       id: fetchedPlaylist.id,
-      items: fetchedPlaylist.items?.length || 0,
+      items: fetchedPlaylist.items.length || 0,
       totalItems: fetchedPlaylist.totalItems,
       hasLocalDownloads: !!downloadedEpisodeKeys.value
     })}`
@@ -459,15 +459,15 @@ async function fetchPlaylist() {
       const localEpisodesByLibraryItemId = new Map()
 
       localLibraryItems.forEach((localItem) => {
-        const libraryItemId = localItem?.libraryItemId
+        const libraryItemId = localItem.libraryItemId
         if (!libraryItemId) return
         localLibraryItemMap.set(libraryItemId, localItem)
 
-        const episodes = localItem?.media?.episodes || []
+        const episodes = localItem.media.episodes || []
         if (episodes.length) {
           const episodeMap = new Map()
           episodes.forEach((episode) => {
-            const key = episode?.serverEpisodeId || episode?.id
+            const key = episode.serverEpisodeId || episode.id
             if (key) {
               episodeMap.set(key, episode)
             }
@@ -492,8 +492,8 @@ async function fetchPlaylist() {
         if (playlistItem.episode) {
           const episodeKey =
             playlistItem.episodeId ||
-            playlistItem.episode?.serverEpisodeId ||
-            playlistItem.episode?.id ||
+            playlistItem.episode.serverEpisodeId ||
+            playlistItem.episode.id ||
             null
           if (!episodeKey) {
             playlistItem.localLibraryItem = matchingLocalLibraryItem
@@ -548,19 +548,19 @@ function showMore(playlistItem: PlaylistItem) {
   AbsLogger.info({
     tag: 'PlaylistPage',
     message: `Show more requested: ${formatForLog({
-      playlistItemId: playlistItem?.id,
+      playlistItemId: playlistItem.id,
       playlistLibraryItemId:
-        playlistItem?.libraryItemId ||
-        playlistItem?.libraryItem?.libraryItemId ||
-        playlistItem?.libraryItem?.id ||
+        playlistItem.libraryItemId ||
+        playlistItem.libraryItem?.libraryItemId ||
+        playlistItem.libraryItem?.id ||
         null,
       playlistEpisodeId:
-        playlistItem?.episodeId ||
-        playlistItem?.episode?.serverEpisodeId ||
-        playlistItem?.episode?.id ||
+        playlistItem.episodeId ||
+        playlistItem.episode?.serverEpisodeId ||
+        playlistItem.episode?.id ||
         null,
-      hasLocalLibraryItem: !!playlistItem?.localLibraryItem,
-      hasLocalEpisode: !!playlistItem?.localEpisode
+      hasLocalLibraryItem: !!playlistItem.localLibraryItem,
+      hasLocalEpisode: !!playlistItem.localEpisode
     })}`
   })
   const playlistLibraryItemId =
@@ -583,9 +583,9 @@ function showMore(playlistItem: PlaylistItem) {
   selectedEpisode.value = episode
     ? {
         ...episode,
-        serverEpisodeId: playlistEpisodeId || episode?.serverEpisodeId,
+        serverEpisodeId: playlistEpisodeId || episode.serverEpisodeId,
         id: playlistEpisodeId || episode.id,
-        localEpisode: useLocal ? playlistItem.localEpisode || episode?.localEpisode : episode?.localEpisode
+        localEpisode: useLocal ? playlistItem.localEpisode || episode.localEpisode : episode.localEpisode
       }
     : null
   selectedLibraryItemId.value =

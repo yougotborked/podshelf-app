@@ -172,7 +172,7 @@ onMounted(async () => {
       if (localLibraryItems.length) {
         const localLibraryItemMap = new Map<string, LibraryItem>()
         localLibraryItems.forEach((item) => {
-          if (item?.libraryItemId) {
+          if (item.libraryItemId) {
             localLibraryItemMap.set(item.libraryItemId, item)
           }
         })
