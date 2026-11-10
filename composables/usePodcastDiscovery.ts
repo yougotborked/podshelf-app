@@ -132,7 +132,7 @@ export function parseChartEntries(payload: unknown): ChartEntry[] {
  */
 export function mergeChartWithLookup(entries: ChartEntry[], lookupResults: unknown[]): DiscoverFeed[] {
   const byId = new Map<string, AppleLookupRaw>()
-  for (const raw of lookupResults || []) {
+  for (const raw of lookupResults) {
     const r = (raw ?? {}) as AppleLookupRaw
     if (r.collectionId != null) byId.set(String(r.collectionId), r)
   }
@@ -144,12 +144,12 @@ export function mergeChartWithLookup(entries: ChartEntry[], lookupResults: unkno
       if (!feedUrl) return null
       return {
         id: entry.id,
-        title: entry.title || details?.collectionName || '',
-        author: entry.author || details?.artistName || '',
-        artwork: details?.artworkUrl600 || details?.artworkUrl100 || entry.artwork,
+        title: entry.title || details.collectionName || '',
+        author: entry.author || details.artistName || '',
+        artwork: details.artworkUrl600 || details.artworkUrl100 || entry.artwork,
         feedUrl,
-        genres: Array.isArray(details?.genres) ? details.genres.filter((g) => g !== 'Podcasts') : [],
-        episodeCount: typeof details?.trackCount === 'number' ? details.trackCount : 0
+        genres: Array.isArray(details.genres) ? details.genres.filter((g) => g !== 'Podcasts') : [],
+        episodeCount: typeof details.trackCount === 'number' ? details.trackCount : 0
       }
     })
     .filter((f): f is DiscoverFeed => f !== null)
@@ -193,7 +193,7 @@ export function usePodcastDiscovery() {
         `${LOOKUP_URL}?id=${entries.map((e) => e.id).join(',')}&entity=podcast`
       )) as { results?: unknown[] }
 
-      return { ok: true, feeds: mergeChartWithLookup(entries, lookup?.results ?? []) }
+      return { ok: true, feeds: mergeChartWithLookup(entries, lookup.results ?? []) }
     } catch (error) {
       const status = (error as { status?: number } | null | undefined)?.status
       console.error('[discovery] Apple charts request failed', error)

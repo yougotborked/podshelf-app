@@ -77,7 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import type { LibraryItem } from '~/types'
+import type { LibraryItem, MediaMetadata } from '~/types'
 import { useLibrariesStore } from '~/stores/libraries'
 import { useGlobalsStore } from '~/stores/globals'
 
@@ -147,13 +147,13 @@ async function runSearch(value: string | null) {
 
   isFetching.value = false
 
-  bookResults.value = (results?.book || []) as typeof bookResults.value
-  podcastResults.value = (results?.podcast || []) as typeof podcastResults.value
-  episodeResults.value = (results?.episodes || []) as typeof episodeResults.value
-  seriesResults.value = (results?.series || []) as typeof seriesResults.value
-  authorResults.value = (results?.authors || []) as typeof authorResults.value
-  narratorResults.value = (results?.narrators || []) as typeof narratorResults.value
-  tagResults.value = (results?.tags || []) as typeof tagResults.value
+  bookResults.value = (results.book || []) as typeof bookResults.value
+  podcastResults.value = (results.podcast || []) as typeof podcastResults.value
+  episodeResults.value = (results.episodes || []) as typeof episodeResults.value
+  seriesResults.value = (results.series || []) as typeof seriesResults.value
+  authorResults.value = (results.authors || []) as typeof authorResults.value
+  narratorResults.value = (results.narrators || []) as typeof narratorResults.value
+  tagResults.value = (results.tags || []) as typeof tagResults.value
 }
 
 /**
@@ -175,7 +175,7 @@ async function searchDownloaded(value: string | null): Promise<Record<string, Re
   const episodes: Record<string, unknown>[] = []
 
   for (const li of localItems) {
-    const metadata = li.media?.metadata || {}
+    const metadata = ((li.media as Partial<LibraryItem['media']> | null | undefined)?.metadata ?? {}) as Partial<MediaMetadata>
     const haystack = [metadata.title, metadata.authorName, metadata.author, metadata.narratorName, metadata.seriesName]
       .filter(Boolean)
       .join(' ')

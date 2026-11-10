@@ -28,23 +28,23 @@ function resolveQueueItemIds(item: Record<string, unknown> | null | undefined): 
   const libraryItem = (item.libraryItem as Record<string, unknown> | null | undefined) || {}
   const libraryItemId =
     (item.libraryItemId as string | null | undefined) ??
-    (item.serverLibraryItemId as string) ??
-    (libraryItem.libraryItemId as string) ??
-    (libraryItem.id as string) ??
-    ((item.localLibraryItem as Record<string, unknown> | null | undefined)?.id as string) ??
-    (item.localLibraryItemId as string) ??
-    ((item.localEpisode as Record<string, unknown> | null | undefined)?.localLibraryItemId as string) ??
-    (item.id as string) ??
+    (item.serverLibraryItemId as string | null | undefined) ??
+    (libraryItem.libraryItemId as string | null | undefined) ??
+    (libraryItem.id as string | null | undefined) ??
+    ((item.localLibraryItem as Record<string, unknown> | null | undefined)?.id as string | null | undefined) ??
+    (item.localLibraryItemId as string | null | undefined) ??
+    ((item.localEpisode as Record<string, unknown> | null | undefined)?.localLibraryItemId as string | null | undefined) ??
+    (item.id as string | null | undefined) ??
     null
 
   const episode = (item.episode as Record<string, unknown> | null | undefined) || {}
   const episodeId =
     (item.episodeId as string | null | undefined) ??
-    (item.serverEpisodeId as string) ??
-    (episode.serverEpisodeId as string) ??
-    (episode.id as string) ??
-    (item.localEpisodeId as string) ??
-    ((item.localEpisode as Record<string, unknown> | null | undefined)?.id as string) ??
+    (item.serverEpisodeId as string | null | undefined) ??
+    (episode.serverEpisodeId as string | null | undefined) ??
+    (episode.id as string | null | undefined) ??
+    (item.localEpisodeId as string | null | undefined) ??
+    ((item.localEpisode as Record<string, unknown> | null | undefined)?.id as string | null | undefined) ??
     null
 
   return { libraryItemId, episodeId }
@@ -266,7 +266,7 @@ export const useAppStore = defineStore('app', {
       const userStore = useUserStore()
       if (!userStore.user) return
 
-      const userMediaProgress = (userStore.user?.mediaProgress as Record<string, unknown>[] | null | undefined) || []
+      const userMediaProgress = (userStore.user.mediaProgress as Record<string, unknown>[] | null | undefined) || []
       const globalsStore = useGlobalsStore()
       const localMediaProgress = (globalsStore.localMediaProgress as Record<string, unknown>[] | null | undefined) || []
 
@@ -275,7 +275,7 @@ export const useAppStore = defineStore('app', {
         if (mp.episodeId) progressMap[mp.episodeId as string] = mp
       })
       localMediaProgress.forEach((mp: Record<string, unknown>) => {
-        if (mp?.episodeId && !progressMap[mp.episodeId as string]) {
+        if (mp.episodeId && !progressMap[mp.episodeId as string]) {
           progressMap[mp.episodeId as string] = mp
         }
       })
@@ -477,8 +477,8 @@ export const useAppStore = defineStore('app', {
       const incomingSummary = {
         incomingLength: Array.isArray(queue) ? queue.length : 0,
         sample: Array.isArray(queue) ? queue.slice(0, 5).map((item) => ({
-          libraryItemId: item?.libraryItemId,
-          episodeId: item?.episodeId
+          libraryItemId: item.libraryItemId,
+          episodeId: item.episodeId
         })) : []
       }
       AbsLogger.info({ tag: 'Store', message: `[Store] setPlayQueue called: ${JSON.stringify(incomingSummary)}` })

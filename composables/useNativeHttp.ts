@@ -64,7 +64,7 @@ async function updateTokens(tokens: { accessToken: string; refreshToken?: string
   const userStore = useUserStore()
   userStore.accessToken = tokens.accessToken
   const socket = useSocket()
-  if (socket?.connected) socket.sendAuthenticate()
+  if (socket.connected) socket.sendAuthenticate()
   if (savedConfig) {
     userStore.serverConnectionConfig = savedConfig as import('~/types').ServerConnectionConfig
   }

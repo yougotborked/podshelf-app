@@ -47,12 +47,13 @@
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 import { useAutoPlaylistPodcastRules } from '~/composables/useAutoPlaylist'
 import { episodePublishedAt, orderListeningQueue, queueItemStartTime, toPlayQueueItems } from '~/composables/useListeningQueue'
 import { useWearSync } from '~/composables/useWearSync'
 import { buildLocalCoverMap } from '~/composables/useCoverSource'
 
-export default {
+export default defineComponent({
   props: {
     currentLibraryId: {
       type: String,
@@ -85,7 +86,7 @@ export default {
   watch: {
     currentLibraryId(newVal) {
       if (newVal) {
-        this.loadEpisodes()
+        void this.loadEpisodes()
       }
     },
     // The watch is told whenever this screen's queue changes. `immediate` matters: a watch
@@ -204,7 +205,7 @@ export default {
 
         this.episodes = episodePayload.episodes || []
         this.offlineToastShown = false
-        this.localStore.setCachedLatestEpisodes(this.currentLibraryId, this.episodes)
+        void this.localStore.setCachedLatestEpisodes(this.currentLibraryId, this.episodes)
       } catch (error) {
         console.error('[PodcastCatchUpFeed] Failed to get recent episodes', error)
         await this.useOfflineEpisodes({ showToast: !this.appStore.offlineModeEnabled })
@@ -233,7 +234,7 @@ export default {
             }
           : null
 
-      this.wearSync.publish(session, this.wearQueueItems, this.progressLookup)
+      void this.wearSync.publish(session, this.wearQueueItems, this.progressLookup)
     },
     async playNext() {
       const episodes = this.unfinishedEpisodes
@@ -281,7 +282,7 @@ export default {
   async mounted() {
     await this.refreshPodcastRules()
     await this.loadLocalPodcastLibraryItems()
-    this.loadEpisodes()
+    void this.loadEpisodes()
   }
-}
+})
 </script>

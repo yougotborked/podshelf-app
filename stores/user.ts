@@ -75,7 +75,7 @@ export const useUserStore = defineStore('user', {
       if (!state.user?.bookmarks) return []
       return (state.user.bookmarks as Record<string, unknown>[]).filter((bm) => bm.libraryItemId === libraryItemId)
     },
-    getUserSetting: (state) => (key: keyof UserSettings) => state.settings?.[key] ?? null,
+    getUserSetting: (state) => (key: keyof UserSettings) => state.settings[key],
     getUserCanUpdate: (state) => !!(state.user?.permissions as Record<string, unknown> | null | undefined)?.update,
     getUserCanDelete: (state) => !!(state.user?.permissions as Record<string, unknown> | null | undefined)?.delete,
     getUserCanDownload: (state) => !!(state.user?.permissions as Record<string, unknown> | null | undefined)?.download,
@@ -217,7 +217,7 @@ export const useUserStore = defineStore('user', {
       }
       const userResponseData = response.data as Record<string, unknown>
       const userObj = userResponseData.user as Record<string, unknown>
-      if (!userObj?.accessToken) {
+      if (!userObj.accessToken) {
         console.error('[user] No access token in refresh response')
         return null
       }
@@ -229,10 +229,8 @@ export const useUserStore = defineStore('user', {
       const savedConfig = await db.setServerConnectionConfig(updatedConfig)
       this.accessToken = userObj.accessToken as string
       const socket = useSocket()
-      if (socket?.connected && !socket.isAuthenticated) {
+      if (socket.connected && !socket.isAuthenticated) {
         socket.sendAuthenticate()
-      } else if (!socket) {
-        console.warn('[user] Socket not available, cannot re-authenticate')
       }
       if (savedConfig) {
         this.serverConnectionConfig = savedConfig as ServerConnectionConfig

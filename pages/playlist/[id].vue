@@ -453,7 +453,7 @@ async function fetchPlaylist() {
   })
 
   if (fetchedPlaylist.items.length) {
-    const localLibraryItems = (await db.getLocalLibraryItems(fetchedPlaylist.items[0]?.libraryItem?.mediaType ?? null)) || []
+    const localLibraryItems = (await db.getLocalLibraryItems(fetchedPlaylist.items[0]?.libraryItem?.mediaType ?? null))
     if (localLibraryItems.length) {
       const localLibraryItemMap = new Map()
       const localEpisodesByLibraryItemId = new Map()
@@ -626,8 +626,7 @@ function playAll() {
     return
   }
 
-  const maxQueueItems = MAX_QUEUE_ITEMS
-  const queue = maxQueueItems > 0 ? normalizedQueue.slice(0, maxQueueItems) : normalizedQueue
+  const queue = normalizedQueue.slice(0, MAX_QUEUE_ITEMS)
   if (queue.length < normalizedQueue.length) {
     toast.info(`Queue limited to ${queue.length} items`)
   }

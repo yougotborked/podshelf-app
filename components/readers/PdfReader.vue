@@ -26,10 +26,11 @@
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 import { getScreenOrientation } from '~/composables/useScreenOrientation'
 import pdf from '@teckel/vue-pdf'
 
-export default {
+export default defineComponent({
   components: {
     pdf
   },
@@ -266,5 +267,5 @@ export default {
     }
     window.removeEventListener('resize', this.screenOrientationChange)
   }
-}
+})
 </script>

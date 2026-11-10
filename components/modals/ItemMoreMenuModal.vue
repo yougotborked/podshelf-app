@@ -160,7 +160,7 @@ const progressPercent = computed(() => {
 })
 
 const ereaderDeviceItems = computed(() => {
-  if (!ebookFile.value || !librariesStore.ereaderDevices?.length) return []
+  if (!ebookFile.value || !librariesStore.ereaderDevices.length) return []
   return librariesStore.ereaderDevices.map((d) => {
     const device = d as Record<string, string>
     return { text: device.name ?? '', value: device.name ?? '' }
@@ -382,7 +382,7 @@ async function toggleFinished() {
     const payload = await db.updateLocalMediaProgressFinished({ localLibraryItemId: localLibraryItemId.value, isFinished })
     console.log('toggleFinished payload', JSON.stringify(payload))
     if (payload?.error) {
-      toast.error(payload?.error || 'Unknown error')
+      toast.error(payload.error || 'Unknown error')
     } else {
       const localMediaProgress = payload?.localMediaProgress
       console.log('toggleFinished localMediaProgress', JSON.stringify(localMediaProgress))
@@ -447,7 +447,7 @@ async function toggleEpisodeFinished() {
     console.log('toggleFinished payload', JSON.stringify(payload))
 
     if (payload?.error) {
-      toast.error(payload?.error || 'Unknown error')
+      toast.error(payload.error || 'Unknown error')
     } else {
       const localMediaProgress = payload?.localMediaProgress
       console.log('toggleFinished localMediaProgress', JSON.stringify(localMediaProgress))
@@ -695,7 +695,7 @@ async function forceMarkFinished() {
       })
 
       if (payload?.error) {
-        toast.error(payload?.error || 'Unknown error')
+        toast.error(payload.error || 'Unknown error')
         return
       }
 
@@ -725,7 +725,7 @@ async function forceMarkFinished() {
       })
 
       if (payload?.error) {
-        toast.error(payload?.error || 'Unknown error')
+        toast.error(payload.error || 'Unknown error')
         return
       }
 
@@ -763,7 +763,7 @@ async function setLocalProgressFinished({ isEpisode, isFinished }: { isEpisode: 
   })
 
   if (payload?.error) {
-    toast.error(payload?.error || 'Unknown error')
+    toast.error(payload.error || 'Unknown error')
     return false
   }
 
