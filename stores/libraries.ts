@@ -186,11 +186,11 @@ export const useLibrariesStore = defineStore('libraries', {
       if (book.series && !filterData.series.includes(book.series as string)) {
         filterData.series.push(book.series as string)
       }
-      const tags = audiobook.tags as string[] || []
+      const tags = audiobook.tags as string[] | null | undefined || []
       tags.forEach((tag) => {
         if (tag && !filterData.tags.includes(tag)) filterData.tags.push(tag)
       })
-      const genres = (book.genres as string[]) || []
+      const genres = (book.genres as string[] | null | undefined) || []
       genres.forEach((genre) => {
         if (genre && !filterData.genres.includes(genre)) filterData.genres.push(genre)
       })

@@ -24,8 +24,8 @@ const coverWidth = computed(() => {
   if (bookCoverAspectRatio.value === 1) return 50 * 1.2
   return 50
 })
-const media = computed(() => (props.libraryItem?.media as Record<string, unknown>) || {})
-const mediaMetadata = computed(() => (media.value.metadata as Record<string, unknown>) || {})
+const media = computed(() => (props.libraryItem?.media as Record<string, unknown> | null | undefined) || {})
+const mediaMetadata = computed(() => (media.value.metadata as Record<string, unknown> | null | undefined) || {})
 const title = computed(() => (props.episode?.title as string) || 'No Title')
 // The podcast the episode belongs to, so a bare episode title is not ambiguous
 const podcastTitle = computed(() => mediaMetadata.value.title as string | undefined)

@@ -47,8 +47,8 @@ const utils = useUtils()
 
 const expanded = ref(false)
 
-const media = computed(() => (props.libraryItem ? (props.libraryItem.media as Record<string, unknown>) || {} : {}))
-const chapters = computed(() => (media.value.chapters as { id: string | number; title?: string; start: number; end: number }[]) || [])
+const media = computed(() => (props.libraryItem ? (props.libraryItem.media as Record<string, unknown> | null | undefined) || {} : {}))
+const chapters = computed(() => (media.value.chapters as { id: string | number; title?: string; start: number; end: number }[] | null | undefined) || [])
 
 function clickBar() {
   expanded.value = !expanded.value

@@ -51,7 +51,7 @@ const userStore = useUserStore()
 const { impact } = useHaptics()
 const eventBus = useEventBus()
 
-const libraryItem = computed(() => (props.item.libraryItem as Record<string, unknown>) || {})
+const libraryItem = computed(() => (props.item.libraryItem as Record<string, unknown> | null | undefined) || {})
 const libraryItemId = computed(() => (props.item.libraryItemId as string) || (libraryItem.value.id as string))
 const localLibraryItem = computed(() => props.item.localLibraryItem as Record<string, unknown> | undefined)
 const episode = computed(() => props.item.episode as Record<string, unknown> | undefined)
@@ -60,11 +60,11 @@ const episodeId = computed(() => {
   return (props.item.episodeId as string) || (episode.value?.serverEpisodeId as string) || (episode.value?.id as string) || null
 })
 const localEpisode = computed(() => props.item.localEpisode as Record<string, unknown> | undefined)
-const media = computed(() => (libraryItem.value.media as Record<string, unknown>) || {})
-const mediaMetadata = computed(() => (media.value.metadata as Record<string, unknown>) || {})
+const media = computed(() => (libraryItem.value.media as Record<string, unknown> | null | undefined) || {})
+const mediaMetadata = computed(() => (media.value.metadata as Record<string, unknown> | null | undefined) || {})
 const tracks = computed(() => {
   if (episode.value) return []
-  return (media.value.tracks as unknown[]) || []
+  return (media.value.tracks as unknown[] | null | undefined) || []
 })
 const itemTitle = computed(() => {
   if (episode.value) return episode.value.title as string
@@ -72,7 +72,7 @@ const itemTitle = computed(() => {
 })
 const bookAuthors = computed(() => {
   if (episode.value) return []
-  return (mediaMetadata.value.authors as Record<string, unknown>[]) || []
+  return (mediaMetadata.value.authors as Record<string, unknown>[] | null | undefined) || []
 })
 const bookAuthorName = computed(() => bookAuthors.value.map((au) => au.name as string).join(', '))
 const authorName = computed(() => {
@@ -111,9 +111,9 @@ const userItemProgress = computed(() =>
   globalsStore.getLocalMediaProgressByServerItemId(libraryItemId.value, episodeId.value) ||
   userStore.getUserMediaProgress(libraryItemId.value, episodeId.value)
 )
-const progressPercent = computed(() => Math.max(Math.min(1, (userItemProgress.value as Record<string, unknown>)?.progress as number || 0), 0))
+const progressPercent = computed(() => Math.max(Math.min(1, (userItemProgress.value as Record<string, unknown> | null | undefined)?.progress as number || 0), 0))
 const userIsFinished = computed(() => {
-  if ((userItemProgress.value as Record<string, unknown>)?.isFinished) return true
+  if ((userItemProgress.value as Record<string, unknown> | null | undefined)?.isFinished) return true
   return progressPercent.value >= FINISHED_PROGRESS_THRESHOLD
 })
 

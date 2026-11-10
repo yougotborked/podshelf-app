@@ -122,11 +122,11 @@ const last7Days = computed(() => {
 })
 
 const listeningStatsDays = computed(() => {
-  return props.listeningStats ? (props.listeningStats.days as Record<string, number>) || {} : {}
+  return props.listeningStats ? (props.listeningStats.days as Record<string, number> | null | undefined) || {} : {}
 })
 
 function getMinutesListeningForDate(date: string) {
-  if (!props.listeningStats || !(props.listeningStats.days as Record<string, number>)) return 0
+  if (!props.listeningStats || !(props.listeningStats.days as Record<string, number> | null | undefined)) return 0
   return Math.round(((props.listeningStats.days as Record<string, number>)[date] || 0) / 60)
 }
 

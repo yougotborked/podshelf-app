@@ -97,8 +97,8 @@ const isAdminOrUp = computed(() => userStore.getIsAdminOrUp)
 const socketConnected = computed(() => appStore.socketConnected)
 const networkConnected = computed(() => !appStore.isOffline)
 const libraryItemId = computed(() => (props.libraryItem?.id as string) || null)
-const media = computed(() => (props.libraryItem?.media as Record<string, unknown>) || {})
-const mediaMetadata = computed(() => (media.value.metadata as Record<string, unknown>) || {})
+const media = computed(() => (props.libraryItem?.media as Record<string, unknown> | null | undefined) || {})
+const mediaMetadata = computed(() => (media.value.metadata as Record<string, unknown> | null | undefined) || {})
 
 const episodeSortItems = computed(() => [
   { text: strings.LabelPubDate, value: 'publishedAt' },
@@ -156,7 +156,7 @@ const episodesSorted = computed(() => {
     let bValue: unknown
 
     if (sortKey.value.includes('.')) {
-      const getNestedValue = (ob: Record<string, unknown>, s: string): unknown => s.split('.').reduce((o: unknown, k: string) => (o as Record<string, unknown>)?.[k], ob)
+      const getNestedValue = (ob: Record<string, unknown>, s: string): unknown => s.split('.').reduce((o: unknown, k: string) => (o as Record<string, unknown> | null | undefined)?.[k], ob)
       aValue = getNestedValue(a, sortKey.value)
       bValue = getNestedValue(b, sortKey.value)
     } else {
@@ -227,7 +227,7 @@ async function searchEpisodes() {
 
   console.log('Podcast feed', payload)
   const podcastfeed = payload.podcast as Record<string, unknown>
-  if (!(podcastfeed.episodes as unknown[])?.length) {
+  if (!(podcastfeed.episodes as unknown[] | null | undefined)?.length) {
     toast.info('No episodes found in RSS feed')
     return
   }

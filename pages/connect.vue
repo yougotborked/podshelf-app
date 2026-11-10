@@ -81,7 +81,7 @@ async function init() {
   // A saved server is enough to work offline against: its cached libraries and downloads are
   // already on the device. Prefer the one last used, otherwise the only one there is.
   const dd = deviceData.value as Record<string, unknown> | null
-  const configs = (dd?.serverConnectionConfigs as Record<string, unknown>[]) || []
+  const configs = (dd?.serverConnectionConfigs as Record<string, unknown>[] | null | undefined) || []
   offlineServer.value = configs.find((c) => c.id === dd?.lastServerConnectionConfigId) || configs[0] || null
 }
 

@@ -80,8 +80,8 @@ const isLocal = computed(() => {
 const localCover = computed(() => (props.libraryItem?.coverContentUrl as string) || null)
 const squareAspectRatio = computed(() => (props.bookCoverAspectRatio || 0) === 1)
 const height = computed(() => (props.width || 120) * (props.bookCoverAspectRatio || 1.6))
-const media = computed(() => props.libraryItem?.media as Record<string, unknown> || {})
-const mediaMetadata = computed(() => (media.value.metadata as Record<string, unknown>) || {})
+const media = computed(() => props.libraryItem?.media as Record<string, unknown> | null | undefined || {})
+const mediaMetadata = computed(() => (media.value.metadata as Record<string, unknown> | null | undefined) || {})
 const title = computed(() => (mediaMetadata.value.title as string) || 'No Title')
 const titleCleaned = computed(() => {
   if (title.value.length > 60) {
@@ -89,7 +89,7 @@ const titleCleaned = computed(() => {
   }
   return title.value
 })
-const authors = computed(() => (mediaMetadata.value.authors as Record<string, unknown>[]) || [])
+const authors = computed(() => (mediaMetadata.value.authors as Record<string, unknown>[] | null | undefined) || [])
 const author = computed(() => authors.value.map((au) => au.name).join(', '))
 const authorCleaned = computed(() => {
   if (author.value.length > 30) {

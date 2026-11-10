@@ -54,7 +54,7 @@ function newLocalLibraryItem(item: Record<string, unknown>) {
     id: item.id as string,
     size: getSize(item),
     coverPathSrc: item.coverContentUrl ? Capacitor.convertFileSrc(item.coverContentUrl as string) : null,
-    media: (item.media as LocalMediaItem['media']) || {}
+    media: (item.media as LocalMediaItem['media'] | null | undefined) || {}
   }
   if (itemIndex >= 0) {
     localLibraryItems.value.splice(itemIndex, 1, newItemObj)
@@ -65,7 +65,7 @@ function newLocalLibraryItem(item: Record<string, unknown>) {
 
 async function init() {
   const db = useDb()
-  const items = ((await db.getLocalLibraryItems()) as Record<string, unknown>[]) || []
+  const items = ((await db.getLocalLibraryItems()) as Record<string, unknown>[] | null | undefined) || []
   localLibraryItems.value = items.map((lmi) => {
     console.log('Local library item', JSON.stringify(lmi))
     return {
@@ -73,7 +73,7 @@ async function init() {
       id: lmi.id as string,
       size: getSize(lmi),
       coverPathSrc: lmi.coverContentUrl ? Capacitor.convertFileSrc(lmi.coverContentUrl as string) : null,
-      media: (lmi.media as LocalMediaItem['media']) || {}
+      media: (lmi.media as LocalMediaItem['media'] | null | undefined) || {}
     }
   })
 }

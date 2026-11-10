@@ -131,7 +131,7 @@ const localEpisodeMap = computed(() => {
   const map: Record<string, Record<string, unknown>> = {}
   for (const item of localLibraryItems.value) {
     const media = item.media as Record<string, unknown> | undefined
-    const mediaEpisodes = (media?.episodes as Record<string, unknown>[]) || []
+    const mediaEpisodes = (media?.episodes as Record<string, unknown>[] | null | undefined) || []
     for (const localEpisode of mediaEpisodes) {
       if (localEpisode.serverEpisodeId) {
         map[localEpisode.serverEpisodeId as string] = { ...localEpisode, localLibraryItemId: item.id }
@@ -178,8 +178,8 @@ const episodeTitle = computed(() => {
 })
 
 const showTitle = computed(() => {
-  const podcast = (current.value?.podcast as Record<string, unknown>) || {}
-  const metadata = (podcast.metadata as Record<string, unknown>) || {}
+  const podcast = (current.value?.podcast as Record<string, unknown> | null | undefined) || {}
+  const metadata = (podcast.metadata as Record<string, unknown> | null | undefined) || {}
   if (metadata.title) return metadata.title as string
   const session = appStore.currentPlaybackSession as Record<string, unknown> | null
   return (session?.displayAuthor as string) || ''
@@ -211,7 +211,7 @@ const elapsedLabel = computed(() => secondsToTimestamp(currentTime.value))
 const remainingTimeLabel = computed(() => secondsToTimestamp(Math.max(0, durationSeconds.value - currentTime.value)))
 
 async function loadLocalItems() {
-  localLibraryItems.value = ((await db.getLocalLibraryItems('podcast')) as Record<string, unknown>[]) || []
+  localLibraryItems.value = ((await db.getLocalLibraryItems('podcast')) as Record<string, unknown>[] | null | undefined) || []
 }
 
 async function loadEpisodes() {
@@ -232,7 +232,7 @@ async function loadEpisodes() {
   try {
     const payload = (await nativeHttp.get(`/api/libraries/${libraryId}/recent-episodes?limit=200`, { connectTimeout: 10000 })) as Record<string, unknown> | null
     if (!payload) throw new Error('Empty response payload')
-    episodes.value = (payload.episodes as ListeningEpisode[]) || []
+    episodes.value = (payload.episodes as ListeningEpisode[] | null | undefined) || []
     void localStore.setCachedLatestEpisodes(libraryId, episodes.value)
   } catch (error) {
     console.error('[minimal] Failed to get recent episodes', error)
@@ -254,7 +254,7 @@ async function useCachedOrLocalEpisodes(libraryId: string) {
   const downloaded = localEpisodesAsQueueCandidates(localLibraryItems.value)
   const downloadedServerIds = new Set(downloaded.map((episode) => episode.id))
 
-  const cached = ((await localStore.getCachedLatestEpisodes(libraryId)) as ListeningEpisode[]) || []
+  const cached = ((await localStore.getCachedLatestEpisodes(libraryId)) as ListeningEpisode[] | null | undefined) || []
   const playableFromCache = restrictToDownloaded(cached, (episode) => downloadedServerIds.has(episode.id))
   if (playableFromCache.length) {
     episodes.value = playableFromCache

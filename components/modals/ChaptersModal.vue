@@ -41,16 +41,11 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import type { Chapter } from '~/types'
 import { useStrings } from '~/composables/useStrings'
 import { useUtils } from '~/composables/useUtils'
 
-interface ChapterItem {
-  id: string | number
-  title?: string
-  start: number
-  end: number
-  [key: string]: unknown
-}
+type ChapterItem = Chapter
 
 const props = defineProps<{
   modelValue: boolean

@@ -123,7 +123,7 @@ async function loadPlaylists() {
     .get(`/api/libraries/${currentLibraryId.value}/playlists`)
     .then((data) => {
       const d = data as Record<string, unknown>
-      playlists.value = (d.results as Record<string, unknown>[]) || []
+      playlists.value = (d.results as Record<string, unknown>[] | null | undefined) || []
       void localStore.setCachedPlaylists(currentLibraryId.value, playlists.value)
     })
     .catch((error) => {

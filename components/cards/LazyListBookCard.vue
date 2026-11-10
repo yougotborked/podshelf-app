@@ -98,8 +98,8 @@ watch(() => props.bookCoverAspectRatio, () => {
 // Computed
 const _libraryItem = computed(() => libraryItem.value || {})
 const isLocal = computed(() => !!_libraryItem.value.isLocal)
-const media = computed(() => (_libraryItem.value.media as Record<string, unknown>) || {})
-const mediaMetadata = computed(() => (media.value.metadata as Record<string, unknown>) || {})
+const media = computed(() => (_libraryItem.value.media as Record<string, unknown> | null | undefined) || {})
+const mediaMetadata = computed(() => (media.value.metadata as Record<string, unknown> | null | undefined) || {})
 const mediaType = computed(() => _libraryItem.value.mediaType as string | undefined)
 const duration = computed(() => (media.value.duration as number) || null)
 const isPodcast = computed(() => mediaType.value === 'podcast')
@@ -154,8 +154,8 @@ const displaySortLine = computed(() => {
   return null
 })
 const userProgress = computed(() => userStore.getUserMediaProgress(libraryItemId.value))
-const userProgressPercent = computed(() => (userProgress.value as Record<string, unknown>)?.progress as number || 0)
-const itemIsFinished = computed(() => !!(userProgress.value as Record<string, unknown>)?.isFinished)
+const userProgressPercent = computed(() => (userProgress.value as Record<string, unknown> | null | undefined)?.progress as number || 0)
+const itemIsFinished = computed(() => !!(userProgress.value as Record<string, unknown> | null | undefined)?.isFinished)
 const isPlaying = computed(() => {
   if (localLibraryItemId.value && appStore.getIsMediaStreaming(localLibraryItemId.value as string)) return true
   return appStore.getIsMediaStreaming(libraryItemId.value)

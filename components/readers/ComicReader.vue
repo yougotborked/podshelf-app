@@ -79,9 +79,9 @@ const pageMenuWidth = ref(256)
 
 const localLibraryItem = computed(() => {
   if (props.isLocal) return props.libraryItem
-  return (props.libraryItem.localLibraryItem as Record<string, unknown>) || null
+  return (props.libraryItem.localLibraryItem as Record<string, unknown> | null | undefined) || null
 })
-const localLibraryItemId = computed(() => (localLibraryItem.value as Record<string, unknown>)?.id as string)
+const localLibraryItemId = computed(() => (localLibraryItem.value as Record<string, unknown> | null | undefined)?.id as string)
 const serverLibraryItemId = computed(() => {
   if (!props.isLocal) return props.libraryItem.id as string
   if (!props.libraryItem.serverAddress || !props.libraryItem.libraryItemId) return null
@@ -149,7 +149,7 @@ async function updateProgress() {
       ...payload
     }
     const localResponse = await db.updateLocalEbookProgress(localPayload)
-    if ((localResponse as Record<string, unknown>)?.localMediaProgress) {
+    if ((localResponse as Record<string, unknown> | null | undefined)?.localMediaProgress) {
       globalsStore.updateLocalMediaProgress((localResponse as Record<string, unknown>).localMediaProgress as Parameters<typeof globalsStore.updateLocalMediaProgress>[0])
     }
   }

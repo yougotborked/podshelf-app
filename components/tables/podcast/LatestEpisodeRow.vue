@@ -151,7 +151,7 @@ const itemProgress = computed(() => {
   const localUpdate = ((localProg as Record<string, unknown>).lastUpdate as number) || 0
   return localUpdate > serverUpdate ? localProg : serverProg
 })
-const itemProgressPercent = computed(() => ((itemProgress.value as Record<string, unknown>)?.progress as number) || 0)
+const itemProgressPercent = computed(() => ((itemProgress.value as Record<string, unknown> | null | undefined)?.progress as number) || 0)
 const userIsFinished = computed(() => isProgressFinished(itemProgress.value as MaybeProgress))
 const timeRemaining = computed(() => {
   if (streamIsPlaying.value) return 'Playing'
@@ -166,7 +166,7 @@ const timeRemaining = computed(() => {
 })
 const publishedAt = computed(() => props.episode.publishedAt as number | null)
 const downloadItem = computed(() => globalsStore.getDownloadItem(props.libraryItemId || '', props.episode.id as string))
-const podcast = computed(() => (props.episode.podcast as Record<string, unknown>) || {})
+const podcast = computed(() => (props.episode.podcast as Record<string, unknown> | null | undefined) || {})
 
 function goToEpisodePage() {
   void router.push(`/item/${props.libraryItemId}/${props.episode.id}`)
@@ -199,7 +199,7 @@ async function downloadClick() {
 async function download(selectedLocalFolder: Record<string, unknown> | null = null) {
   let localFolder = selectedLocalFolder
   if (!localFolder) {
-    const localFolders = ((await db.getLocalFolders()) as Record<string, unknown>[]) || []
+    const localFolders = ((await db.getLocalFolders()) as Record<string, unknown>[] | null | undefined) || []
     console.log('Local folders loaded', localFolders.length)
     const foldersWithMediaType = localFolders.filter((lf) => {
       console.log('Checking local folder', lf.mediaType)

@@ -268,7 +268,7 @@ function init() {
   nativeHttp
     .get(`/api/me/stats/year/${props.year}`)
     .then((data) => {
-      yearStats.value = (data as Record<string, unknown>) || {}
+      yearStats.value = (data as Record<string, unknown> | null | undefined) || {}
       return initCanvas()
     })
     .catch((error: Error) => {

@@ -95,7 +95,7 @@ const show = computed({
 })
 
 const serverAddress = computed(() => userStore.getServerAddress)
-const rssFeedEntity = computed(() => (globalsStore.rssFeedEntity as Record<string, unknown>) || {})
+const rssFeedEntity = computed(() => (globalsStore.rssFeedEntity as Record<string, unknown> | null | undefined) || {})
 const entityId = computed(() => rssFeedEntity.value.id as string)
 const entityType = computed(() => rssFeedEntity.value.type as string)
 const entityFeed = computed(() => rssFeedEntity.value.feed as Record<string, unknown>)

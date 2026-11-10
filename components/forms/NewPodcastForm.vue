@@ -66,13 +66,13 @@ const podcast = reactive({
 const _podcastData = computed(() => (props.podcastData || {}) as Record<string, unknown>)
 const feedMetadata = computed(() => {
   if (!props.podcastFeedData) return {}
-  return (props.podcastFeedData.metadata as Record<string, unknown>) || {}
+  return (props.podcastFeedData.metadata as Record<string, unknown> | null | undefined) || {}
 })
 
 const currentLibrary = computed(() => librariesStore.getCurrentLibrary)
 const folders = computed(() => {
   if (!currentLibrary.value) return []
-  return (currentLibrary.value.folders as Array<{ id: string; fullPath: string }>) || []
+  return (currentLibrary.value.folders as Array<{ id: string; fullPath: string }> | null | undefined) || []
 })
 const folderItems = computed(() => {
   return folders.value.map((fold) => ({
@@ -140,7 +140,7 @@ function init() {
   podcast.author = (_podcastData.value.artistName as string) || (feedMetadata.value.author as string) || ''
   podcast.description = (_podcastData.value.description as string) || (feedMetadata.value.descriptionPlain as string) || ''
   podcast.releaseDate = (_podcastData.value.releaseDate as string) || ''
-  podcast.genres = (_podcastData.value.genres as string[]) || (feedMetadata.value.categories as string[]) || []
+  podcast.genres = (_podcastData.value.genres as string[] | null | undefined) || (feedMetadata.value.categories as string[] | null | undefined) || []
   podcast.feedUrl = (_podcastData.value.feedUrl as string) || (feedMetadata.value.feedUrl as string) || ''
   podcast.imageUrl = (_podcastData.value.cover as string) || (feedMetadata.value.image as string) || ''
   podcast.itunesPageUrl = (_podcastData.value.pageUrl as string) || ''

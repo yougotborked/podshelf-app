@@ -41,7 +41,7 @@ const sizeMultiplier = computed(() => {
   return (props.width || 0) / 240
 })
 const title = computed(() => collection.value ? collection.value.name as string : '')
-const books = computed(() => collection.value ? (collection.value.books as unknown[]) || [] : [])
+const books = computed(() => collection.value ? (collection.value.books as unknown[] | null | undefined) || [] : [])
 
 // Methods
 function setEntity(_collection: Record<string, unknown>) {

@@ -56,8 +56,8 @@ function itemTitle(item: Record<string, unknown>) {
   const lli = item.localLibraryItem as Record<string, unknown>
   if (ep) return ep.title as string
   if (le) return le.title as string
-  if (li?.media) return ((li.media as Record<string, unknown>).metadata as Record<string, unknown>)?.title as string
-  if (lli?.media) return ((lli.media as Record<string, unknown>).metadata as Record<string, unknown>)?.title as string
+  if (li?.media) return ((li.media as Record<string, unknown>).metadata as Record<string, unknown> | null | undefined)?.title as string
+  if (lli?.media) return ((lli.media as Record<string, unknown>).metadata as Record<string, unknown> | null | undefined)?.title as string
   return ''
 }
 

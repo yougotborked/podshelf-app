@@ -49,9 +49,9 @@ const librariesStore = useLibrariesStore()
 const route = useRoute()
 
 const currentLibrary = computed(() => librariesStore.getCurrentLibrary)
-const currentLibraryIcon = computed(() => (currentLibrary.value as Record<string, unknown>)?.icon as string || 'database')
+const currentLibraryIcon = computed(() => (currentLibrary.value as Record<string, unknown> | null | undefined)?.icon as string || 'database')
 const userHasPlaylists = computed(() => {
-  const autoUnfinished = (appStore.deviceData as Record<string, unknown>)?.deviceSettings && ((appStore.deviceData as Record<string, unknown>).deviceSettings as Record<string, unknown>)?.autoCacheUnplayedEpisodes
+  const autoUnfinished = (appStore.deviceData as Record<string, unknown> | null | undefined)?.deviceSettings && ((appStore.deviceData as Record<string, unknown>).deviceSettings as Record<string, unknown> | null | undefined)?.autoCacheUnplayedEpisodes
   return librariesStore.numUserPlaylists || autoUnfinished
 })
 const routeName = computed(() => route.name)

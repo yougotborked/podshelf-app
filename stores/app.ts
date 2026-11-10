@@ -25,26 +25,26 @@ function resolveQueueItemIds(item: Record<string, unknown>): { libraryItemId: st
     return { libraryItemId: null, episodeId: null }
   }
 
-  const libraryItem = (item.libraryItem as Record<string, unknown>) || {}
+  const libraryItem = (item.libraryItem as Record<string, unknown> | null | undefined) || {}
   const libraryItemId =
-    (item.libraryItemId as string) ??
+    (item.libraryItemId as string | null | undefined) ??
     (item.serverLibraryItemId as string) ??
     (libraryItem.libraryItemId as string) ??
     (libraryItem.id as string) ??
-    ((item.localLibraryItem as Record<string, unknown>)?.id as string) ??
+    ((item.localLibraryItem as Record<string, unknown> | null | undefined)?.id as string) ??
     (item.localLibraryItemId as string) ??
-    ((item.localEpisode as Record<string, unknown>)?.localLibraryItemId as string) ??
+    ((item.localEpisode as Record<string, unknown> | null | undefined)?.localLibraryItemId as string) ??
     (item.id as string) ??
     null
 
-  const episode = (item.episode as Record<string, unknown>) || {}
+  const episode = (item.episode as Record<string, unknown> | null | undefined) || {}
   const episodeId =
-    (item.episodeId as string) ??
+    (item.episodeId as string | null | undefined) ??
     (item.serverEpisodeId as string) ??
     (episode.serverEpisodeId as string) ??
     (episode.id as string) ??
     (item.localEpisodeId as string) ??
-    ((item.localEpisode as Record<string, unknown>)?.id as string) ??
+    ((item.localEpisode as Record<string, unknown> | null | undefined)?.id as string) ??
     null
 
   return { libraryItemId, episodeId }
@@ -148,7 +148,7 @@ export const useAppStore = defineStore('app', {
       const isLocalLibraryItemId = libraryItemId.startsWith('local_')
       if (isLocalLibraryItemId) {
         if ((state.currentPlaybackSession as Record<string, unknown>).localLibraryItem &&
-            ((state.currentPlaybackSession as Record<string, unknown>).localLibraryItem as Record<string, unknown>)?.id !== libraryItemId) {
+            ((state.currentPlaybackSession as Record<string, unknown>).localLibraryItem as Record<string, unknown> | null | undefined)?.id !== libraryItemId) {
           return false
         }
         if (!episodeId) return true
@@ -211,9 +211,9 @@ export const useAppStore = defineStore('app', {
           await localStore.setPlaybackSession(session)
         }
         const idx = queue.findIndex((q) => {
-          const liId = (q.localLibraryItem as Record<string, unknown>)?.id || q.libraryItemId
-          const epId = (q.localEpisode as Record<string, unknown>)?.id || q.episodeId
-          const curLi = (deviceSession.localLibraryItem as Record<string, unknown>)?.id || deviceSession.libraryItemId
+          const liId = (q.localLibraryItem as Record<string, unknown> | null | undefined)?.id || q.libraryItemId
+          const epId = (q.localEpisode as Record<string, unknown> | null | undefined)?.id || q.episodeId
+          const curLi = (deviceSession.localLibraryItem as Record<string, unknown> | null | undefined)?.id || deviceSession.libraryItemId
           const curEp = deviceSession.localEpisodeId || deviceSession.episodeId
           return liId === curLi && epId === curEp
         })
@@ -266,9 +266,9 @@ export const useAppStore = defineStore('app', {
       const userStore = useUserStore()
       if (!userStore.user) return
 
-      const userMediaProgress = (userStore.user?.mediaProgress as Record<string, unknown>[]) || []
+      const userMediaProgress = (userStore.user?.mediaProgress as Record<string, unknown>[] | null | undefined) || []
       const globalsStore = useGlobalsStore()
-      const localMediaProgress = (globalsStore.localMediaProgress as Record<string, unknown>[]) || []
+      const localMediaProgress = (globalsStore.localMediaProgress as Record<string, unknown>[] | null | undefined) || []
 
       const progressMap: Record<string, unknown> = {}
       userMediaProgress.forEach((mp: Record<string, unknown>) => {
@@ -284,7 +284,7 @@ export const useAppStore = defineStore('app', {
       const localLibraries = await db.getLocalLibraryItems('podcast')
       const downloadedMap: Record<string, boolean> = {}
       for (const li of localLibraries as Record<string, unknown>[]) {
-        for (const ep of (li.media as Record<string, unknown>)?.episodes as Record<string, unknown>[] || []) {
+        for (const ep of (li.media as Record<string, unknown> | null | undefined)?.episodes as Record<string, unknown>[] | null | undefined || []) {
           const sid = (ep.serverEpisodeId || ep.id) as string
           if (sid) downloadedMap[`${li.libraryItemId}_${sid}`] = true
         }
@@ -304,7 +304,7 @@ export const useAppStore = defineStore('app', {
         let page = 0
         for (;;) {
           const payload = await nativeHttp.get(`/api/libraries/${(lib as Record<string, unknown>).id}/recent-episodes?limit=200&page=${page}`, { connectTimeout: 10000 }).catch(() => null)
-          const episodes = (payload as Record<string, unknown>)?.episodes as Record<string, unknown>[] || []
+          const episodes = (payload as Record<string, unknown> | null | undefined)?.episodes as Record<string, unknown>[] | null | undefined || []
           for (const ep of episodes) {
             const serverId = ep.id as string
             const liId = ep.libraryItemId as string
@@ -394,9 +394,9 @@ export const useAppStore = defineStore('app', {
 
       if (playbackSession && this.playQueue.length) {
         const idx = this.playQueue.findIndex((q) => {
-          const liId = (q.localLibraryItem as Record<string, unknown>)?.id || q.libraryItemId
-          const epId = (q.localEpisode as Record<string, unknown>)?.id || q.episodeId
-          const curLi = (playbackSession.localLibraryItem as Record<string, unknown>)?.id || playbackSession.libraryItemId
+          const liId = (q.localLibraryItem as Record<string, unknown> | null | undefined)?.id || q.libraryItemId
+          const epId = (q.localEpisode as Record<string, unknown> | null | undefined)?.id || q.episodeId
+          const curLi = (playbackSession.localLibraryItem as Record<string, unknown> | null | undefined)?.id || playbackSession.libraryItemId
           const curEp = playbackSession.localEpisodeId || playbackSession.episodeId
           return liId === curLi && epId === curEp
         })

@@ -24,8 +24,8 @@ const coverWidth = computed(() => {
   if (bookCoverAspectRatio.value === 1) return 50 * 1.2
   return 50
 })
-const media = computed(() => props.libraryItem?.media as Record<string, unknown> || {})
-const mediaMetadata = computed(() => media.value.metadata as Record<string, unknown> || {})
+const media = computed(() => props.libraryItem?.media as Record<string, unknown> | null | undefined || {})
+const mediaMetadata = computed(() => media.value.metadata as Record<string, unknown> | null | undefined || {})
 const mediaType = computed(() => props.libraryItem?.mediaType as string | null ?? null)
 const isPodcast = computed(() => mediaType.value === 'podcast')
 const title = computed(() => (mediaMetadata.value.title as string) || 'No Title')

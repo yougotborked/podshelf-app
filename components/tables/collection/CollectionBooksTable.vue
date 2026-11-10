@@ -30,7 +30,7 @@ const booksCopy = ref<Record<string, unknown>[]>([])
 const totalDuration = computed(() => {
   let _total = 0
   props.books.forEach((book) => {
-    _total += ((book.media as Record<string, unknown>)?.duration as number) || 0
+    _total += ((book.media as Record<string, unknown> | null | undefined)?.duration as number) || 0
   })
   return _total
 })

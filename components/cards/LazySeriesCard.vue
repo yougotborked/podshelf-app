@@ -49,7 +49,7 @@ const sizeMultiplier = computed(() => {
   return (props.width || 0) / 240
 })
 const title = computed(() => series.value ? series.value.name as string : '')
-const books = computed(() => series.value ? (series.value.books as unknown[]) || [] : [])
+const books = computed(() => series.value ? (series.value.books as unknown[] | null | undefined) || [] : [])
 const seriesBookProgress = computed(() => {
   return (books.value as Record<string, unknown>[])
     .map((libraryItem) => userStore.getUserMediaProgress(libraryItem.id as string))
