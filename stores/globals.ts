@@ -214,7 +214,7 @@ export const useGlobalsStore = defineStore('globals', {
       this.itemDownloads = this.itemDownloads.filter((i) => i.id != id)
     },
 
-    updateLocalMediaProgress(prog: LocalMediaProgress) {
+    updateLocalMediaProgress(prog: LocalMediaProgress | null | undefined) {
       if (!prog || !prog.id) return
       const index = this.localMediaProgress.findIndex((lmp) => lmp.id == prog.id)
       if (index >= 0) {

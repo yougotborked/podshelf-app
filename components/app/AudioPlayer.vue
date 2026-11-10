@@ -120,6 +120,7 @@
 </template>
 
 <script setup lang="ts">
+import { getScreenOrientation } from '~/composables/useScreenOrientation'
 import type { Chapter } from '~/types'
 import { Capacitor } from '@capacitor/core'
 import { App } from '@capacitor/app'
@@ -1295,9 +1296,9 @@ function maybeRestartPolling() {
 // ── Lifecycle ─────────────────────────────────────────────────────────────────
 onMounted(() => {
   updateScreenSize()
-  if (screen.orientation) {
+  if (getScreenOrientation()) {
     // Not available on ios
-    screen.orientation.addEventListener('change', screenOrientationChangeListener)
+    getScreenOrientation()?.addEventListener('change', screenOrientationChangeListener)
   } else {
     document.addEventListener('orientationchange', screenOrientationChangeListener)
   }
@@ -1323,9 +1324,9 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  if (screen.orientation) {
+  if (getScreenOrientation()) {
     // Not available on ios
-    screen.orientation.removeEventListener('change', screenOrientationChangeListener)
+    getScreenOrientation()?.removeEventListener('change', screenOrientationChangeListener)
   } else {
     document.removeEventListener('orientationchange', screenOrientationChangeListener)
   }

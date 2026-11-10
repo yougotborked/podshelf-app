@@ -51,7 +51,7 @@ function clickedIt() {
   void router.push('/downloading')
 }
 
-function onItemDownloadComplete(data: Record<string, unknown>) {
+function onItemDownloadComplete(data: Record<string, unknown> | null | undefined) {
   console.log('DownloadProgressIndicator onItemDownloadComplete', JSON.stringify(data))
   if (!data || !data.libraryItemId) {
     console.error('Invalid item download complete payload')

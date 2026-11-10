@@ -26,6 +26,7 @@
 </template>
 
 <script>
+import { getScreenOrientation } from '~/composables/useScreenOrientation'
 import pdf from '@teckel/vue-pdf'
 
 export default {
@@ -246,9 +247,9 @@ export default {
     this.windowWidth = window.innerWidth
     this.windowHeight = window.innerHeight
 
-    if (screen.orientation) {
+    if (getScreenOrientation()) {
       // Not available on ios
-      screen.orientation.addEventListener('change', this.screenOrientationChange)
+      getScreenOrientation()?.addEventListener('change', this.screenOrientationChange)
     } else {
       document.addEventListener('orientationchange', this.screenOrientationChange)
     }
@@ -257,9 +258,9 @@ export default {
     this.init()
   },
   beforeUnmount() {
-    if (screen.orientation) {
+    if (getScreenOrientation()) {
       // Not available on ios
-      screen.orientation.removeEventListener('change', this.screenOrientationChange)
+      getScreenOrientation()?.removeEventListener('change', this.screenOrientationChange)
     } else {
       document.removeEventListener('orientationchange', this.screenOrientationChange)
     }

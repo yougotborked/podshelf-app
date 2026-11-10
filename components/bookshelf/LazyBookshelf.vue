@@ -17,6 +17,7 @@
 </template>
 
 <script setup lang="ts">
+import { getScreenOrientation } from '~/composables/useScreenOrientation'
 import { ref, computed, watch, onMounted, onBeforeUnmount, onUpdated } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { useLibrariesStore } from '@/stores/libraries'
@@ -563,9 +564,9 @@ function initListeners() {
   socket.$on('items_updated', libraryItemsUpdated)
   socket.$on('items_added', libraryItemsAdded)
 
-  if (screen.orientation) {
+  if (getScreenOrientation()) {
     // Not available on ios
-    screen.orientation.addEventListener('change', screenOrientationChange)
+    getScreenOrientation()?.addEventListener('change', screenOrientationChange)
   } else {
     document.addEventListener('orientationchange', screenOrientationChange)
   }
@@ -586,9 +587,9 @@ function removeListeners() {
   socket.$off('items_updated', libraryItemsUpdated)
   socket.$off('items_added', libraryItemsAdded)
 
-  if (screen.orientation) {
+  if (getScreenOrientation()) {
     // Not available on ios
-    screen.orientation.removeEventListener('change', screenOrientationChange)
+    getScreenOrientation()?.removeEventListener('change', screenOrientationChange)
   } else {
     document.removeEventListener('orientationchange', screenOrientationChange)
   }

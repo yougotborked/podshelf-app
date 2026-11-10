@@ -7,6 +7,7 @@
 </template>
 
 <script setup lang="ts">
+import { getScreenOrientation } from '~/composables/useScreenOrientation'
 import { ref, computed, watch, onMounted } from 'vue'
 import { useGlobalsStore } from '~/stores/globals'
 
@@ -43,11 +44,11 @@ function screenOrientationChange() {
 }
 
 function setListeners() {
-  screen.orientation.addEventListener('change', screenOrientationChange)
+  getScreenOrientation()?.addEventListener('change', screenOrientationChange)
 }
 
 function removeListeners() {
-  screen.orientation.removeEventListener('change', screenOrientationChange)
+  getScreenOrientation()?.removeEventListener('change', screenOrientationChange)
 }
 
 function setWidth() {

@@ -20,7 +20,7 @@ import type { PlaybackSession, DeviceData, QueueItem } from '~/types'
 import { getAutoPlaylistPodcastRule, refreshAutoPlaylistPodcastRules } from '~/composables/useAutoPlaylist'
 
 // Helper functions (copy from store/index.js)
-function resolveQueueItemIds(item: Record<string, unknown>): { libraryItemId: string | null; episodeId: string | null } {
+function resolveQueueItemIds(item: Record<string, unknown> | null | undefined): { libraryItemId: string | null; episodeId: string | null } {
   if (!item || typeof item !== 'object') {
     return { libraryItemId: null, episodeId: null }
   }
