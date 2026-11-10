@@ -35,7 +35,7 @@ function handleIFrameHeight(iFrame: HTMLIFrameElement) {
     const lastItemA = itemAs[itemAs.length - 1]
     const lastItemP = itemPs[itemPs.length - 1]
     let lastItem: Element | null = null
-    if (isElement(lastItemA) && isElement(lastItemP)) {
+    if (lastItemA && lastItemP && isElement(lastItemA) && isElement(lastItemP)) {
       if (lastItemA.clientHeight + lastItemA.offsetTop > lastItemP.clientHeight + lastItemP.offsetTop) {
         lastItem = lastItemA
       } else {
@@ -84,6 +84,7 @@ async function initMobi() {
     const anchoredDoc = htmlParser.getAnchoredDoc()
 
     const iFrame = document.getElementsByTagName('iframe')[0]
+    if (!iFrame) throw new Error('The reader frame is not in the page')
     iFrame.contentDocument!.body.innerHTML = anchoredDoc.documentElement.outerHTML
 
     // Add css

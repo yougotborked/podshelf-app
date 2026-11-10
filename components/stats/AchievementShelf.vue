@@ -158,15 +158,15 @@ const RANK_INK: Record<number, string> = {
 function badgeClass(tier: EvaluatedAchievement): string {
   // Locked badges keep their rank's colour, dimmed, rather than going grey. The point of a
   // locked badge is seeing what it is and what it is worth.
-  const base = RANK_SURFACE[tier.rank] ?? RANK_SURFACE[1]
+  const base = RANK_SURFACE[tier.rank] ?? RANK_SURFACE[1] ?? ''
   return tier.earned ? base : `${base} opacity-40`
 }
 
 function rankFill(rank: number): string {
-  return RANK_FILL[rank] ?? RANK_FILL[1]
+  return RANK_FILL[rank] ?? RANK_FILL[1] ?? ''
 }
 
 function rankInk(rank: number): string {
-  return RANK_INK[rank] ?? RANK_INK[1]
+  return RANK_INK[rank] ?? RANK_INK[1] ?? ''
 }
 </script>

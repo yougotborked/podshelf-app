@@ -17,7 +17,8 @@ export const RECONNECT_BACKOFF_MS = [2000, 5000, 15000, 30000, 60000]
  * than intended, never strand the app offline waiting for a delay that never elapses.
  */
 export function reconnectDelayMs(attempts: number): number {
-  if (!Number.isFinite(attempts) || attempts < 0) return RECONNECT_BACKOFF_MS[0]
+  const first = RECONNECT_BACKOFF_MS[0] ?? 2000
+  if (!Number.isFinite(attempts) || attempts < 0) return first
   const index = Math.min(Math.floor(attempts), RECONNECT_BACKOFF_MS.length - 1)
-  return RECONNECT_BACKOFF_MS[index]
+  return RECONNECT_BACKOFF_MS[index] ?? first
 }

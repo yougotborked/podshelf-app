@@ -13,7 +13,7 @@
       <template v-for="n in 7" :key="n">
         <div class="absolute pointer-events-none left-0 h-px bg-md-outline-variant" :style="{ top: n * lineSpacing - lineSpacing / 2 + 'px', width: chartContentWidth + 'px', marginLeft: chartContentMarginLeft + 'px' }" />
 
-        <div class="absolute z-10" :style="{ left: points[n - 1].x + 'px', bottom: points[n - 1].y + 'px' }">
+        <div class="absolute z-10" :style="{ left: points[n - 1]?.x + 'px', bottom: points[n - 1]?.y + 'px' }">
           <div class="h-2 w-2 bg-md-primary/80 hover:bg-md-primary rounded-full transform duration-150 transition-transform hover:scale-125" />
         </div>
       </template>
@@ -146,7 +146,7 @@ const mostListenedDay = computed(() => {
   const sorted = Object.values(last7DaysOfListening.value)
     .map((dl) => ({ ...dl }))
     .sort((a, b) => b.minutesListening - a.minutesListening)
-  return sorted[0].minutesListening
+  return sorted[0]?.minutesListening ?? 0
 })
 
 const yAxisFactor = computed(() => {
@@ -169,7 +169,7 @@ const points = computed(() => {
   const data = []
   for (let i = 0; i < 7; i++) {
     const listeningObj = last7DaysOfListening.value[i]
-    const minutesListening = listeningObj.minutesListening || 0
+    const minutesListening = listeningObj?.minutesListening || 0
     const yPercent = minutesListening / (yAxisFactor.value * 7)
     data.push({
       x: 4 + chartContentMarginLeft.value + (daySpacing.value + daySpacing.value / 14) * i,
@@ -192,6 +192,7 @@ const pointLines = computed(() => {
   for (let i = 1; i < 7; i++) {
     const lastPoint = points.value[i - 1]
     const nextPoint = points.value[i]
+    if (!lastPoint || !nextPoint) continue
     const x1 = lastPoint.x
     const x2 = nextPoint.x
     const y1 = lastPoint.y

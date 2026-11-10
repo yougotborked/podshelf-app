@@ -210,11 +210,13 @@ async function clearDownloadQueue() {
 
 async function searchEpisodes() {
   if (!networkConnected.value || !socketConnected.value) {
-    return toast.error(strings.MessageNoNetworkConnection)
+    toast.error(strings.MessageNoNetworkConnection)
+    return
   }
 
   if (!mediaMetadata.value.feedUrl) {
-    return toast.error('Podcast does not have an RSS Feed')
+    toast.error('Podcast does not have an RSS Feed')
+    return
   }
   fetchingRSSFeed.value = true
   const payload = await nativeHttp.post(`/api/podcasts/feed`, { rssFeed: mediaMetadata.value.feedUrl }, { connectTimeout: 10000 }).catch((error: Error) => {

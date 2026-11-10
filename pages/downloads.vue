@@ -41,7 +41,7 @@ function getSize(item: Record<string, unknown> | null | undefined): number {
   const files = item.localFiles as { size: number }[]
   let size = 0
   for (let i = 0; i < files.length; i++) {
-    size += files[i].size
+    size += files[i]?.size ?? 0
   }
   return size
 }

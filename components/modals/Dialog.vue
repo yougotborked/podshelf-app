@@ -33,7 +33,7 @@ const props = defineProps<{
   modelValue: boolean
   title?: string
   items: (DialogItem | string)[]
-  selected?: string | number
+  selected?: string | number | null
   itemPaddingY?: string
   width?: string | number
 }>()

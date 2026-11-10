@@ -22,7 +22,7 @@
 
 <script setup lang="ts">
 const props = defineProps<{
-  bookItems?: unknown[]
+  bookItems?: Record<string, unknown>[]
   width?: number
   height?: number
   bookCoverAspectRatio?: number

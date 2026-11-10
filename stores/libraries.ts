@@ -111,7 +111,7 @@ export const useLibrariesStore = defineStore('libraries', {
       const lastLibraryId = await useLocalStore().getLastLibraryId()
       if (lastLibraryId && this.libraries.some((li) => li.id === lastLibraryId)) {
         this.currentLibraryId = lastLibraryId
-      } else if (this.libraries.length) {
+      } else if (this.libraries[0]) {
         this.currentLibraryId = this.libraries[0].id
       }
     },
@@ -129,8 +129,9 @@ export const useLibrariesStore = defineStore('libraries', {
       try {
         const data = await nativeHttp.get('/api/libraries', { connectTimeout: 10000 }) as Record<string, unknown>
         const libraries = (data.libraries || data) as Library[]
-        if (libraries.length && (!this.currentLibraryId || !libraries.find((li) => li.id == this.currentLibraryId))) {
-          this.currentLibraryId = libraries[0].id
+        const firstLibrary = libraries[0]
+        if (firstLibrary && (!this.currentLibraryId || !libraries.find((li) => li.id == this.currentLibraryId))) {
+          this.currentLibraryId = firstLibrary.id
         }
         this.libraries = libraries
         this.lastLoad = Date.now()
@@ -172,27 +173,28 @@ export const useLibrariesStore = defineStore('libraries', {
       if (!audiobook || !audiobook.book || !this.filterData) return
       if (this.currentLibraryId !== audiobook.libraryId) return
       const book = audiobook.book as Record<string, unknown>
-      const filterData = this.filterData as Record<string, string[]>
+      const filterData = this.filterData as Record<string, string[] | undefined>
+      const into = (key: string): string[] => (filterData[key] ??= [])
       if (book.authorFL) {
         (book.authorFL as string).split(', ').forEach((author) => {
-          if (author && !filterData.authors.includes(author)) filterData.authors.push(author)
+          if (author && !into('authors').includes(author)) into('authors').push(author)
         })
       }
       if (book.narratorFL) {
         (book.narratorFL as string).split(', ').forEach((narrator) => {
-          if (narrator && !filterData.narrators.includes(narrator)) filterData.narrators.push(narrator)
+          if (narrator && !into('narrators').includes(narrator)) into('narrators').push(narrator)
         })
       }
-      if (book.series && !filterData.series.includes(book.series as string)) {
-        filterData.series.push(book.series as string)
+      if (book.series && !into('series').includes(book.series as string)) {
+        into('series').push(book.series as string)
       }
       const tags = audiobook.tags as string[] | null | undefined || []
       tags.forEach((tag) => {
-        if (tag && !filterData.tags.includes(tag)) filterData.tags.push(tag)
+        if (tag && !into('tags').includes(tag)) into('tags').push(tag)
       })
       const genres = (book.genres as string[] | null | undefined) || []
       genres.forEach((genre) => {
-        if (genre && !filterData.genres.includes(genre)) filterData.genres.push(genre)
+        if (genre && !into('genres').includes(genre)) into('genres').push(genre)
       })
     }
   }

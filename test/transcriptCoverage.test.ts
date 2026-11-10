@@ -25,9 +25,9 @@ describe('parseAttributes', () => {
 describe('parseTranscripts', () => {
   it('finds a transcript on an episode', () => {
     const [t] = parseTranscripts(ITEM(`<podcast:transcript url="https://x/a.vtt" type="text/vtt" language="en" />`))
-    expect(t.url).toBe('https://x/a.vtt')
-    expect(t.type).toBe('text/vtt')
-    expect(t.language).toBe('en')
+    expect(t?.url).toBe('https://x/a.vtt')
+    expect(t?.type).toBe('text/vtt')
+    expect(t?.language).toBe('en')
   })
 
   it('finds several, since a feed may publish more than one format', () => {
@@ -38,7 +38,7 @@ describe('parseTranscripts', () => {
   it('records a missing type as unknown rather than dropping the transcript', () => {
     // The spec requires type, feeds in the wild omit it, and the publisher still meant to say
     // a transcript exists
-    expect(parseTranscripts(ITEM(`<podcast:transcript url="a.vtt" />`))[0].type).toBe('unknown')
+    expect(parseTranscripts(ITEM(`<podcast:transcript url="a.vtt" />`))[0]?.type).toBe('unknown')
   })
 
   it('ignores a declaration with no url, which points at nothing', () => {
@@ -46,7 +46,7 @@ describe('parseTranscripts', () => {
   })
 
   it('marks rel=captions', () => {
-    expect(parseTranscripts(ITEM(`<podcast:transcript url="a.vtt" type="text/vtt" rel="captions"/>`))[0].isCaptions).toBe(true)
+    expect(parseTranscripts(ITEM(`<podcast:transcript url="a.vtt" type="text/vtt" rel="captions"/>`))[0]?.isCaptions).toBe(true)
   })
 
   it('finds nothing in an episode without one', () => {

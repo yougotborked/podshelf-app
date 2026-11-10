@@ -420,19 +420,19 @@ const moreMenuItems = computed(() => {
   else if (moreMenuSetting.value === 'jumpForward')
     return jumpForwardSecondsOptions.value.map((value) => ({
       text: getJumpLabel(value),
-      value: value
+      value: String(value)
     }))
   else if (moreMenuSetting.value === 'jumpBackwards')
     return jumpBackwardsSecondsOptions.value.map((value) => ({
       text: getJumpLabel(value),
-      value: value
+      value: String(value)
     }))
   return []
 })
 
 const moreMenuSelected = computed(() => {
-  if (moreMenuSetting.value === 'jumpForward') return settings.jumpForwardTime
-  if (moreMenuSetting.value === 'jumpBackwards') return settings.jumpBackwardsTime
+  if (moreMenuSetting.value === 'jumpForward') return String(settings.jumpForwardTime)
+  if (moreMenuSetting.value === 'jumpBackwards') return String(settings.jumpBackwardsTime)
   if (moreMenuSetting.value === 'language') return settings.languageCode
   if (moreMenuSetting.value === 'theme') return theme.value
   if (moreMenuSetting.value === 'downloadUsingCellular') return settings.downloadUsingCellular
@@ -543,12 +543,13 @@ function saveTheme(t: string) {
   void useLocalStore().setTheme(t)
 }
 
-function autoSleepTimerTimeUpdated(val: string) {
+function autoSleepTimerTimeUpdated(val: string | number) {
   if (!val) return // invalid times return falsy
   void saveSettings()
 }
 
-function androidAutoBrowseLimitForGroupingUpdated(val: number) {
+function androidAutoBrowseLimitForGroupingUpdated(input: string | number) {
+  let val = Number(input)
   if (!val) return // invalid values return falsy
   if (val > 1000) val = 1000
   if (val < 30) val = 30

@@ -114,7 +114,7 @@ describe('rankCandidates', () => {
       ],
       profile
     )
-    expect(ranked[0].id).toBe(2)
+    expect(ranked[0]?.id).toBe(2)
   })
 
   it('leaves the chart order alone when there is no profile to rank by', () => {
@@ -137,7 +137,7 @@ describe('rankCandidates', () => {
   })
 
   it('attaches the match to every candidate, scored or not', () => {
-    expect(rankCandidates([{ id: 1 }], profile)[0].match).toBeDefined()
+    expect(rankCandidates([{ id: 1 }], profile)[0]?.match).toBeDefined()
   })
 })
 

@@ -31,7 +31,7 @@ export function imageHttpDataToBlob(data: unknown, mimeType = 'image/jpeg'): Blo
   if (typeof data === 'string') {
     if (data.startsWith('data:')) {
       const match = /^data:([^;]+);base64,([\s\S]+)$/.exec(data)
-      if (match) return base64ToBlob(match[2], match[1] || mimeType)
+      if (match && match[2]) return base64ToBlob(match[2], match[1] || mimeType)
     }
     try {
       return base64ToBlob(data, mimeType)

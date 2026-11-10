@@ -71,12 +71,14 @@ const isIos = computed(() => platform === 'ios')
 // Methods
 async function selectFolder() {
   if (!newFolderMediaType.value) {
-    return toast.error('Must select a media type')
+    toast.error('Must select a media type')
+    return
   }
   const folderObj = await AbsFileSystem.selectFolder({ mediaType: newFolderMediaType.value })
   if (!folderObj) return
   if (folderObj.error) {
-    return toast.error(`Error: ${folderObj.error || 'Unknown Error'}`)
+    toast.error(`Error: ${folderObj.error || 'Unknown Error'}`)
+    return
   }
 
   const indexOfExisting = localFolders.value.findIndex((lf) => lf.id == folderObj.id)

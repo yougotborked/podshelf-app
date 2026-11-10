@@ -28,7 +28,7 @@
       <p class="text-xs">{{ page }} / {{ numPages }}</p>
     </div>
 
-    <modals-dialog v-model="showPageMenu" :items="pageItems" :selected="page" :width="360" item-padding-y="8px" @action="setPage" />
+    <modals-dialog v-model="showPageMenu" :items="pageItems" :selected="String(page)" :width="360" item-padding-y="8px" @action="(value: string) => setPage(Number(value))" />
   </div>
 </template>
 
@@ -98,7 +98,7 @@ const localItemProgress = computed(() => globalsStore.getLocalMediaProgressById(
 const serverItemProgress = computed(() => userStore.getUserMediaProgress(serverLibraryItemId.value || ''))
 const savedPage = computed(() => {
   if (!props.keepProgress) return 0
-  if (!userItemProgress.value?.ebookLocation || isNaN(userItemProgress.value.ebookLocation as number)) return 0
+  if (!userItemProgress.value?.ebookLocation || isNaN(Number(userItemProgress.value.ebookLocation))) return 0
   return Number(userItemProgress.value.ebookLocation)
 })
 const cleanedPageNames = computed(() => {
@@ -117,7 +117,7 @@ const pageItems = computed(() => {
   let index = 1
   return cleanedPageNames.value.map((p) => ({
     text: p,
-    value: index++
+    value: String(index++)
   }))
 })
 const isPlayerOpen = computed(() => appStore.getIsPlayerOpen)
@@ -189,6 +189,7 @@ function setPage(p: number) {
   }
   showPageMenu.value = false
   const filename = pages.value![p - 1]
+  if (!filename) return
   page.value = p
 
   void updateProgress()

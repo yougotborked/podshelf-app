@@ -658,7 +658,7 @@ async function jumpChapterStart() {
     const currChapterIndex = chapters.value.findIndex((ch) => Number(ch.start) <= currentTime.value && Number(ch.end) >= currentTime.value)
     if (currChapterIndex > 0) {
       const prevChapter = chapters.value[currChapterIndex - 1]
-      seek(prevChapter.start as number)
+      if (prevChapter) seek(prevChapter.start)
     }
   } else {
     seek(currentChapter.value.start as number)
@@ -700,8 +700,9 @@ function setChunksReady(chunks: (string | number)[], numSegments: number) {
     if (typeof chunk === 'string') {
       const chunkRange = chunk.split('-').map((c) => Number(c))
       if (chunkRange.length < 2) continue
-      if (chunkRange[1] > largestSeg) largestSeg = chunkRange[1]
-    } else if (chunk > largestSeg) {
+      const end = chunkRange[1]
+      if (end !== undefined && end > largestSeg) largestSeg = end
+    } else if (chunk !== undefined && chunk > largestSeg) {
       largestSeg = chunk
     }
   }
@@ -823,7 +824,7 @@ async function touchstartCursor(e: TouchEvent) {
 
   await hapticsImpact()
   isDraggingCursor.value = true
-  draggingTouchStartX.value = e.touches[0].pageX
+  draggingTouchStartX.value = e.touches[0]?.pageX ?? 0
   draggingTouchStartTime.value = currentTime.value
   draggingCurrentTime.value = currentTime.value
   updateTrack()
@@ -873,7 +874,7 @@ function resetStream(_startTime: number) {
 
 function touchstart(e: TouchEvent) {
   if (!e.changedTouches || globalsStore.isModalOpen) return
-  const touchPosY = e.changedTouches[0].pageY
+  const touchPosY = e.changedTouches[0]?.pageY ?? 0
   // when minimized only listen to touchstart on the player
   if (!showFullscreen.value && touchPosY < window.innerHeight - 120) return
 
@@ -890,7 +891,7 @@ function touchstart(e: TouchEvent) {
 function touchend(e: TouchEvent) {
   if (!e.changedTouches) return
   const touchDuration = Date.now() - touchStartTime.value
-  const touchEndY = e.changedTouches[0].pageY
+  const touchEndY = e.changedTouches[0]?.pageY ?? 0
   const touchDistanceY = touchEndY - touchStartY.value
 
   // reset touch start data
@@ -920,7 +921,7 @@ function touchend(e: TouchEvent) {
 function touchmove(e: TouchEvent) {
   if (!isDraggingCursor.value || !e.touches) return
 
-  const distanceMoved = e.touches[0].pageX - draggingTouchStartX.value
+  const distanceMoved = (e.touches[0]?.pageX ?? draggingTouchStartX.value) - draggingTouchStartX.value
   let duration = totalDuration.value
   let minTime = 0
   let maxTime = duration

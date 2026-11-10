@@ -35,7 +35,7 @@ export const languageCodeMap: Record<string, { label: string; dateFnsLocale: str
 }
 
 export const languageCodeOptions = Object.keys(languageCodeMap).map((code) => ({
-  text: languageCodeMap[code].label,
+  text: languageCodeMap[code]?.label ?? code,
   value: code
 }))
 
@@ -109,7 +109,7 @@ export async function setLanguageCode(code: string): Promise<boolean> {
 
   const defaultStrings = _translations[defaultCode]
   for (const key in _strings.value) {
-    _strings.value[key] = strings[key] || defaultStrings[key]
+    _strings.value[key] = strings[key] || defaultStrings?.[key] || ''
   }
 
   const { setDateFnsLocale } = useUtils()

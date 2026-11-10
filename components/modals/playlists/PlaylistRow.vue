@@ -31,7 +31,7 @@ const emit = defineEmits<{
 const strings = useStrings()
 const router = useRouter()
 
-const items = computed(() => (props.playlist.items as unknown[] | null | undefined) || [])
+const items = computed(() => (props.playlist.items as Record<string, unknown>[] | null | undefined) || [])
 
 function click() {
   emit('click', props.playlist)

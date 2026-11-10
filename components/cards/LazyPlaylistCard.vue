@@ -41,7 +41,7 @@ const sizeMultiplier = computed(() => {
   return (props.width || 0) / 240
 })
 const title = computed(() => playlist.value ? playlist.value.name as string : '')
-const items = computed(() => playlist.value ? (playlist.value.items as unknown[] | null | undefined) || [] : [])
+const items = computed(() => playlist.value ? (playlist.value.items as Record<string, unknown>[] | null | undefined) || [] : [])
 
 // Methods
 function setEntity(p: Record<string, unknown>) {

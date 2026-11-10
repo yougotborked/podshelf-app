@@ -107,6 +107,7 @@ async function initCanvas() {
         const coverIndex = index % bookCovers.length
         const libraryItemId = bookCovers[coverIndex]
         index++
+        if (!libraryItemId) continue
 
         await new Promise<void>((resolve) => {
           const img = new Image()
@@ -221,6 +222,7 @@ async function initCanvas() {
 
       for (let i = 0; i < Math.min(5, finishedImgsArr.length); i++) {
         const imgToAdd = finishedImgsArr[i]
+        if (!imgToAdd) continue
         ctx.drawImage(imgToAdd.img, imgToAdd.sx, imgToAdd.sy, imgToAdd.sw, imgToAdd.sw, 40 + 145 * i, 570, 140, 140)
       }
     }
@@ -230,7 +232,7 @@ async function initCanvas() {
     if (topAuthors.length) {
       addText('TOP AUTHORS', '24px', 'normal', tanColor, '1px', 70, 524)
       for (let i = 0; i < topAuthors.length; i++) {
-        addText(topAuthors[i].name, '36px', 'bolder', 'white', '0px', 70, 584 + i * 60, 330)
+        addText(topAuthors[i]?.name ?? '', '36px', 'bolder', 'white', '0px', 70, 584 + i * 60, 330)
       }
     }
 
@@ -238,7 +240,7 @@ async function initCanvas() {
     if (topGenres.length) {
       addText('TOP GENRES', '24px', 'normal', tanColor, '1px', 430, 524)
       for (let i = 0; i < topGenres.length; i++) {
-        addText(topGenres[i].genre, '36px', 'bolder', 'white', '0px', 430, 584 + i * 60, 330)
+        addText(topGenres[i]?.genre ?? '', '36px', 'bolder', 'white', '0px', 430, 584 + i * 60, 330)
       }
     }
   }

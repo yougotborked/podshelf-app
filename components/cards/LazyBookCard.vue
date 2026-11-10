@@ -69,7 +69,7 @@
     </div>
 
     <!-- Error widget -->
-    <div v-if="showError" :style="{ height: 1.5 * sizeMultiplier + 'rem', width: 2.5 * sizeMultiplier + 'rem' }" class="bg-error rounded-r-full shadow-md flex items-center justify-end border-r border-b border-md-error absolute bottom-4 left-0 z-10">
+    <div v-if="showErrorBadge" :style="{ height: 1.5 * sizeMultiplier + 'rem', width: 2.5 * sizeMultiplier + 'rem' }" class="bg-error rounded-r-full shadow-md flex items-center justify-end border-r border-b border-md-error absolute bottom-4 left-0 z-10">
       <span class="material-symbols text-md-on-error pr-1" :style="{ fontSize: 0.875 * sizeMultiplier + 'rem' }">priority_high</span>
     </div>
 
@@ -250,7 +250,7 @@ const userProgressPercent = computed(() => {
   return Math.max(Math.min(1, ((userProgress.value as Record<string, unknown> | null | undefined)?.progress as number) || 0), 0) || 0
 })
 const itemIsFinished = computed(() => !!(userProgress.value as Record<string, unknown> | null | undefined)?.isFinished)
-const showError = computed(() => isMissing.value || isInvalid.value)
+const showErrorBadge = computed(() => isMissing.value || isInvalid.value)
 const isStreaming = computed(() => appStore.getIsMediaStreaming(libraryItemId.value, recentEpisode.value?.id as string))
 const streamIsPlaying = computed(() => appStore.playerIsPlaying && isStreaming.value)
 const playerIsStartingPlayback = computed(() => appStore.playerIsStartingPlayback)

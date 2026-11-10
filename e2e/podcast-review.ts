@@ -8,7 +8,7 @@
  * Defaults to the public audiobookshelf demo server.
  */
 
-import { chromium, Page, Browser } from '@playwright/test'
+import { chromium, type Page, type Browser } from '@playwright/test'
 import * as path from 'path'
 import * as fs from 'fs'
 

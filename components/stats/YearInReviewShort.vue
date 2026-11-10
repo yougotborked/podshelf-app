@@ -97,6 +97,7 @@ async function initCanvas() {
         const coverIndex = index % bookCovers.length
         const libraryItemId = bookCovers[coverIndex]
         index++
+        if (!libraryItemId) continue
 
         await new Promise<void>((resolve) => {
           const img = new Image()

@@ -33,7 +33,7 @@ interface DropdownItem {
 }
 
 const props = defineProps<{
-  modelValue?: string | number
+  modelValue?: string | number | null
   label?: string
   items?: DropdownItem[]
   disabled?: boolean

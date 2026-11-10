@@ -50,9 +50,9 @@ describe('parseChartEntries', () => {
   it('reads ranked entries and takes the largest artwork', () => {
     const feeds = parseChartEntries({ feed: { entry: [entry('1', 'A'), entry('2', 'B')] } })
     expect(feeds.map((f) => f.id)).toEqual(['1', '2'])
-    expect(feeds[0].title).toBe('A')
-    expect(feeds[0].author).toBe('A Co')
-    expect(feeds[0].artwork).toBe('large.png')
+    expect(feeds[0]?.title).toBe('A')
+    expect(feeds[0]?.author).toBe('A Co')
+    expect(feeds[0]?.artwork).toBe('large.png')
   })
 
   // Apple returns a bare object instead of an array when the chart has exactly one result.
@@ -60,7 +60,7 @@ describe('parseChartEntries', () => {
   it('handles a single entry arriving unwrapped', () => {
     const feeds = parseChartEntries({ feed: { entry: entry('9', 'Only') } })
     expect(feeds).toHaveLength(1)
-    expect(feeds[0].id).toBe('9')
+    expect(feeds[0]?.id).toBe('9')
   })
 
   it('returns nothing rather than throwing on an empty or malformed feed', () => {
@@ -85,7 +85,7 @@ describe('mergeChartWithLookup', () => {
       { collectionId: 1, feedUrl: 'https://one.xml' }
     ])
     expect(merged.map((f) => f.id)).toEqual(['1', '2'])
-    expect(merged[0].feedUrl).toBe('https://one.xml')
+    expect(merged[0]?.feedUrl).toBe('https://one.xml')
   })
 
   // The only thing to do with a discovered podcast is add it, which needs an RSS URL. A card
@@ -96,17 +96,17 @@ describe('mergeChartWithLookup', () => {
   })
 
   it('prefers the larger artwork from the lookup', () => {
-    const merged = mergeChartWithLookup([chart[0]], [
+    const merged = mergeChartWithLookup(chart.slice(0, 1), [
       { collectionId: 1, feedUrl: 'f', artworkUrl600: 'big.png', artworkUrl100: 'small.png' }
     ])
-    expect(merged[0].artwork).toBe('big.png')
+    expect(merged[0]?.artwork).toBe('big.png')
   })
 
   it("strips Apple's catch-all Podcasts genre", () => {
-    const merged = mergeChartWithLookup([chart[0]], [
+    const merged = mergeChartWithLookup(chart.slice(0, 1), [
       { collectionId: 1, feedUrl: 'f', genres: ['News', 'Podcasts', 'Daily News'] }
     ])
-    expect(merged[0].genres).toEqual(['News', 'Daily News'])
+    expect(merged[0]?.genres).toEqual(['News', 'Daily News'])
   })
 
   it('survives a lookup that returned nothing', () => {

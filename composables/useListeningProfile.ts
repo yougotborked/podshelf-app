@@ -102,7 +102,7 @@ export function buildListeningProfile(progress: ProgressRow[] = [], podcastsById
   return {
     episodesFinished,
     bandCounts,
-    preferredBand: isConfident && bandEntries.length ? bandEntries[0][0] : null,
+    preferredBand: isConfident ? (bandEntries[0]?.[0] ?? null) : null,
     genreWeights,
     topGenres: Object.entries(genreWeights)
       .sort((a, b) => b[1] - a[1])
@@ -135,12 +135,12 @@ export function scoreCandidate(candidate: DiscoveryCandidate, profile: Listening
   const reasons: string[] = []
   let score = 0
 
-  const shared = (candidate.genres || []).filter((genre) => profile.genreWeights[genre] > 0)
+  const shared = (candidate.genres || []).filter((genre) => (profile.genreWeights[genre] ?? 0) > 0)
   if (shared.length) {
     const total = Object.values(profile.genreWeights).reduce((n, v) => n + v, 0) || 1
     // Share of finished listening the overlapping genres account for, so the scale does not
     // depend on how many episodes someone happens to have finished overall
-    const weight = shared.reduce((n, genre) => n + profile.genreWeights[genre], 0) / total
+    const weight = shared.reduce((n, genre) => n + (profile.genreWeights[genre] ?? 0), 0) / total
     score += weight
     reasons.push(`you listen to ${shared.slice(0, 2).join(' and ')}`)
   }
@@ -174,6 +174,7 @@ export function describeLengthFit(episodeDurations: number[] = [], profile: List
   // Median, not mean: one feed-length omnibus should not redefine a show's typical episode
   const sorted = [...usable].sort((a, b) => a - b)
   const median = sorted[Math.floor(sorted.length / 2)]
+  if (median === undefined) return null
   const band = durationBand(median)
   if (!band) return null
 

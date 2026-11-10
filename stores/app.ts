@@ -175,7 +175,7 @@ export const useAppStore = defineStore('app', {
       const serverVersion = state.serverSettings?.version as string | undefined
       if (!serverVersion) return false
       const [major, minor] = serverVersion.split('.').map(Number)
-      return major < 2 || (major === 2 && minor < 17)
+      return (major ?? 0) < 2 || (major === 2 && (minor ?? 0) < 17)
     },
     /**
      * Whether we should be working from the on-device copy rather than the server. Either the
