@@ -7,7 +7,7 @@ import AudioPlayerContainer from '~/components/app/AudioPlayerContainer.vue'
 // `"cast-player".mediaPlayer === 'cast-player'` (undefined) and stayed false for the whole cast.
 //
 // Only the method is exercised; nothing is mounted and setup() never runs.
-const onMediaPlayerChanged = (AudioPlayerContainer as any).methods.onMediaPlayerChanged as (this: unknown, data: { value: string }) => void
+const onMediaPlayerChanged = (AudioPlayerContainer as unknown as { methods: Record<string, unknown> }).methods.onMediaPlayerChanged as (this: unknown, data: { value: string }) => void
 
 function container() {
   return {

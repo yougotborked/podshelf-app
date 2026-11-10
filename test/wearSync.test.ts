@@ -12,8 +12,8 @@ function episode(overrides: Record<string, unknown> = {}) {
   }
 }
 
-function items(episodes: Record<string, unknown>[], localFor: (e: any) => any = () => null) {
-  return toPlayQueueItems(episodes as any, localFor)
+function items(episodes: Record<string, unknown>[], localFor: Parameters<typeof toPlayQueueItems>[1] = () => null) {
+  return toPlayQueueItems(episodes as unknown as Parameters<typeof toPlayQueueItems>[0], localFor)
 }
 
 describe('toWearQueueEntries', () => {
@@ -121,7 +121,7 @@ describe('toWearQueueEntries', () => {
   })
 
   it('skips an item with no episode or no ids', () => {
-    expect(toWearQueueEntries([{ libraryItemId: 'x', episodeId: 'y' } as any])).toEqual([])
+    expect(toWearQueueEntries([{ libraryItemId: 'x', episodeId: 'y' }] as unknown as Parameters<typeof toWearQueueEntries>[0])).toEqual([])
     expect(toWearQueueEntries(items([episode({ id: undefined })]))).toEqual([])
   })
 

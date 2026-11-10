@@ -6,7 +6,7 @@ import PodcastCatchUpFeed from '~/components/bookshelf/PodcastCatchUpFeed.vue'
 // loaded and then never shown.
 //
 // Only the method is exercised - nothing is mounted and setup() never runs.
-const loadEpisodes = (PodcastCatchUpFeed as any).methods.loadEpisodes as (this: unknown) => Promise<void>
+const loadEpisodes = (PodcastCatchUpFeed as unknown as { methods: Record<string, unknown> }).methods.loadEpisodes as (this: unknown) => Promise<void>
 
 function feed({ isOffline, offlineEpisodes = vi.fn().mockResolvedValue(undefined) }: { isOffline: boolean; offlineEpisodes?: ReturnType<typeof vi.fn> }) {
   return {

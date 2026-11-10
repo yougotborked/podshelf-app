@@ -33,6 +33,7 @@
 </template>
 
 <script setup lang="ts">
+import type { LibraryItem, LocalFolder } from '~/types'
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { Dialog } from '@capacitor/dialog'
@@ -47,8 +48,8 @@ const strings = useStrings()
 const folderId = route.params.id as string
 
 // State
-const localLibraryItems = ref<any[]>([])
-const folder = ref<any>(null)
+const localLibraryItems = ref<LibraryItem[]>([])
+const folder = ref<LocalFolder | null>(null)
 const removingFolder = ref(false)
 const showDialog = ref(false)
 
@@ -67,7 +68,7 @@ const dialogItems = computed(() => {
 })
 
 // Methods
-function getLocalLibraryItemSubText(localLibraryItem: any) {
+function getLocalLibraryItemSubText(localLibraryItem: LibraryItem | null | undefined) {
   if (!localLibraryItem) return ''
   if (localLibraryItem.mediaType == 'book') {
     const txts: string[] = []
@@ -114,7 +115,7 @@ async function init() {
 
   const items = (await db.getLocalLibraryItemsInFolder(folderId)) || []
   console.log('Init folder', folderId, items)
-  localLibraryItems.value = items.map((lmi: any) => {
+  localLibraryItems.value = items.map((lmi) => {
     console.log('Local library item', JSON.stringify(lmi))
     return {
       ...lmi,
@@ -123,7 +124,7 @@ async function init() {
   })
 }
 
-function newLocalLibraryItem(item: any) {
+function newLocalLibraryItem(item: LibraryItem) {
   if (item.folderId == folderId) {
     console.log('New local library item', item.id)
     if (localLibraryItems.value.find((li) => li.id == item.id)) {

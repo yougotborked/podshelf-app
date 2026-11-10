@@ -1,5 +1,5 @@
 import { AbsDatabase } from '~/plugins/capacitor'
-import type { LibraryItem, LocalFolder } from '~/types'
+import type { LibraryItem, LocalFolder, MediaItemHistory } from '~/types'
 
 class DbService {
   getDeviceData(): Promise<unknown> {
@@ -105,7 +105,7 @@ class DbService {
     return AbsDatabase.updateDeviceSettings(payload)
   }
 
-  getMediaItemHistory(mediaId: string): Promise<unknown> {
+  getMediaItemHistory(mediaId: string): Promise<MediaItemHistory | null> {
     return AbsDatabase.getMediaItemHistory({ mediaId })
   }
 }

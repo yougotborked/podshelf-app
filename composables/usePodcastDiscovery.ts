@@ -74,6 +74,26 @@ export function appleChartUrl(options: { limit?: number; category?: string; coun
 
 type ChartEntry = { id: string; title: string; author: string; artwork: string }
 
+// The parts of Apple's chart and lookup JSON this reads. Everything is optional: the shape is
+// Apple's, it has changed before, and a missing field must read as absent rather than throw.
+interface AppleChartRaw {
+  id?: { attributes?: Record<string, string | undefined> }
+  'im:name'?: { label?: string }
+  'im:artist'?: { label?: string }
+  'im:image'?: Array<{ label?: string }>
+}
+
+interface AppleLookupRaw {
+  collectionId?: number | string | null
+  feedUrl?: string
+  collectionName?: string
+  artistName?: string
+  artworkUrl600?: string
+  artworkUrl100?: string
+  genres?: string[]
+  trackCount?: number
+}
+
 /**
  * Pulls the ranked entries out of a chart feed.
  *
@@ -89,8 +109,8 @@ export function parseChartEntries(payload: unknown): ChartEntry[] {
 
   return entries
     .map((raw) => {
-      const e = raw as Record<string, any>
-      const id = e?.id?.attributes?.['im:id']
+      const e = (raw ?? {}) as AppleChartRaw
+      const id = e.id?.attributes?.['im:id']
       if (!id) return null
       const images = Array.isArray(e['im:image']) ? e['im:image'] : []
       return {
@@ -111,10 +131,10 @@ export function parseChartEntries(payload: unknown): ChartEntry[] {
  * it, and that needs an RSS URL. A card that cannot be actioned is worse than one fewer card.
  */
 export function mergeChartWithLookup(entries: ChartEntry[], lookupResults: unknown[]): DiscoverFeed[] {
-  const byId = new Map<string, Record<string, any>>()
+  const byId = new Map<string, AppleLookupRaw>()
   for (const raw of lookupResults || []) {
-    const r = raw as Record<string, any>
-    if (r?.collectionId != null) byId.set(String(r.collectionId), r)
+    const r = (raw ?? {}) as AppleLookupRaw
+    if (r.collectionId != null) byId.set(String(r.collectionId), r)
   }
 
   return entries
@@ -128,7 +148,7 @@ export function mergeChartWithLookup(entries: ChartEntry[], lookupResults: unkno
         author: entry.author || details?.artistName || '',
         artwork: details?.artworkUrl600 || details?.artworkUrl100 || entry.artwork,
         feedUrl,
-        genres: Array.isArray(details?.genres) ? details.genres.filter((g: string) => g !== 'Podcasts') : [],
+        genres: Array.isArray(details?.genres) ? details.genres.filter((g) => g !== 'Podcasts') : [],
         episodeCount: typeof details?.trackCount === 'number' ? details.trackCount : 0
       }
     })

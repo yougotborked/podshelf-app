@@ -45,7 +45,7 @@ import { ref, computed, watch } from 'vue'
 
 const props = defineProps<{
   modelValue: boolean
-  customHeaders: Record<string, string> | null
+  customHeaders?: Record<string, string> | null
 }>()
 const emit = defineEmits<{
   'update:modelValue': [val: boolean]

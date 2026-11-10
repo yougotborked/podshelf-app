@@ -11,8 +11,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
-import ePub from 'epubjs'
+import { ref, shallowRef, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import ePub, { type Book, type Contents, type Rendition } from 'epubjs'
+import type { BookOptions } from 'epubjs/types/book'
 
 const props = defineProps<{
   url: string
@@ -32,10 +33,15 @@ const userStore = useUserStore()
 const nativeHttp = useNativeHttp()
 const db = useDb()
 
-/** @type {ePub.Book | null} */
-const book = ref<any>(null)
-/** @type {ePub.Rendition | null} */
-const rendition = ref<any>(null)
+// The one internal this reaches into: the continuous manager's snapper, which epubjs does not type.
+interface EpubSnapper {
+  needsSnap: (this: { scrollLeft: number; layout: { pageWidth: number; divisor: number } }) => boolean
+}
+
+// shallowRef: epubjs objects are classes with their own internals; Vue wrapping them in proxies
+// breaks identity checks inside the library.
+const book = shallowRef<Book | null>(null)
+const rendition = shallowRef<Rendition | null>(null)
 const progress = ref(0)
 const totalLocations = ref(0)
 const currentLocationNum = ref(0)
@@ -111,24 +117,24 @@ function updateSettings(settings: typeof ereaderSettings.value) {
   applyTheme()
 
   const fontScale = settings.fontScale || 100
-  ;(rendition.value as any).themes?.fontSize(`${fontScale}%`)
-  ;(rendition.value as any).themes?.font(settings.font)
-  ;(rendition.value as any).spread?.(settings.spread || 'auto')
+  ;rendition.value.themes.fontSize(`${fontScale}%`)
+  ;rendition.value.themes.font(settings.font)
+  ;rendition.value.spread(settings.spread || 'auto')
 }
 
 function goToChapter(href: string) {
-  return (rendition.value as any)?.display?.(href)
+  return rendition.value?.display(href)
 }
 
 function prev() {
   if (rendition.value) {
-    ;(rendition.value as any).prev()
+    ;void rendition.value.prev()
   }
 }
 
 function next() {
   if (rendition.value) {
-    ;(rendition.value as any).next()
+    ;void rendition.value.next()
   }
 }
 
@@ -282,12 +288,14 @@ function initEpub() {
   }
 
   console.log('[EpubReader] initEpub', props.url)
-  const b = (ePub as any)(props.url, {
+  // width and height are read by epubjs but missing from its BookOptions.
+  const options = {
     width: window.innerWidth,
     height: window.innerHeight - readerHeightOffset.value,
     openAs: 'epub',
-    requestMethod: props.isLocal ? null : (customRequest as any)
-  })
+    requestMethod: props.isLocal ? undefined : customRequest
+  } as BookOptions
+  const b = ePub(props.url, options)
   book.value = b
 
   const rend = b.renderTo('viewer', {
@@ -299,18 +307,18 @@ function initEpub() {
   })
   rendition.value = rend
 
-  b.ready.then(() => {
+  void b.ready.then(() => {
     console.log('%c [EpubReader] Book ready', 'color:cyan;')
 
-    let displayCfi = (b as any).locations?.start
-    if (savedEbookLocation.value && (b as any).spine?.get(savedEbookLocation.value)) {
+    let displayCfi = (b.locations as unknown as { start?: string }).start
+    if (savedEbookLocation.value && b.spine.get(savedEbookLocation.value)) {
       displayCfi = savedEbookLocation.value
     }
 
     rend.on('displayed', async () => {
       console.log('%c [EpubReader] Rendition displayed', 'color:blue;')
 
-      const snapper = (rend as any).manager?.snapper
+      const snapper = (rend as unknown as { manager?: { snapper?: EpubSnapper } }).manager?.snapper
       if (snapper) {
         snapper.needsSnap = function () {
           const left = Math.round(this.scrollLeft)
@@ -340,20 +348,20 @@ function initEpub() {
 
     const savedLocations = loadLocations()
     if (savedLocations) {
-      ;(b as any).locations?.load(savedLocations)
-      totalLocations.value = (b as any).locations?.length() || 0
+      ;b.locations.load(savedLocations)
+      totalLocations.value = b.locations.length() || 0
     } else {
-      ;(b as any).locations?.generate(100).then(() => {
-        totalLocations.value = (b as any).locations?.length() || 0
-        currentLocationNum.value = (rend as any).currentLocation?.()?.start.location || 0
-        checkSaveLocations((b as any).locations?.save())
+      ;void b.locations.generate(100).then(() => {
+        totalLocations.value = b.locations.length() || 0
+        currentLocationNum.value = (rend.currentLocation() as unknown as { start?: { location?: number } } | null)?.start?.location || 0
+        checkSaveLocations(b.locations.save())
       })
     }
 
     console.log(`[EpubReader] Displaying cfi ${displayCfi}`)
-    currentLocationCfi.value = displayCfi
-    rend.display(displayCfi).then(() => {
-      rend.display(displayCfi).then(() => {
+    currentLocationCfi.value = displayCfi ?? null
+    void rend.display(displayCfi).then(() => {
+      void rend.display(displayCfi).then(() => {
         inittingDisplay.value = false
       })
     })
@@ -362,7 +370,9 @@ function initEpub() {
 
 function applyTheme() {
   if (!rendition.value) return
-  ;(rendition.value as any).getContents().forEach((c: any) => {
+  // epubjs's types require a stylesheet key; the library treats it as optional (it prefixes it onto
+  // the element id) and one shared sheet per page is what this wants.
+  ;(rendition.value.getContents() as unknown as Array<Contents & { addStylesheetRules(rules: object): void }>).forEach((c) => {
     c.addStylesheetRules(themeRules.value)
   })
 }
@@ -387,8 +397,8 @@ async function screenOrientationChange() {
 const screenOrientationChangeListener = asVoidHandler(screenOrientationChange)
 
 function refreshUI() {
-  if ((rendition.value as any)?.resize) {
-    ;(rendition.value as any).resize(window.innerWidth, window.innerHeight - readerHeightOffset.value)
+  if (rendition.value) {
+    ;rendition.value.resize(window.innerWidth, window.innerHeight - readerHeightOffset.value)
   }
 }
 
@@ -406,7 +416,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  ;(book.value as any)?.destroy?.()
+  ;book.value?.destroy()
 
   if (screen.orientation) {
     screen.orientation.removeEventListener('change', screenOrientationChangeListener)

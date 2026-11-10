@@ -11,6 +11,8 @@
 </template>
 
 <script setup lang="ts">
+import type { AuthorEntity } from '~/types'
+import { buildAuthorsFromItems } from '~/composables/useLocalAuthors'
 const eventBus = useEventBus()
 const socket = useSocket()
 const nativeHttp = useNativeHttp()
@@ -22,7 +24,7 @@ const librariesStore = useLibrariesStore()
 const appStore = useAppStore()
 
 const loading = ref(true)
-const authors = ref<any[]>([])
+const authors = ref<AuthorEntity[]>([])
 const loadedLibraryId = ref<string | null>(null)
 const cardWidth = ref(200)
 
@@ -32,30 +34,7 @@ const cardHeight = computed(() => cardWidth.value * 1.25)
 
 async function buildLocalAuthors() {
   const localItems = await db.getLocalLibraryItems('book')
-  const authorMap = new Map()
-
-  localItems.forEach((item: any) => {
-    const names = item?.media?.metadata?.authors || []
-    names.forEach((name: string) => {
-      if (!name) return
-      const key = name.toLowerCase()
-      if (!authorMap.has(key)) {
-        authorMap.set(key, {
-          id: `local_author_${key}`,
-          name,
-          displayName: name,
-          books: 0,
-          numAudiobooks: 0,
-          libraryId: currentLibraryId.value
-        })
-      }
-      const entry = authorMap.get(key)
-      entry.books += 1
-      entry.numAudiobooks += 1
-    })
-  })
-
-  return Array.from(authorMap.values()).sort((a: any, b: any) => a.name.localeCompare(b.name))
+  return buildAuthorsFromItems(localItems, currentLibraryId.value)
 }
 
 async function init() {
@@ -64,13 +43,13 @@ async function init() {
     return
   }
   loadedLibraryId.value = currentLibraryId.value
-  let authorList: any[] = []
+  let authorList: AuthorEntity[] = []
 
   if (networkConnected.value) {
     authorList = await nativeHttp
       .get(`/api/libraries/${currentLibraryId.value}/authors`)
-      .then((response: any) => response.authors)
-      .catch((error: any) => {
+      .then((response) => (response as { authors: AuthorEntity[] }).authors)
+      .catch((error: unknown) => {
         console.error('Failed to load authors', error)
         return []
       })
@@ -81,7 +60,7 @@ async function init() {
   }
 
   if (!authorList.length) {
-    authorList = await localStore.getCachedAuthors(currentLibraryId.value)
+    authorList = ((await localStore.getCachedAuthors(currentLibraryId.value)) || []) as AuthorEntity[]
   }
 
   if (!authorList.length) {
@@ -94,14 +73,14 @@ async function init() {
   loading.value = false
 }
 
-function authorAdded(author: any) {
+function authorAdded(author: AuthorEntity) {
   if (!authors.value.some((au) => au.id === author.id)) {
     authors.value.push(author)
     eventBus.emit('bookshelf-total-entities', authors.value.length)
   }
 }
 
-function authorUpdated(author: any) {
+function authorUpdated(author: AuthorEntity) {
   authors.value = authors.value.map((au) => {
     if (au.id === author.id) {
       return author
@@ -110,7 +89,7 @@ function authorUpdated(author: any) {
   })
 }
 
-function authorRemoved(author: any) {
+function authorRemoved(author: AuthorEntity) {
   authors.value = authors.value.filter((au) => au.id !== author.id)
   eventBus.emit('bookshelf-total-entities', authors.value.length)
 }

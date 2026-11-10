@@ -154,9 +154,10 @@
 </template>
 
 <script setup lang="ts">
+import type { HttpError, LibraryItem, PodcastCandidate } from '~/types'
 import type { DiscoverFeed, DiscoveryFailure } from '~/composables/usePodcastDiscovery'
 import { buildListeningProfile, describeLengthFit, rankCandidates } from '~/composables/useListeningProfile'
-import { indexLibraryByFeed, normalizeFeedUrl, parsePodcastFeed } from '~/composables/usePodcastFeedPreview'
+import { indexLibraryByFeed, normalizeFeedUrl, parsePodcastFeed, type ParsedFeedEpisode } from '~/composables/usePodcastFeedPreview'
 import { fetchExternalText } from '~/composables/useNativeHttp'
 
 const router = useRouter()
@@ -171,7 +172,7 @@ const { fetchTrending } = usePodcastDiscovery()
 
 // ── State ─────────────────────────────────────────────────────────────────────
 const searchQuery = ref('')
-const searchResults = ref<any[]>([])
+const searchResults = ref<PodcastCandidate[]>([])
 const searchLoading = ref(false)
 const searchDebounce = ref<ReturnType<typeof setTimeout> | null>(null)
 
@@ -193,8 +194,8 @@ const libraryItemIdByFeed = ref<Map<string, string>>(new Map())
 const libraryGenresById = ref<Record<string, { genres: string[] }>>({})
 
 const showAddFlow = ref(false)
-const selectedPodcast = ref<any>(null)
-const selectedPodcastFeed = ref<any>(null)
+const selectedPodcast = ref<PodcastCandidate | null>(null)
+const selectedPodcastFeed = ref<Record<string, unknown> | null>(null)
 const addProcessing = ref(false)
 
 /**
@@ -210,20 +211,20 @@ const rankedTrending = computed(() => rankCandidates(trendingResults.value, list
 
 const previewLengthFit = computed(() =>
   describeLengthFit(
-    previewEpisodes.value.map((ep: any) => Number(ep?.duration)),
+    previewEpisodes.value.map((ep) => Number(ep.duration)),
     listeningProfile.value
   )
 )
 
 const showPreview = ref(false)
-const previewPodcast = ref<any>(null)
+const previewPodcast = ref<PodcastCandidate | null>(null)
 const previewLoading = ref(false)
 // The feed fetch used to fail silently, leaving the title and artist with no description, no
 // episodes and no hint that anything had been attempted
 const previewFailed = ref(false)
 const previewExpanded = ref(false)
 const previewDescription = ref('')
-const previewEpisodes = ref<any[]>([])
+const previewEpisodes = ref<ParsedFeedEpisode[]>([])
 
 // ── Computed ──────────────────────────────────────────────────────────────────
 const currentLibraryId = computed(() => librariesStore.currentLibraryId)
@@ -256,19 +257,19 @@ function isInLibrary(feedUrl?: string) {
 async function loadLibraryFeedUrls() {
   if (!currentLibraryId.value) return
   try {
-    const res = (await nativeHttp.get(`/api/libraries/${currentLibraryId.value}/items?minified=1&limit=0`, { connectTimeout: 10000 })) as any
-    const items: any[] = res?.results ?? res?.items ?? []
+    const res = (await nativeHttp.get(`/api/libraries/${currentLibraryId.value}/items?minified=1&limit=0`, { connectTimeout: 10000 })) as { results?: LibraryItem[]; items?: LibraryItem[] } | null
+    const items: LibraryItem[] = res?.results ?? res?.items ?? []
     // Keyed by normalized feed URL. Apple and a library routinely store the same feed with a
     // different scheme, a www prefix or tracking parameters, and comparing the raw strings made
     // Discover offer podcasts the user already had.
     libraryItemIdByFeed.value = indexLibraryByFeed(
       items,
-      (item: any) => item?.media?.metadata?.feedUrl,
-      (item: any) => item?.id
+      (item) => item.media.metadata.feedUrl ?? undefined,
+      (item) => item.id
     )
     const genres: Record<string, { genres: string[] }> = {}
     for (const item of items) {
-      if (item?.id) genres[item.id] = { genres: item?.media?.metadata?.genres ?? [] }
+      if (item.id) genres[item.id] = { genres: item.media.metadata.genres ?? [] }
     }
     libraryGenresById.value = genres
   } catch {
@@ -322,7 +323,7 @@ function onSearchInput() {
 async function doSearch(term: string) {
   searchLoading.value = true
   try {
-    const res = (await nativeHttp.get(`/api/search/podcast?term=${encodeURIComponent(term)}`, { connectTimeout: 10000 })) as any[]
+    const res = (await nativeHttp.get(`/api/search/podcast?term=${encodeURIComponent(term)}`, { connectTimeout: 10000 })) as PodcastCandidate[]
     searchResults.value = Array.isArray(res) ? res : []
   } catch {
     searchResults.value = []
@@ -352,27 +353,28 @@ function toPodcastCard(feed: DiscoverFeed) {
 }
 
 // ── Add flow ──────────────────────────────────────────────────────────────────
-async function startAddFlow(podcast: any) {
+async function startAddFlow(podcast: PodcastCandidate) {
   if (!podcast.feedUrl) {
     toast.error('Podcast has no feed URL')
     return
   }
   addProcessing.value = true
   try {
-    const payload = (await nativeHttp.post('/api/podcasts/feed', { rssFeed: podcast.feedUrl }, { connectTimeout: 10000 })) as any
+    const payload = (await nativeHttp.post('/api/podcasts/feed', { rssFeed: podcast.feedUrl }, { connectTimeout: 10000 })) as { podcast?: Record<string, unknown> } | null
     if (!payload) {
       toast.error('Failed to get podcast feed')
       return
     }
     selectedPodcast.value = podcast
-    selectedPodcastFeed.value = payload.podcast
+    selectedPodcastFeed.value = payload.podcast ?? null
     showAddFlow.value = true
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[Discover] feed check failed', err)
     // Adding genuinely does need admin - it creates a library item on the server - so a 403
     // here is a real answer rather than a fault, and saying "failed to get podcast feed" sends
     // the user looking at the podcast instead of at their account.
-    const status = err?.status ?? err?.response?.status
+    const httpError = err as HttpError | null
+    const status = httpError?.status ?? httpError?.response?.status
     toast.error(status === 403 ? 'Only a server admin can add podcasts' : 'Failed to get podcast feed')
   } finally {
     addProcessing.value = false
@@ -385,7 +387,7 @@ function cancelAddFlow() {
   selectedPodcastFeed.value = null
 }
 
-async function onCardClick(podcast: any) {
+async function onCardClick(podcast: PodcastCandidate) {
   // Already in the library: open it rather than offering a preview and an Add button for
   // something that is one tap away in full.
   const existingId = libraryItemIdFor(podcast?.feedUrl)
@@ -451,7 +453,7 @@ function closePreview() {
 async function startAddFlowFromPreview() {
   const podcast = previewPodcast.value
   closePreview()
-  await startAddFlow(podcast)
+  if (podcast) await startAddFlow(podcast)
 }
 
 // ── Lifecycle ─────────────────────────────────────────────────────────────────

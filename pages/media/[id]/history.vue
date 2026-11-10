@@ -19,13 +19,14 @@
         <p v-if="evt.num" class="text-sm text-md-on-surface-variant italic px-1">+{{ evt.num }}</p>
 
         <div class="flex-grow" />
-        <p class="text-base text-md-on-surface" @click="clickPlaybackTime(evt.currentTime)">{{ $secondsToTimestampFull(evt.currentTime) }}</p>
+        <p class="text-base text-md-on-surface" @click="clickPlaybackTime(evt.currentTime ?? 0)">{{ $secondsToTimestampFull(evt.currentTime ?? 0) }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import type { MediaHistoryEvent, MediaItemHistory } from '~/types'
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { AbsAudioPlayer } from '@/plugins/capacitor'
 
@@ -40,8 +41,8 @@ const id = route.params.id as string
 
 // State
 const title = ref((route.query.title as string) || 'Unknown')
-const mediaItemHistory = ref<any>(null)
-const onMediaItemHistoryUpdatedListener = ref<any>(null)
+const mediaItemHistory = ref<MediaItemHistory | null>(null)
+const onMediaItemHistoryUpdatedListener = ref<{ remove(): void } | null>(null)
 
 // Computed
 const displayTitle = computed(() => {
@@ -50,7 +51,7 @@ const displayTitle = computed(() => {
 })
 const mediaEvents = computed(() => {
   if (!mediaItemHistory.value) return []
-  return (mediaItemHistory.value.events || []).sort((a: any, b: any) => b.timestamp - a.timestamp)
+  return [...(mediaItemHistory.value.events || [])].sort((a, b) => b.timestamp - a.timestamp)
 })
 const mediaItemLibraryItemId = computed(() => {
   if (!mediaItemHistory.value) return null
@@ -61,7 +62,7 @@ const mediaItemEpisodeId = computed(() => {
   return mediaItemHistory.value.episodeId
 })
 const groupedMediaEvents = computed(() => {
-  const groups: Record<string, any[]> = {}
+  const groups: Record<string, MediaHistoryEvent[]> = {}
   const nuxtApp = useNuxtApp()
 
   const today = nuxtApp.$formatDate(new Date(), 'MMM dd, yyyy')
@@ -72,7 +73,7 @@ const groupedMediaEvents = computed(() => {
   let numSyncs = 0
   let lastSaveName: string | null = null
 
-  mediaEvents.value.forEach((evt: any) => {
+  mediaEvents.value.forEach((evt) => {
     const date = nuxtApp.$formatDate(evt.timestamp, 'MMM dd, yyyy')
     let include = true
     let keyUpdated = false
@@ -93,8 +94,8 @@ const groupedMediaEvents = computed(() => {
       const saveName = evt.name + '-' + evt.serverSyncAttempted + '-' + evt.serverSyncSuccess
       if (lastSaveName === saveName && numSaves > 0 && !keyUpdated) {
         include = false
-        const totalInGroup = groups[key].length
-        groups[key][totalInGroup - 1].num = numSaves
+        const lastInGroup = groups[key]?.at(-1)
+        if (lastInGroup) lastInGroup.num = numSaves
         numSaves++
       } else {
         numSaves = 1
@@ -108,8 +109,8 @@ const groupedMediaEvents = computed(() => {
     if (evt.name === 'Sync') {
       if (numSyncs > 0 && !keyUpdated) {
         include = false
-        const totalInGroup = groups[key].length
-        groups[key][totalInGroup - 1].num = numSyncs
+        const lastInGroup = groups[key]?.at(-1)
+        if (lastInGroup) lastInGroup.num = numSyncs
         numSyncs++
       } else {
         numSyncs = 1
@@ -119,7 +120,7 @@ const groupedMediaEvents = computed(() => {
     }
 
     if (include) {
-      groups[key].push(evt)
+      groups[key]?.push(evt)
     }
   })
 
@@ -137,16 +138,18 @@ async function clickPlaybackTime(time: number) {
 
 function playAtTime(startTime: number) {
   appStore.playerIsStartingPlayback = true
-  appStore.playerStartingPlaybackMediaId = mediaItemEpisodeId.value || mediaItemLibraryItemId.value
-  const localProg = globalsStore.getLocalMediaProgressByServerItemId(mediaItemLibraryItemId.value, mediaItemEpisodeId.value)
+  const libraryItemId = mediaItemLibraryItemId.value
+  if (!libraryItemId) return
+  appStore.playerStartingPlaybackMediaId = mediaItemEpisodeId.value || libraryItemId
+  const localProg = globalsStore.getLocalMediaProgressByServerItemId(libraryItemId, mediaItemEpisodeId.value ?? null)
   if (localProg) {
-    eventBus.emit('play-item', { libraryItemId: localProg.localLibraryItemId, episodeId: localProg.localEpisodeId, serverLibraryItemId: mediaItemLibraryItemId.value, serverEpisodeId: mediaItemEpisodeId.value, startTime })
+    eventBus.emit('play-item', { libraryItemId: localProg.localLibraryItemId, episodeId: localProg.localEpisodeId, serverLibraryItemId: libraryItemId, serverEpisodeId: mediaItemEpisodeId.value, startTime })
   } else {
-    eventBus.emit('play-item', { libraryItemId: mediaItemLibraryItemId.value, episodeId: mediaItemEpisodeId.value, startTime })
+    eventBus.emit('play-item', { libraryItemId, episodeId: mediaItemEpisodeId.value, startTime })
   }
 }
 
-function getEventIcon(name: string) {
+function getEventIcon(name: string | undefined) {
   switch (name) {
     case 'Play':
       return 'play_circle'
@@ -165,7 +168,7 @@ function getEventIcon(name: string) {
   }
 }
 
-function getEventColor(name: string) {
+function getEventColor(name: string | undefined) {
   switch (name) {
     case 'Play':
       return 'success'
@@ -184,7 +187,7 @@ function getEventColor(name: string) {
   }
 }
 
-function onMediaItemHistoryUpdated(updatedHistory: any) {
+function onMediaItemHistoryUpdated(updatedHistory: MediaItemHistory | null) {
   if (!updatedHistory || !updatedHistory.id) {
     console.error('Invalid media item history', updatedHistory)
     return

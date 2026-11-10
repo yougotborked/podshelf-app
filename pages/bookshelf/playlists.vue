@@ -16,6 +16,7 @@
 </template>
 
 <script setup lang="ts">
+import type { Playlist } from '~/types'
 import { AbsDownloader } from '~/plugins/capacitor'
 import {
   buildUnfinishedAutoPlaylist,
@@ -35,7 +36,7 @@ const autoCacheUnplayedEpisodes = computed(() => appStore.deviceData?.deviceSett
 const defaultAutoPlaylist = { id: 'unfinished', name: strings.LabelAutoUnfinishedPodcasts, items: [], totalItems: 0 }
 
 // Load cached playlist at setup time (replaces asyncData)
-const autoPlaylist = ref<{ id: string; name: string; items: any[]; totalItems: number }>(defaultAutoPlaylist)
+const autoPlaylist = ref<Playlist>(defaultAutoPlaylist)
 const downloadedEpisodeKeys = ref<Set<string> | null>(null)
 
 const enabled = autoCacheUnplayedEpisodes.value
@@ -43,8 +44,8 @@ if (enabled) {
   const cached = await localStore.getCachedPlaylist('unfinished')
   if (cached) {
     autoPlaylist.value = {
-      ...(cached as any),
-      totalItems: (cached.totalItems as number) || ((cached.items as any[] | null | undefined)?.length ?? 0)
+      ...(cached as Playlist),
+      totalItems: (cached.totalItems as number) || ((cached.items as unknown[] | null | undefined)?.length ?? 0)
     }
   }
 }

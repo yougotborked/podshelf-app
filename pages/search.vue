@@ -77,6 +77,7 @@
 </template>
 
 <script setup lang="ts">
+import type { LibraryItem } from '~/types'
 import { useLibrariesStore } from '~/stores/libraries'
 import { useGlobalsStore } from '~/stores/globals'
 
@@ -165,8 +166,8 @@ async function searchDownloaded(value: string | null): Promise<Record<string, Re
   if (!query) return empty
 
   const localItems = [
-    ...((await db.getLocalLibraryItems('book').catch(() => [])) as Record<string, any>[]),
-    ...((await db.getLocalLibraryItems('podcast').catch(() => [])) as Record<string, any>[])
+    ...(await db.getLocalLibraryItems('book').catch(() => [] as LibraryItem[])),
+    ...(await db.getLocalLibraryItems('podcast').catch(() => [] as LibraryItem[]))
   ]
 
   const books: Record<string, unknown>[] = []
@@ -185,7 +186,7 @@ async function searchDownloaded(value: string | null): Promise<Record<string, Re
       else books.push({ libraryItem: li })
     }
 
-    for (const ep of (li.media?.episodes || []) as Record<string, any>[]) {
+    for (const ep of li.media.episodes || []) {
       if (`${ep.title || ''}`.toLowerCase().includes(query)) {
         episodes.push({ libraryItem: { ...li, recentEpisode: ep } })
       }

@@ -43,8 +43,11 @@ export interface DeviceData {
     autoCacheUnplayedEpisodes?: boolean
     hapticFeedback?: string
     autoContinuePlaylists?: boolean
+    languageCode?: string
   }
   lastPlaybackSession?: PlaybackSession
+  serverConnectionConfigs?: ServerConnectionConfig[]
+  lastServerConnectionConfigId?: string | null
   [key: string]: unknown
 }
 
@@ -53,7 +56,41 @@ export interface ServerConnectionConfig {
   name: string
   address: string
   token: string
+  refreshToken?: string
+  username?: string | null
+  userId?: string
+  version?: string | null
+  customHeaders?: Record<string, string> | null
+  index?: number
   [key: string]: unknown
+}
+
+// The connect form's working copy of a connection: every field may still be empty while the user
+// is typing, and the id does not exist until the server has accepted the login.
+export type ServerConnectionDraft = { [K in keyof ServerConnectionConfig]?: ServerConnectionConfig[K] | null }
+
+// What /api/authorize answers with, as far as the connect form reads it.
+export interface AuthorizedUser {
+  id: string
+  username?: string
+  token?: string
+  accessToken?: string
+  refreshToken?: string
+  librariesAccessible?: string[]
+  [key: string]: unknown
+}
+
+export interface ServerSettings {
+  language?: string
+  version?: string
+  [key: string]: unknown
+}
+
+export interface AuthorizePayload {
+  user: AuthorizedUser
+  userDefaultLibraryId?: string
+  serverSettings: ServerSettings
+  ereaderDevices?: unknown[]
 }
 
 export interface UserSettings {
@@ -126,6 +163,10 @@ export interface MediaMetadata {
   // Books list several authors; a podcast has one `author` string.
   authors?: AuthorRef[]
   author?: string | null
+  // Flattened display strings the server and the device both provide.
+  authorName?: string | null
+  narratorName?: string | null
+  seriesName?: string | null
   narrators?: string[]
   series?: SeriesRef[]
   genres?: string[]
@@ -160,6 +201,7 @@ export interface PodcastEpisode {
   audioTrack?: AudioTrack
   // The local copy of a server episode, attached by the episode page.
   localEpisode?: PodcastEpisode | null
+  progress?: LocalMediaProgress | null
   chapters?: Chapter[]
   [key: string]: unknown
 }
@@ -184,12 +226,21 @@ export interface LibraryItem {
   mediaType?: 'book' | 'podcast' | string
   media: LibraryItemMedia
   libraryFiles?: LibraryFile[]
+  numFiles?: number
+  size?: number
+  coverContentUrl?: string | null
+  // Set by the downloads screens for display.
+  coverPathSrc?: string | null
+  folderId?: string
   // Local copies: the files on the device, and which one each audio track plays from.
   localFiles?: LocalFile[]
   isMissing?: boolean
   isInvalid?: boolean
   // Local copies only.
   isLocal?: boolean
+  // Shelves attach the viewer's progress and a downloaded copy to the items they list.
+  progress?: LocalMediaProgress | null
+  recentEpisode?: PodcastEpisode | null
   libraryItemId?: string
   serverAddress?: string
   serverUserId?: string
@@ -290,5 +341,78 @@ export interface LocalFile {
   contentUrl?: string
   mimeType?: string
   size?: number
+  [key: string]: unknown
+}
+
+// A row on the home screen: a titled list of items, series, authors or episodes.
+export interface Shelf {
+  id?: string
+  label?: string
+  // A key into the translated strings, when the label should follow the language.
+  labelStringKey?: string
+  type?: string
+  // Built on the device from downloads rather than fetched from the server.
+  localOnly?: boolean
+  entities: LibraryItem[]
+  [key: string]: unknown
+}
+
+// An author as the authors page lists them: the server's record, or one the device builds from
+// downloaded books when offline.
+export interface AuthorEntity {
+  id: string
+  name: string
+  displayName?: string
+  // Offline-built authors count books as `books`; the server calls it `numBooks`.
+  books?: number
+  numBooks?: number
+  numAudiobooks?: number
+  libraryId?: string | null
+  imagePath?: string | null
+  [key: string]: unknown
+}
+
+// A series: books the server groups in reading order.
+export interface SeriesEntity {
+  id: string
+  name?: string
+  libraryId?: string
+  books?: LibraryItem[]
+  [key: string]: unknown
+}
+
+// A podcast offered for adding: a chart entry from Apple or a hit from the server's podcast
+// search. Both carry a title and a feed url; the rest depends on where it came from.
+export interface PodcastCandidate {
+  id?: string
+  title?: string
+  author?: string
+  artistName?: string
+  artwork?: string
+  cover?: string
+  feedUrl?: string
+  genres?: string[]
+  [key: string]: unknown
+}
+
+// One thing that happened to a media item: a save, a sync, a play. The history screen lists them.
+export interface MediaHistoryEvent {
+  id?: string
+  timestamp: number
+  name?: string
+  currentTime?: number
+  // How many consecutive saves or syncs the screen has collapsed into this row.
+  num?: number
+  serverSyncAttempted?: boolean
+  serverSyncSuccess?: boolean
+  [key: string]: unknown
+}
+
+export interface MediaItemHistory {
+  id: string
+  mediaDisplayTitle?: string
+  libraryItemId?: string
+  episodeId?: string | null
+  events?: MediaHistoryEvent[]
   [key: string]: unknown
 }
