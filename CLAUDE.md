@@ -178,7 +178,7 @@ A warning nobody has to act on is a warning nobody reads, so nothing here only w
 |---|---|---|
 | Kotlin (`:app`, `:wear`, `:wear-sync`) | `allWarningsAsErrors` + `-Wextra`, in `android/build.gradle` | none — all fixed |
 | Android lint (both apps) | `checkAllWarnings`, `warningsAsErrors`, `abortOnError`, in `android/build.gradle` | none — fixed or suppressed in place with the reason |
-| TypeScript | `strict` + `noUncheckedIndexedAccess`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noImplicitOverride` | none — baseline is empty |
+| TypeScript | `strict` + `noUncheckedIndexedAccess`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noImplicitOverride`, `noUnusedLocals`, `noUnusedParameters` | none — baseline is empty |
 | ESLint (`.ts`, `.vue`, `.js`) | type-aware: `no-floating-promises`, `no-misused-promises`, `no-unnecessary-condition`, `switch-exhaustiveness-check` … | none — baseline is empty |
 
 Both TypeScript baselines (`scripts/typecheck-baseline.json`, `scripts/lint-baseline.json`) are
@@ -200,6 +200,12 @@ artifact — that is what `scripts/r8-check/constructors.py` is.
 a **new** finding. Both files are currently empty, so in practice any finding fails. If a rule is
 ever tightened and reports old code, `npm run typecheck:update` / `npm run lint:update` records it —
 run the script *without* `--update` first, so a real regression is not baselined by accident.
+
+Two flags are deliberately **off**, measured rather than assumed: `exactOptionalPropertyTypes` (~64
+errors, nearly all a Vue component passing `undefined` to an optional prop, which Vue treats as
+absent — satisfying it means writing `| undefined` on every prop, which says nothing the compiler
+did not already know) and `noPropertyAccessFromIndexSignature` (~620, all `record.field` on a
+`Record<string, unknown>`, where bracket notation reads worse and catches nothing).
 
 Options-API components written in a plain `<script>` (not `lang="ts"`) go through `defineComponent`,
 otherwise `this.someComputed` is typed as the function itself and every guard on it reads as dead
