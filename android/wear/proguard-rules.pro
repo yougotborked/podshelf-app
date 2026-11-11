@@ -8,3 +8,13 @@
 -keepclasseswithmembers class com.podshelf.wearsync.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
+
+# AGP 9 runs R8 in strict full mode for keep rules: `-keep class X` no longer keeps X's default
+# constructor. Room's consumer rule is `-keep class * extends androidx.room.RoomDatabase`, so
+# WorkDatabase_Impl kept its name and lost the constructor Room calls by reflection, and
+# WorkManager's startup initializer killed the app before Application.onCreate. Naming the
+# constructor here is what the library's rule meant. scripts/r8-check/constructors.py reads the
+# built dex for exactly this and fails the build if any class built by name has none.
+-keepclassmembers class * extends androidx.room.RoomDatabase {
+    <init>();
+}
