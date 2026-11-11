@@ -47,15 +47,11 @@ function handleIFrameHeight(iFrame: HTMLIFrameElement) {
     if (lastEle && (lastEle as Node).nodeType === 3 && !lastchild && !lastItem) return
 
     let nodeHeight = 0
-    if (lastEle && (lastEle as Node).nodeType === 3 && document.createRange) {
+    if (lastEle && (lastEle as Node).nodeType === 3) {
       const range = document.createRange()
       range.selectNodeContents(lastEle)
-      if (range.getBoundingClientRect) {
-        const rect = range.getBoundingClientRect()
-        if (rect) {
-          nodeHeight = rect.bottom - rect.top
-        }
-      }
+      const rect = range.getBoundingClientRect()
+      nodeHeight = rect.bottom - rect.top
     }
     const lastChildHeight = isElement(lastchild) ? (lastchild as Element).clientHeight + (lastchild as HTMLElement).offsetTop : 0
     const lastEleHeight = isElement(lastEle) ? (lastEle as HTMLElement).clientHeight + (lastEle as HTMLElement).offsetTop : 0

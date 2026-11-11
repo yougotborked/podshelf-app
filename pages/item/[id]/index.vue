@@ -472,7 +472,7 @@ async function play(startTime: number | null = null) {
       playLibraryItemId = localLibraryItem.value.id
     }
 
-    if (startTime !== null && startTime !== undefined && !appStore.getIsMediaStreaming(playLibraryItemId, null)) {
+    if (startTime !== null && !appStore.getIsMediaStreaming(playLibraryItemId, null)) {
       const { value } = await Dialog.confirm({
         title: useNuxtApp().$strings.HeaderConfirm,
         message: useNuxtApp().$getString('MessageConfirmPlaybackTime', [title.value ?? '', useNuxtApp().$secondsToTimestamp(startTime)])
@@ -743,7 +743,7 @@ onMounted(async () => {
       return
     }
 
-    if (localItem && !localItem.isLocal) {
+    if (!localItem.isLocal) {
       const localLi = (await db.getLocalLibraryItemByLId(localItem.id || libItemId)) as LibraryItem | null
       if (localLi) {
         localItem.localLibraryItem = localLi
@@ -766,7 +766,7 @@ onMounted(async () => {
       }
     }
 
-    if (cachedItem && !cachedItem.isLocal) {
+    if (!cachedItem.isLocal) {
       const localLi = (await db.getLocalLibraryItemByLId(cachedItem.id || libItemId)) as LibraryItem | null
       if (localLi) {
         cachedItem.localLibraryItem = localLi

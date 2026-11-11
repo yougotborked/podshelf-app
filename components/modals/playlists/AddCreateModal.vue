@@ -80,7 +80,7 @@ const show = computed({
 })
 
 const currentLibraryId = computed(() => librariesStore.currentLibraryId)
-const selectedPlaylistItems = computed(() => globalsStore.selectedPlaylistItems || [])
+const selectedPlaylistItems = computed(() => globalsStore.selectedPlaylistItems)
 const networkConnected = computed(() => !appStore.isOffline)
 
 const sortedPlaylists = computed(() => {
@@ -104,7 +104,7 @@ watch(show, (newVal) => {
 })
 
 function checkIsItemInPlaylist(playlist: Record<string, unknown>, item: Record<string, unknown>) {
-  const ep = item.episode as Record<string, unknown>
+  const ep = item.episode as Record<string, unknown> | null | undefined
   const li = item.libraryItem as Record<string, unknown>
   if (ep) {
     return (playlist.items as Record<string, unknown>[]).some((i) => i.libraryItemId === li.id && i.episodeId === ep.id)

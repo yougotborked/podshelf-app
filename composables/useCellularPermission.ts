@@ -15,7 +15,7 @@ export function useCellularPermission() {
         toast.error(strings.ToastDownloadNotAllowedOnCellular || 'Download not allowed on cellular')
         return false
       }
-    } else if (actionType === 'streaming') {
+    } else {
       permission = appStore.getCanStreamingUsingCellular
       if (permission === 'NEVER') {
         toast.error(strings.ToastStreamingNotAllowedOnCellular || 'Streaming not allowed on cellular')

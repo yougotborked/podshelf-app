@@ -58,19 +58,15 @@ export function useUtils() {
   }
 
   const addDaysToToday = (daysToAdd: number): Date | null => {
-    const date = addDays(new Date(), daysToAdd)
-    if (!date || !isDate(date)) return null
-    return date
+    return addDays(new Date(), daysToAdd)
   }
 
   const addDaysToDate = (jsdate: Date, daysToAdd: number): Date | null => {
-    const date = addDays(jsdate, daysToAdd)
-    if (!date || !isDate(date)) return null
-    return date
+    return addDays(jsdate, daysToAdd)
   }
 
-  const bytesPretty = (bytes: number, decimals = 2): string => {
-    if (isNaN(bytes) || bytes === null) return 'Invalid Bytes'
+  const bytesPretty = (bytes: number | null | undefined, decimals = 2): string => {
+    if (bytes === null || bytes === undefined || isNaN(bytes)) return 'Invalid Bytes'
     if (bytes === 0) return '0 Bytes'
     const k = 1024
     const dm = decimals < 0 ? 0 : decimals
@@ -96,8 +92,8 @@ export function useUtils() {
     return `${hours} ${useFullNames ? `hour${hours === 1 ? '' : 's'}` : 'hr'} ${minutes} ${useFullNames ? `minute${minutes === 1 ? '' : 's'}` : 'min'}`
   }
 
-  const elapsedPrettyExtended = (seconds: number, useDays = true, showSeconds = true): string => {
-    if (isNaN(seconds) || seconds === null) return ''
+  const elapsedPrettyExtended = (seconds: number | null | undefined, useDays = true, showSeconds = true): string => {
+    if (seconds === null || seconds === undefined || isNaN(seconds)) return ''
     seconds = Math.round(seconds)
     let minutes = Math.floor(seconds / 60)
     seconds -= minutes * 60
@@ -202,9 +198,9 @@ export function useUtils() {
     const orientation = getScreenOrientation()
     if (!orientation) return
     if (orientationLockSetting === 'PORTRAIT') {
-      orientation.lock?.('portrait')?.catch(console.error)
+      orientation.lock?.('portrait').catch(console.error)
     } else if (orientationLockSetting === 'LANDSCAPE') {
-      orientation.lock?.('landscape')?.catch(console.error)
+      orientation.lock?.('landscape').catch(console.error)
     } else {
       orientation.unlock?.()
     }

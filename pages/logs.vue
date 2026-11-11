@@ -117,12 +117,14 @@ async function shareLogs() {
   const version = runtimeConfig.public.version
   const filename = `abs_logs_${platform}_${version}.txt`
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- lib.dom types navigator.share as always present; desktop browsers and older Android WebViews do not have it
   if (!navigator.share) {
     toast.error('Share not supported on this device')
     return
   }
 
   const shareData: ShareData = { title: filename }
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- lib.dom types navigator.canShare as always present; it is missing where file sharing is unsupported
   if (navigator.canShare) {
     const file = new File([logsString], filename, { type: 'text/plain' })
     if (navigator.canShare({ files: [file] })) {

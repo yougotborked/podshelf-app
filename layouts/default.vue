@@ -422,7 +422,7 @@ async function retryConnectionIfNeeded() {
     return
   }
 
-  if (!serverConfig?.address || !serverConfig?.token) {
+  if (!serverConfig?.address || !serverConfig.token) {
     console.warn('[default] No server config available for retry connection')
     return
   }
@@ -532,7 +532,7 @@ onMounted(async () => {
       // so send anyone with downloaded content to their downloads instead of trapping them on
       // a screen they have no way to leave.
       const localItems = (await useDb().getLocalLibraryItems().catch(() => [])) as unknown[]
-      if (localItems?.length && appStore.isOffline) {
+      if (localItems.length && appStore.isOffline) {
         await AbsLogger.info({ tag: 'default', message: 'mounted: No server config and offline, showing downloads' })
         if (route.path !== '/downloads') void router.replace('/downloads')
       } else {

@@ -94,10 +94,10 @@ export function useBookshelfCards(options: BookshelfCardsOptions) {
     app.use(nuxtApp.$pinia as ReturnType<typeof createPinia>)
     const instance = app.mount(container) as unknown as {
       $el: HTMLElement
-      setSelectionMode: (v: boolean) => void
+      setSelectionMode?: (v: boolean) => void
       isHovering: boolean
-      setEntity: (e: unknown) => void
-      setLocalLibraryItem: (e: unknown) => void
+      setEntity?: (e: unknown) => void
+      setLocalLibraryItem?: (e: unknown) => void
     }
 
     const componentRef = {

@@ -58,7 +58,7 @@ export function getAutoPlaylistPodcastRule(
   rules: Record<string, AutoPlaylistPodcastRule>,
   libraryItemId: string
 ): AutoPlaylistPodcastRule {
-  return normalizeRule(rules?.[libraryItemId])
+  return normalizeRule(rules[libraryItemId])
 }
 
 /**
@@ -118,7 +118,7 @@ export function useAutoPlaylistPodcastRules() {
 function toEpisodeMetadataMap(metadataEntries: Record<string, unknown>[] = []): Map<string, Record<string, unknown>> {
   const map = new Map<string, Record<string, unknown>>()
   metadataEntries.forEach((entry) => {
-    if (entry && entry.id) map.set(entry.id as string, entry)
+    if (entry.id) map.set(entry.id as string, entry)
   })
   return map
 }
@@ -129,7 +129,7 @@ function mergeEpisodeMetadata(
 ): Record<string, unknown>[] {
   if (!metadataMap || !metadataMap.size) return [...episodes]
   return episodes.map((episode) => {
-    const serverId = (episode?.serverEpisodeId || episode?.id) as string | undefined
+    const serverId = (episode.serverEpisodeId || episode.id) as string | undefined
     if (!serverId) return episode
     if (episode.publishedAt || episode.pubDate) return episode
     const metadata = metadataMap.get(serverId)
@@ -162,7 +162,7 @@ async function fetchServerEpisodesInBatches(
       if (!context) return
       if (result.status !== 'fulfilled') { context.useLocalEpisodesFallback(); return }
       const serverItem = result.value as Record<string, unknown>
-      const serverEpisodes = (serverItem?.media as Record<string, unknown> | null | undefined)?.episodes as Record<string, unknown>[] | undefined
+      const serverEpisodes = (serverItem.media as Record<string, unknown> | null | undefined)?.episodes as Record<string, unknown>[] | undefined
       if (!Array.isArray(serverEpisodes) || !serverEpisodes.length) { context.useLocalEpisodesFallback(); return }
 
       context.episodes = serverEpisodes.map((serverEpisode) => {
@@ -198,8 +198,7 @@ const MAX_AUTO_PLAYLIST_ITEMS = 400
 function sanitizeTracks(tracks: Record<string, unknown>[] = []): Record<string, unknown>[] {
   if (!Array.isArray(tracks) || !tracks.length) return tracks
   return tracks.map((track) => {
-    if (!track || typeof track !== 'object') return track
-    const { chapters: _chapters, ...rest } = track as { chapters?: unknown; [k: string]: unknown }
+        const { chapters: _chapters, ...rest } = track as { chapters?: unknown; [k: string]: unknown }
     return rest
   })
 }
@@ -249,11 +248,10 @@ function sanitizeLocalEpisode(localEpisode: Record<string, unknown> | null): Rec
 }
 
 export function toCacheablePlaylist(playlist: Record<string, unknown>): Record<string, unknown> {
-  if (!playlist) return playlist
-  return {
+    return {
     ...playlist,
     items: ((playlist.items as Record<string, unknown>[] | null | undefined) || []).map((item) => {
-      const { localLibraryItem, localEpisode, ...rest } = (item || {}) as {
+      const { localLibraryItem, localEpisode, ...rest } = item as {
         localLibraryItem?: Record<string, unknown>; localEpisode?: Record<string, unknown>; [k: string]: unknown
       }
       const sanitized: Record<string, unknown> = { ...rest }
@@ -283,11 +281,11 @@ export function toCacheablePlaylist(playlist: Record<string, unknown>): Record<s
 export function collectDownloadedEpisodeKeys(localLibraries: Record<string, unknown>[] = []): Set<string> {
   const keys = new Set<string>()
   localLibraries.forEach((libraryItem) => {
-    const libraryId = (libraryItem?.libraryItemId || libraryItem?.id) as string
+    const libraryId = (libraryItem.libraryItemId || libraryItem.id) as string
     if (!libraryId) return
-    const episodes = ((libraryItem?.media as Record<string, unknown> | null | undefined)?.episodes as Record<string, unknown>[] | null | undefined) || []
+    const episodes = ((libraryItem.media as Record<string, unknown> | null | undefined)?.episodes as Record<string, unknown>[] | null | undefined) || []
     episodes.forEach((episode) => {
-      const serverId = (episode?.serverEpisodeId || episode?.id) as string
+      const serverId = (episode.serverEpisodeId || episode.id) as string
       if (!serverId) return
       keys.add(`${libraryId}_${serverId}`)
     })
@@ -308,9 +306,9 @@ export async function buildUnfinishedAutoPlaylist(networkConnected: boolean): Pr
 
   const progressMap = new Map<string, Record<string, unknown>>()
   ;((userStore.user?.mediaProgress as Record<string, unknown>[] | null | undefined) || []).forEach((progress) => {
-    if (progress?.episodeId) progressMap.set(progress.episodeId as string, progress)
+    if (progress.episodeId) progressMap.set(progress.episodeId as string, progress)
   })
-  ;(globalsStore.localMediaProgress || []).forEach((progress) => {
+  ;globalsStore.localMediaProgress.forEach((progress) => {
     if ((progress as Record<string, unknown> | null | undefined)?.episodeId) {
       progressMap.set((progress as Record<string, unknown>).episodeId as string, progress as Record<string, unknown>)
     }
@@ -327,7 +325,7 @@ export async function buildUnfinishedAutoPlaylist(networkConnected: boolean): Pr
 
   const metadataResults = await Promise.allSettled(
     localLibraries.map((libraryItem) => {
-      const libraryId = (libraryItem?.libraryItemId || libraryItem?.id) as string
+      const libraryId = (libraryItem.libraryItemId || libraryItem.id) as string
       return libraryId ? localStore.getEpisodeMetadata(libraryId) : Promise.resolve([])
     })
   )
@@ -359,12 +357,12 @@ export async function buildUnfinishedAutoPlaylist(networkConnected: boolean): Pr
     const rule = getAutoPlaylistPodcastRule(podcastRuleMap, libraryId)
     // Skip before the server round-trip below - an excluded podcast costs nothing
     if (rule.mode === 'exclude') return
-    const localEpisodes = ((libraryItem?.media as Record<string, unknown> | null | undefined)?.episodes as Record<string, unknown>[] | null | undefined) || []
+    const localEpisodes = ((libraryItem.media as Record<string, unknown> | null | undefined)?.episodes as Record<string, unknown>[] | null | undefined) || []
     const metadataMap = metadataByLibraryId.get(libraryId)
 
     const localEpisodeMap = new Map<string, Record<string, unknown>>()
     localEpisodes.forEach((episode) => {
-      const serverId = (episode?.serverEpisodeId || episode?.id) as string
+      const serverId = (episode.serverEpisodeId || episode.id) as string
       if (serverId) localEpisodeMap.set(serverId, episode)
     })
 
@@ -377,7 +375,7 @@ export async function buildUnfinishedAutoPlaylist(networkConnected: boolean): Pr
       needsServerDates: false,
       useLocalEpisodesFallback() {
         this.episodes = this.episodes.map((episode) => {
-          const serverId = (episode?.serverEpisodeId || episode?.id) as string
+          const serverId = (episode.serverEpisodeId || episode.id) as string
           if (!serverId || episode.localEpisode) return episode
           const localEpisode = this.localEpisodeMap.get(serverId)
           return localEpisode ? { ...episode, localEpisode } : episode
@@ -385,7 +383,7 @@ export async function buildUnfinishedAutoPlaylist(networkConnected: boolean): Pr
       }
     }
 
-    const needsServerDates = canFetchServerEpisodes && context.episodes.some((episode) => !episode?.publishedAt && !episode?.pubDate)
+    const needsServerDates = canFetchServerEpisodes && context.episodes.some((episode) => !episode.publishedAt && !episode.pubDate)
     context.needsServerDates = needsServerDates
     if (!needsServerDates) context.useLocalEpisodesFallback()
     libraryContexts.push(context)
@@ -402,7 +400,7 @@ export async function buildUnfinishedAutoPlaylist(networkConnected: boolean): Pr
     const playlistLibraryItem = createPlaylistLibraryItem(libraryItem, libraryId)
 
     context.episodes.forEach((episode) => {
-      const serverId = (episode?.serverEpisodeId || episode?.id) as string
+      const serverId = (episode.serverEpisodeId || episode.id) as string
       if (!serverId) return
       const progress = progressMap.get(serverId)
       if (isProgressFinished(progress as MaybeProgress)) return

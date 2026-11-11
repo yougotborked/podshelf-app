@@ -90,7 +90,7 @@ export async function expectAppRendered(page: Page, booted: BootedApp): Promise<
 
 /** Settles layout before a screenshot: fonts loaded, transitions finished, art decoded. */
 export async function settle(page: Page): Promise<void> {
-  await page.evaluate(() => document.fonts?.ready)
+  await page.evaluate(() => document.fonts.ready)
   await page.waitForTimeout(400)
 }
 

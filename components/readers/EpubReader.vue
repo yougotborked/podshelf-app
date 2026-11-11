@@ -312,6 +312,7 @@ function initEpub() {
     console.log('%c [EpubReader] Book ready', 'color:cyan;')
 
     let displayCfi = (b.locations as unknown as { start?: string }).start
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- epubjs types Spine.get as always returning a Section, but it returns null for a location that is not in this book
     if (savedEbookLocation.value && b.spine.get(savedEbookLocation.value)) {
       displayCfi = savedEbookLocation.value
     }

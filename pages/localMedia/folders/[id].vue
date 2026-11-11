@@ -113,7 +113,7 @@ async function init() {
   const folderData = await db.getLocalFolder(folderId)
   folder.value = folderData
 
-  const items = (await db.getLocalLibraryItemsInFolder(folderId)) || []
+  const items = (await db.getLocalLibraryItemsInFolder(folderId))
   console.log('Init folder', folderId, items)
   localLibraryItems.value = items.map((lmi) => {
     console.log('Local library item', JSON.stringify(lmi))

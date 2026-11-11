@@ -79,8 +79,8 @@ export const useGlobalsStore = defineStore('globals', {
     },
     getLibraryItemCoverSrc: () => (libraryItem: Record<string, unknown> | null, placeholder: string, raw = false) => {
       if (!libraryItem) return placeholder
-      const media = libraryItem.media as Record<string, unknown>
-      if (!media || !media.coverPath || media.coverPath === placeholder) return placeholder
+      const media = libraryItem.media as Record<string, unknown> | null | undefined
+      if (!media?.coverPath || media.coverPath === placeholder) return placeholder
       const coverPath = media.coverPath as string
       if (coverPath.startsWith('http:') || coverPath.startsWith('https:')) return coverPath
 

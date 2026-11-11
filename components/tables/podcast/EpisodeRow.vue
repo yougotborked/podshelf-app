@@ -272,7 +272,7 @@ async function toggleFinished() {
     const payload = await db.updateLocalMediaProgressFinished({ localLibraryItemId, localEpisodeId, isFinished })
     console.log('toggleFinished payload', JSON.stringify(payload))
     if (payload?.error) {
-      toast.error(payload?.error || 'Unknown error')
+      toast.error(payload.error || 'Unknown error')
     } else {
       const localMediaProg = payload?.localMediaProgress
       console.log('toggleFinished localMediaProgress', JSON.stringify(localMediaProg))

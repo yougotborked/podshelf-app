@@ -186,8 +186,8 @@ export interface OrderListeningQueueOptions {
  * The queue, in the order it should be played: finished episodes dropped, per-podcast rules
  * applied, oldest first, and - when asked - whatever was already started ahead of all of it.
  */
-export function orderListeningQueue(episodes: ListeningEpisode[] = [], { rules = {}, lookup = {}, resumeFirst = false }: OrderListeningQueueOptions = {}): ListeningEpisode[] {
-  const unfinished = episodes.filter((episode) => !!episode && !isEpisodeFinished(episode, lookup))
+export function orderListeningQueue(episodes: (ListeningEpisode | null | undefined)[] = [], { rules = {}, lookup = {}, resumeFirst = false }: OrderListeningQueueOptions = {}): ListeningEpisode[] {
+  const unfinished = episodes.filter((episode): episode is ListeningEpisode => !!episode && !isEpisodeFinished(episode, lookup))
   // Rules are applied to the unfinished set, so a "newest 3" show offers its newest three
   // *remaining* episodes rather than three it may already have played
   const allowed = applyPodcastRules(unfinished, rules, (episode) => episode.libraryItemId, episodePublishedAt)
@@ -211,7 +211,7 @@ export function orderListeningQueue(episodes: ListeningEpisode[] = [], { rules =
  * local ids or the player streams a file that is already on disk, while progress is only ever
  * reported against the server ids.
  */
-export function toPlayQueueItems(episodes: ListeningEpisode[] = [], localEpisodeFor: (episode: ListeningEpisode) => LocalEpisode | null | undefined = () => null): PlayQueueItem[] {
+export function toPlayQueueItems(episodes: (ListeningEpisode | null | undefined)[] = [], localEpisodeFor: (episode: ListeningEpisode) => LocalEpisode | null | undefined = () => null): PlayQueueItem[] {
   const items: PlayQueueItem[] = []
   for (const episode of episodes) {
     if (!episode?.libraryItemId || !episode.id) continue
@@ -220,7 +220,7 @@ export function toPlayQueueItems(episodes: ListeningEpisode[] = [], localEpisode
     const playLocally = !!(localEpisode && localLibraryItemId && localEpisode.id)
     items.push({
       libraryItemId: playLocally ? (localLibraryItemId as string) : episode.libraryItemId,
-      episodeId: playLocally ? (localEpisode?.id as string) : episode.id,
+      episodeId: playLocally ? (localEpisode.id as string) : episode.id,
       serverLibraryItemId: episode.libraryItemId,
       serverEpisodeId: episode.id,
       episode,
@@ -258,7 +258,7 @@ export interface LocalLibraryItemWithEpisodes {
  * identity - so an offline device with a full download folder was told there was nothing left to
  * play. Progress lookups failed for the same reason, so nothing was filtered as finished either.
  */
-export function localEpisodesAsQueueCandidates(localLibraryItems: LocalLibraryItemWithEpisodes[] = []): ListeningEpisode[] {
+export function localEpisodesAsQueueCandidates(localLibraryItems: (LocalLibraryItemWithEpisodes | null | undefined)[] = []): ListeningEpisode[] {
   const episodes: ListeningEpisode[] = []
   for (const item of localLibraryItems) {
     if (!item?.libraryItemId) continue
@@ -286,8 +286,8 @@ export function localEpisodesAsQueueCandidates(localLibraryItems: LocalLibraryIt
  * Offering one offline starts a stream that cannot connect, which on a surface with a single play
  * button leaves nothing to do about it.
  */
-export function restrictToDownloaded(episodes: ListeningEpisode[] = [], isDownloaded: (episode: ListeningEpisode) => boolean): ListeningEpisode[] {
-  return episodes.filter((episode) => !!episode && isDownloaded(episode))
+export function restrictToDownloaded(episodes: (ListeningEpisode | null | undefined)[] = [], isDownloaded: (episode: ListeningEpisode) => boolean): ListeningEpisode[] {
+  return episodes.filter((episode): episode is ListeningEpisode => !!episode && isDownloaded(episode))
 }
 
 /**

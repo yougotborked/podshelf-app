@@ -261,7 +261,7 @@ async function extract() {
     pEl.style.opacity = '0'
     pEl.style.position = 'absolute'
     document.body.appendChild(pEl)
-    const textWidth = pEl.getBoundingClientRect()?.width
+    const textWidth = pEl.getBoundingClientRect().width
     if (textWidth) {
       pageMenuWidth.value = textWidth + (16 + 5 + 2 + 5)
     }
