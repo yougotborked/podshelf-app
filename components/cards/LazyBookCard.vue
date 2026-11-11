@@ -368,7 +368,7 @@ async function playEpisode() {
   eventBus.emit('play-item', { libraryItemId: libraryItemId.value, episodeId: recentEpisode.value?.id as string })
 }
 
-async function clickCard(e: MouseEvent) {
+function clickCard(e: MouseEvent) {
   if (isSelectionMode.value) {
     e.stopPropagation()
     e.preventDefault()

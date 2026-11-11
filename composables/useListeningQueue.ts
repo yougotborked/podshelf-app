@@ -219,7 +219,7 @@ export function toPlayQueueItems(episodes: (ListeningEpisode | null | undefined)
     const localLibraryItemId = localEpisode?.localLibraryItemId
     const playLocally = !!(localEpisode && localLibraryItemId && localEpisode.id)
     items.push({
-      libraryItemId: playLocally ? (localLibraryItemId as string) : episode.libraryItemId,
+      libraryItemId: playLocally ? (localLibraryItemId) : episode.libraryItemId,
       episodeId: playLocally ? (localEpisode.id as string) : episode.id,
       serverLibraryItemId: episode.libraryItemId,
       serverEpisodeId: episode.id,

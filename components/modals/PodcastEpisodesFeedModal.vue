@@ -102,7 +102,7 @@ function downloadEpisodes() {
       const errorMsg = err.response && err.response.data ? err.response.data : 'Failed to download episodes'
       console.error('Failed to download episodes', error)
       processing.value = false
-      toast.error(errorMsg as string)
+      toast.error(errorMsg)
 
       selectedEpisodes.value = {}
     })

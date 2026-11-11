@@ -281,7 +281,7 @@ function initEpub() {
       const response = await fetch(url, {
         headers: { Authorization: `Bearer ${userStore.getToken}` }
       })
-      return response.arrayBuffer()
+      return await response.arrayBuffer()
     } catch (error) {
       console.error('EpubReader.initEpub customRequest failed:', error)
       throw error
@@ -317,7 +317,7 @@ function initEpub() {
       displayCfi = savedEbookLocation.value
     }
 
-    rend.on('displayed', async () => {
+    rend.on('displayed', () => {
       console.log('%c [EpubReader] Rendition displayed', 'color:blue;')
 
       const snapper = (rend as unknown as { manager?: { snapper?: EpubSnapper } }).manager?.snapper

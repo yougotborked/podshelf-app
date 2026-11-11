@@ -788,7 +788,7 @@ async function ensureDownloadedKeySet(mediaType = 'podcast') {
 
   const localLibraries = await db.getLocalLibraryItems(mediaType)
   downloadedEpisodeKeys.value = collectDownloadedEpisodeKeys(localLibraries as Record<string, unknown>[])
-  return downloadedEpisodeKeys.value!
+  return downloadedEpisodeKeys.value
 }
 
 async function checkAutoDownload() {

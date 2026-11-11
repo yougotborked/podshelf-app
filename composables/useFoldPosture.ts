@@ -107,8 +107,8 @@ function foldPosturePlugin(): FoldPosturePlugin {
     plugin = registerPlugin<FoldPosturePlugin>('AbsFoldPosture', {
       // Every non-Android platform, and the browser the screenshot harness runs in.
       web: () => ({
-        getPosture: async () => FLAT,
-        addListener: async () => ({ remove: () => undefined })
+        getPosture: () => Promise.resolve(FLAT),
+        addListener: () => Promise.resolve({ remove: () => undefined })
       })
     })
   }

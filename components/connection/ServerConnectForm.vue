@@ -88,6 +88,7 @@
 </template>
 
 <script setup lang="ts">
+import { describeRejection } from '~/composables/useRejectionLog'
 import type { AuthorizePayload, DeviceData, HttpError, ServerConnectionConfig, ServerConnectionDraft } from '~/types'
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Browser } from '@capacitor/browser'
@@ -288,7 +289,7 @@ async function oauthRequest(url: string): Promise<URL | null> {
   async function sha256(plain: string): Promise<ArrayBuffer> {
     const encoder = new TextEncoder()
     const data = encoder.encode(plain)
-    return await window.crypto.subtle.digest('SHA-256', data)
+    return window.crypto.subtle.digest('SHA-256', data)
   }
 
   function generateRandomString(): string {
@@ -812,7 +813,7 @@ function handleLoginFormError(err: { code?: unknown }) {
     error.value = `Failed to retrieve status of server: ${err.code}`
   } else {
     // error is usually a meaningful error like "Server timed out"
-    error.value = `Failed to contact server. (${err})`
+    error.value = `Failed to contact server. (${describeRejection(err)})`
   }
 }
 

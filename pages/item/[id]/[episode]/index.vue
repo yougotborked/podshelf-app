@@ -60,12 +60,13 @@
 </template>
 
 <script setup lang="ts">
+import { describeRejection } from '~/composables/useRejectionLog'
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { Dialog } from '@capacitor/dialog'
 import { AbsFileSystem, AbsDownloader, AbsLogger } from '@/plugins/capacitor'
 import { useCellularPermission } from '~/composables/useCellularPermission'
-import type { HttpError, LibraryItem, LocalFolder, LocalMediaProgress, PlayItemPayload, PodcastEpisode } from '~/types'
+import type { HttpError, LibraryItem, LocalFolder, PlayItemPayload, PodcastEpisode } from '~/types'
 
 const route = useRoute()
 const router = useRouter()
@@ -494,7 +495,7 @@ async function toggleFinished() {
       const localMediaProgress = payload?.localMediaProgress
       console.log('toggleFinished localMediaProgress', JSON.stringify(localMediaProgress))
       if (localMediaProgress) {
-        globalsStore.updateLocalMediaProgress(localMediaProgress as LocalMediaProgress)
+        globalsStore.updateLocalMediaProgress(localMediaProgress)
       }
     }
   } else {
@@ -563,7 +564,7 @@ onMounted(async () => {
     if (canRequest) {
       fetchedLibraryItem = (await nativeHttp.get(`/api/items/${libItemId}?expanded=1`, { connectTimeout: 10000 }).catch((error: HttpError) => {
         console.error('Failed', error)
-        AbsLogger.error({ tag: 'EpisodePage', message: `Failed to fetch library item ${libItemId}: ${error.message || error}` })
+        AbsLogger.error({ tag: 'EpisodePage', message: `Failed to fetch library item ${libItemId}: ${error.message || describeRejection(error)}` })
         return null
       })) as LibraryItem | null
 

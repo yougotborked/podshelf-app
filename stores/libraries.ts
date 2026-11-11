@@ -52,7 +52,7 @@ export const useLibrariesStore = defineStore('libraries', {
     },
     getLibraryIsAudiobooksOnly: (state) => {
       const lib = state.libraries.find((l) => l.id === state.currentLibraryId)
-      return !!(lib?.settings as Record<string, unknown> | undefined)?.audiobooksOnly
+      return !!(lib?.settings)?.audiobooksOnly
     }
   },
 

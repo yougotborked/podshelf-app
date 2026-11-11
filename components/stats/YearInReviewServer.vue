@@ -84,7 +84,7 @@ async function initCanvas() {
   // Cover image tiles
   let imgsToAdd: Record<string, unknown> = {}
 
-  const ys = yearStats.value as Record<string, unknown>
+  const ys = yearStats.value
   const booksAddedWithCovers = ys.booksAddedWithCovers as string[]
 
   if (booksAddedWithCovers.length) {

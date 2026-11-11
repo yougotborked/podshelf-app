@@ -599,7 +599,7 @@ function toggleLockOrientation() {
   } else {
     settings.lockOrientation = 'NONE'
   }
-  useUtils().setOrientationLock(settings.lockOrientation as string)
+  useUtils().setOrientationLock(settings.lockOrientation)
   void saveSettings()
 }
 

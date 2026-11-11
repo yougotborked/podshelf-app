@@ -80,7 +80,7 @@ async function initCanvas() {
   ctx.fillRect(0, 0, c.width, c.height)
 
   // Cover image tiles
-  const ys = yearStats.value as Record<string, unknown>
+  const ys = yearStats.value
   const bookCovers = [...(ys.finishedBooksWithCovers as string[])]
   bookCovers.push(...(ys.booksWithCovers as string[]))
 
