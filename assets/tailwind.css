@@ -37,6 +37,7 @@
   --color-md-badge-4-on: rgb(var(--md-badge-4-on));
   --color-md-badge-5-on: rgb(var(--md-badge-5-on));
   --color-md-on-primary: rgb(var(--md-on-primary));
+  --color-md-scrim: rgb(var(--md-scrim));
   --color-md-primary-container: rgb(var(--md-primary-container));
   --color-md-on-primary-container: rgb(var(--md-on-primary-container));
   --color-md-on-surface: rgb(var(--md-on-surface));

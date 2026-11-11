@@ -257,8 +257,11 @@ player's scrubber ended up stock `yellow-300` rather than the Podshelf amber.
 
 Both are gone, and the alias definitions were deleted so a stray one now renders *no colour at
 all* rather than looking slightly off. `scripts/check-theme-tokens.mjs` (the `theme` step of
-`npm run verify`) fails on either, with a small allowlist for the genuine exceptions — the player
-picks its glyph colour against the cover art's lightness, which no token can express.
+`npm run verify`) fails on either, and on `text-white` / `bg-black/…` and friends, with a small
+allowlist for the genuine exceptions — the player picks its glyph colour against the cover art's
+lightness, overlays sit on cover art or on a scrim, and the readers carry their own paper. A
+processing overlay uses `bg-md-scrim/NN`, not `bg-black/NN`; a divider uses `border-md-outline-variant`,
+not `border-white/10`, which is invisible on the light theme.
 
 ## Critical Constraints
 

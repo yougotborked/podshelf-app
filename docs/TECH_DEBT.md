@@ -25,27 +25,6 @@ Any watch carrying a build from before the pin may need the one-time uninstall.
 
 **Clears when** the watch app ships through Play, which signs every build with the upload key.
 
-### 83 uses of text-white / bg-white are outside the token set
-
-**Where** `components/**`, `pages/**`, `layouts/**`
-
-`text-white`, `bg-white`, `text-black` and friends are fixed values that do not change between
-themes - the same defect as a raw `text-gray-400`, and the same one the Material token rule
-exists to prevent. The theme checker cannot see them: `paletteRe` requires a numeric suffix
-(`-\d{2,3}`), and `white` has none.
-
-One was found by looking at a light-theme screenshot: `ReadIconBtn` set `text-white` on the
-wrapper and the unread shield drew with `currentColor`, so the mark-as-finished control was a
-white icon on a near-white surface. That one is fixed. The other 82 are not audited.
-
-They are not all wrong. White on a cover thumbnail, on a scrim, or on a filled accent button is
-correct and should stay - which is exactly why this needs reading 82 call sites rather than a
-regex, and why the rule cannot simply be switched on: it would fail the build on every one of
-them at once.
-
-**Clears when** the call sites have been audited, the genuinely theme-independent ones moved to
-`ALLOW` with their reason, and `white|black` added to the checker so new ones cannot appear.
-
 ### The publish gate does not run the Kotlin tests
 
 **Where** `.github/workflows/publish-play.yml`

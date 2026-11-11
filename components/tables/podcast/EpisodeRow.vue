@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full py-4 overflow-hidden relative border-b border-white/10" @click.stop="goToEpisodePage">
+  <div class="w-full py-4 overflow-hidden relative border-b border-md-outline-variant" @click.stop="goToEpisodePage">
     <div v-if="episode" class="w-full px-1">
       <!-- Help debug for testing -->
       <!-- <template>
@@ -30,7 +30,7 @@
 
       <div class="flex items-center pt-2">
         <!-- Play/Pause Button -->
-        <div class="h-10 px-4 border border-md-outline-variant rounded-full flex items-center justify-center cursor-pointer" :class="userIsFinished ? 'text-white/40' : ''" @click.stop="playClick">
+        <div class="h-10 px-4 border border-md-outline-variant rounded-full flex items-center justify-center cursor-pointer" :class="userIsFinished ? 'text-md-on-surface/40' : ''" @click.stop="playClick">
           <span v-if="!playerIsStartingForThisMedia" class="material-symbols text-2xl fill leading-none" :class="streamIsPlaying ? '' : 'text-md-primary'">
             {{ streamIsPlaying ? 'pause' : 'play_arrow' }}
           </span>
@@ -62,7 +62,7 @@
       </div>
     </div>
 
-    <div v-if="processing" class="absolute top-0 left-0 w-full h-full bg-black/30 flex items-center justify-center">
+    <div v-if="processing" class="absolute top-0 left-0 w-full h-full bg-md-scrim/30 flex items-center justify-center">
       <widgets-loading-spinner size="la-lg" />
     </div>
 

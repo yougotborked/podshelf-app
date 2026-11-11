@@ -31,7 +31,7 @@
       </div>
       <div v-if="showPlayButton" class="absolute top-0 bottom-0 right-0 h-full flex items-center justify-center z-20 pr-1">
         <button type="button" class="relative rounded-full bg-md-on-surface-variant/50" :class="{ 'p-2': !playerIsStartingForThisMedia }" @click.stop.prevent="play">
-          <span v-if="!playerIsStartingForThisMedia" class="material-symbols text-2xl fill text-white">{{ playerIsPlaying ? 'pause' : 'play_arrow' }}</span>
+          <span v-if="!playerIsStartingForThisMedia" class="material-symbols text-2xl fill text-md-surface-0">{{ playerIsPlaying ? 'pause' : 'play_arrow' }}</span>
           <div v-else class="p-2 text-md-on-surface w-10 h-10 flex items-center justify-center bg-md-on-surface-variant/80 rounded-full overflow-hidden">
             <svg class="animate-spin" style="width: 24px; height: 24px" viewBox="0 0 24 24">
               <path fill="currentColor" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z" />

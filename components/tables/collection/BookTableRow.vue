@@ -15,7 +15,7 @@
         </div>
       </div>
       <div class="w-8 min-w-8 flex justify-center">
-        <button v-if="showPlayBtn" class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center" @click.stop.prevent="playClick">
+        <button v-if="showPlayBtn" class="w-8 h-8 rounded-full border border-md-outline-variant flex items-center justify-center" @click.stop.prevent="playClick">
           <span class="material-symbols text-2xl fill" :class="streamIsPlaying ? '' : 'text-md-primary'">{{ streamIsPlaying ? 'pause' : 'play_arrow' }}</span>
         </button>
       </div>

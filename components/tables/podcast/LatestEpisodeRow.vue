@@ -28,7 +28,7 @@
 
       <div class="flex items-center pt-2">
         <!-- Play/Pause Button -->
-        <div class="h-9 px-4 border border-md-outline-variant hover:bg-white/10 rounded-full flex items-center justify-center cursor-pointer" :class="userIsFinished ? 'text-md-on-surface/40' : ''" @click.stop="playClick">
+        <div class="h-9 px-4 border border-md-outline-variant hover:bg-md-on-surface/10 rounded-full flex items-center justify-center cursor-pointer" :class="userIsFinished ? 'text-md-on-surface/40' : ''" @click.stop="playClick">
           <span v-if="!playerIsStartingForThisMedia" class="material-symbols text-2xl fill leading-none" :class="streamIsPlaying ? '' : 'text-md-primary'">
             {{ streamIsPlaying ? 'pause' : 'play_arrow' }}
           </span>
@@ -60,7 +60,7 @@
       </div>
     </div>
 
-    <div v-if="processing" class="absolute top-0 left-0 w-full h-full bg-black/30 flex items-center justify-center">
+    <div v-if="processing" class="absolute top-0 left-0 w-full h-full bg-md-scrim/30 flex items-center justify-center">
       <widgets-loading-spinner size="la-lg" />
     </div>
 

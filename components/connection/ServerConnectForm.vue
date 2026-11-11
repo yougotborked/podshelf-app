@@ -77,7 +77,7 @@
       </div>
     </div>
 
-    <div :class="processing ? 'opacity-100' : 'opacity-0 pointer-events-none'" class="fixed w-full h-full top-0 left-0 bg-black/75 flex items-center justify-center z-30 transition-opacity duration-500">
+    <div :class="processing ? 'opacity-100' : 'opacity-0 pointer-events-none'" class="fixed w-full h-full top-0 left-0 bg-md-scrim/75 flex items-center justify-center z-30 transition-opacity duration-500">
       <widgets-loading-spinner size="la-2x" />
     </div>
 

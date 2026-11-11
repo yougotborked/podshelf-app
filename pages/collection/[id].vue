@@ -25,7 +25,7 @@
         <tables-collection-books-table :books="bookItems" :collection-id="collection?.id" />
       </div>
     </div>
-    <div v-show="processingRemove" class="absolute top-0 left-0 w-full h-full z-10 bg-black/40 flex items-center justify-center">
+    <div v-show="processingRemove" class="absolute top-0 left-0 w-full h-full z-10 bg-md-scrim/40 flex items-center justify-center">
       <ui-loading-indicator />
     </div>
   </div>
