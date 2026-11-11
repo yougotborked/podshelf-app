@@ -143,8 +143,12 @@ two launch crashes. AGP 9 runs R8 in **strict full mode for keep rules**: a `-ke
 class no longer keeps its constructor. Room's consumer rule is written that way, so
 `WorkDatabase_Impl` lost the constructor Room calls by reflection, and WorkManager's startup
 initializer killed both apps before `Application.onCreate` (0.14.0-dev.49, and every Play build of
-the watch). `android.r8.strictFullModeForKeepRules=false` in `android/gradle.properties` puts the
-old meaning back; do not remove it until the libraries' rules are written for strict mode.
+the watch). The build now runs in strict mode, as AGP intends: `android.r8.strictFullModeForKeepRules=false` is
+gone, and `android/{app,wear}/proguard-rules.pro` carry the rule Room's own consumer rule lacks
+(`-keepclassmembers class * extends androidx.room.RoomDatabase { <init>(); }`). Strict mode with that
+rule left exactly one class in each app without a constructor before it was added — `WorkDatabase_Impl`
+— and none after. A new library whose consumer rule names a class it builds reflectively will show up
+as a failure of the check below, not at launch.
 `scripts/r8-check/constructors.py` reads the dex that is about to ship and fails if any class the
 platform builds by name — manifest components, startup initializers, Room databases, service
 providers — has no constructor. `check-app-r8.sh` runs it on both release APKs and the Play
