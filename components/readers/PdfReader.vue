@@ -25,10 +25,17 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from 'vue'
 import { getScreenOrientation } from '~/composables/useScreenOrientation'
 import pdf from '@teckel/vue-pdf'
+
+// What pdf.js is told to open. `isEvalSupported` is spelled out for GHSA-wgrm-67xf-hhpq (see init()).
+interface PdfDocInitParams {
+  url: string | undefined
+  isEvalSupported: boolean
+  httpHeaders: Record<string, string>
+}
 
 export default defineComponent({
   components: {
@@ -59,7 +66,7 @@ export default defineComponent({
       numPages: 0,
       windowWidth: 0,
       windowHeight: 0,
-      pdfDocInitParams: null,
+      pdfDocInitParams: null as PdfDocInitParams | null,
       isRefreshing: false
     }
   },
@@ -115,7 +122,7 @@ export default defineComponent({
       if (!this.keepProgress) return 0
 
       // Validate ebookLocation is a number
-      if (!this.userItemProgress?.ebookLocation || isNaN(this.userItemProgress.ebookLocation)) return 0
+      if (!this.userItemProgress?.ebookLocation || isNaN(Number(this.userItemProgress.ebookLocation))) return 0
       return Number(this.userItemProgress.ebookLocation)
     },
     isPlayerOpen() {
@@ -164,7 +171,7 @@ export default defineComponent({
         this.page = this.savedPage
       }
     },
-    numPagesLoaded(e) {
+    numPagesLoaded(e: number) {
       if (!e) return
 
       this.numPages = e
@@ -224,8 +231,8 @@ export default defineComponent({
       }
       this.isRefreshing = false
     },
-    async error(err) {
-      if (err && err.status === 401) {
+    async error(err: { status?: number } | null | undefined) {
+      if (err?.status === 401) {
         console.log('Received 401 error, refreshing token')
         await this.refreshToken()
         return

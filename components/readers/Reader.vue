@@ -39,7 +39,7 @@
           <ul>
             <li v-for="chapter in chapters" :key="chapter.id" class="py-1">
               <a :href="chapter.href" class="opacity-80 hover:opacity-100" @click.prevent="goToChapter(chapter.href)">{{ chapter.label }}</a>
-              <ul v-if="chapter.subitems.length">
+              <ul v-if="chapter.subitems?.length">
                 <li v-for="subchapter in chapter.subitems" :key="subchapter.id" class="py-1 pl-4">
                   <a :href="subchapter.href" class="opacity-80 hover:opacity-100" @click.prevent="goToChapter(subchapter.href)">{{ subchapter.label }}</a>
                 </li>
@@ -125,17 +125,51 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { VolumeButtons } from '@capacitor-community/volume-buttons'
 import { KeepAwake } from '@capacitor-community/keep-awake'
 
+// The slice of a library item the reader looks at.
+interface ReaderEbookFile {
+  ino?: string
+  ebookFormat?: string
+  isLocal?: boolean
+  localFileId?: string
+  contentUrl?: string
+  metadata: { ext: string }
+}
+interface ReaderLibraryItem {
+  id: string
+  media?: { metadata?: { title?: string }; ebookFile?: ReaderEbookFile | null }
+  libraryFiles: ReaderEbookFile[]
+}
+interface ReaderChapter {
+  id?: string
+  href: string
+  label: string
+  subitems?: ReaderChapter[]
+}
+type EbookType = 'mobi' | 'epub' | 'pdf' | 'comic'
+// What each reader component (epub, pdf, comic, mobi) exposes; they differ, so all optional.
+interface ReaderComponentApi {
+  updateSettings?: (settings: Record<string, unknown>) => void
+  goToChapter?: (href: string) => void
+  clickShowInfoMenu?: () => void
+  clickShowPageMenu?: () => void
+  chapters?: ReaderChapter[]
+  next?: () => void
+  prev?: () => void
+}
+
 export default defineComponent({
   setup() {
     const appStore = useAppStore()
     const eventBus = useEventBus()
-    return { appStore, eventBus }
+    const platform = usePlatform()
+    const { showHideStatusBar } = useUtils()
+    return { appStore, eventBus, platform, showHideStatusBar }
   },
   data() {
     return {
@@ -144,12 +178,12 @@ export default defineComponent({
       touchendX: 0,
       touchendY: 0,
       touchstartTime: 0,
-      touchIdentifier: null,
+      touchIdentifier: null as number | null,
       showingToolbar: false,
       showTOCModal: false,
       showSettingsModal: false,
       comicHasMetadata: false,
-      chapters: [],
+      chapters: [] as ReaderChapter[],
       isInittingWatchVolume: false,
       ereaderSettings: {
         theme: 'dark',
@@ -166,18 +200,18 @@ export default defineComponent({
   },
   watch: {
     show: {
-      handler(newVal) {
+      handler(newVal: boolean) {
         if (newVal) {
           this.comicHasMetadata = false
           this.registerListeners()
           this.hideToolbar()
         } else {
           this.unregisterListeners()
-          this.$showHideStatusBar(true)
+          void this.showHideStatusBar(true)
         }
       }
     },
-    isPlayerOpen(newVal, oldVal) {
+    isPlayerOpen(newVal: boolean, oldVal: boolean) {
       // Closed player
       if (!newVal && oldVal) {
         void this.initWatchVolume()
@@ -186,26 +220,26 @@ export default defineComponent({
   },
   computed: {
     show: {
-      get() {
+      get(): boolean {
         return this.appStore.showReader
       },
-      set(val) {
+      set(val: boolean) {
         this.appStore.showReader = val
       }
     },
     isIos() {
-      return this.$platform === 'ios'
+      return this.platform === 'ios'
     },
     title() {
       return this.mediaMetadata.title || 'No Title'
     },
-    selectedLibraryItem() {
-      return this.appStore.selectedLibraryItem
+    selectedLibraryItem(): ReaderLibraryItem | null {
+      return this.appStore.selectedLibraryItem as ReaderLibraryItem | null
     },
-    media() {
+    media(): ReaderLibraryItem['media'] | null {
       return this.selectedLibraryItem?.media || null
     },
-    mediaMetadata() {
+    mediaMetadata(): { title?: string } {
       return this.media?.metadata || {}
     },
     ereaderTheme() {
@@ -287,8 +321,8 @@ export default defineComponent({
       else if (this.ebookType === 'pdf') return 'readers-pdf-reader'
       return null
     },
-    ebookFile() {
-      if (!this.media) return null
+    ebookFile(): ReaderEbookFile | null | undefined {
+      if (!this.media || !this.selectedLibraryItem) return null
       // ebook file id is passed when reading a supplementary ebook
       if (this.ebookFileId) {
         return this.selectedLibraryItem.libraryFiles.find((lf) => lf.ino === this.ebookFileId)
@@ -303,7 +337,7 @@ export default defineComponent({
       }
       return this.ebookFile.ebookFormat
     },
-    ebookType() {
+    ebookType(): EbookType | null {
       if (this.isMobi) return 'mobi'
       else if (this.isEpub) return 'epub'
       else if (this.isPdf) return 'pdf'
@@ -329,7 +363,7 @@ export default defineComponent({
       return this.ebookFile?.contentUrl
     },
     ebookUrl() {
-      if (!this.ebookFile) return null
+      if (!this.ebookFile || !this.selectedLibraryItem) return null
       if (this.localContentUrl) {
         return Capacitor.convertFileSrc(this.localContentUrl)
       }
@@ -351,35 +385,39 @@ export default defineComponent({
   },
   methods: {
     settingsUpdated() {
-      this.$refs.readerComponent?.updateSettings?.(this.ereaderSettings)
+      this.readerApi()?.updateSettings?.(this.ereaderSettings)
       localStorage.setItem('ereaderSettings', JSON.stringify(this.ereaderSettings))
 
       void this.initWatchVolume()
       void this.initKeepScreenAwake()
     },
-    goToChapter(href) {
+    // The mounted reader component, whichever of the four it is.
+    readerApi(): ReaderComponentApi | undefined {
+      return this.$refs.readerComponent as ReaderComponentApi | undefined
+    },
+    goToChapter(href: string) {
       this.showTOCModal = false
-      this.$refs.readerComponent?.goToChapter(href)
+      this.readerApi()?.goToChapter?.(href)
     },
     readerMounted() {
       if (this.isEpub) {
         this.loadEreaderSettings()
       }
     },
-    readerLoaded(data) {
+    readerLoaded(data: { hasMetadata: boolean }) {
       if (this.isComic) {
         this.comicHasMetadata = data.hasMetadata
       }
     },
     clickMetadataBtn() {
-      this.$refs.readerComponent?.clickShowInfoMenu()
+      this.readerApi()?.clickShowInfoMenu?.()
     },
     clickTOCBtn() {
       this.hideToolbar()
       if (this.isComic) {
-        this.$refs.readerComponent?.clickShowPageMenu?.()
+        this.readerApi()?.clickShowPageMenu?.()
       } else {
-        this.chapters = this.$refs.readerComponent?.chapters || []
+        this.chapters = this.readerApi()?.chapters || []
         this.showTOCModal = true
       }
     },
@@ -388,14 +426,10 @@ export default defineComponent({
       this.showSettingsModal = true
     },
     next() {
-      if (this.$refs.readerComponent && this.$refs.readerComponent.next) {
-        this.$refs.readerComponent.next()
-      }
+      this.readerApi()?.next?.()
     },
     prev() {
-      if (this.$refs.readerComponent && this.$refs.readerComponent.prev) {
-        this.$refs.readerComponent.prev()
-      }
+      this.readerApi()?.prev?.()
     },
     handleGesture() {
       // Touch must be less than 1s. Must be > 60px drag and X distance > Y distance
@@ -431,34 +465,37 @@ export default defineComponent({
     },
     showToolbar() {
       this.showingToolbar = true
-      this.$showHideStatusBar(true)
+      void this.showHideStatusBar(true)
     },
     hideToolbar() {
       this.showingToolbar = false
-      this.$showHideStatusBar(false)
+      void this.showHideStatusBar(false)
     },
     toggleToolbar() {
       if (this.showingToolbar) this.hideToolbar()
       else this.showToolbar()
     },
-    touchstart(e) {
+    touchstart(e: TouchEvent) {
       // Ignore rapid touch
       if (this.touchstartTime && Date.now() - this.touchstartTime < 250) {
         return
       }
 
-      this.touchstartX = e.touches[0].screenX
-      this.touchstartY = e.touches[0].screenY
+      const touch = e.touches[0]
+      if (!touch) return
+      this.touchstartX = touch.screenX
+      this.touchstartY = touch.screenY
       this.touchstartTime = Date.now()
-      this.touchIdentifier = e.touches[0].identifier
+      this.touchIdentifier = touch.identifier
     },
-    touchend(e) {
-      if (this.touchIdentifier !== e.changedTouches[0].identifier) {
+    touchend(e: TouchEvent) {
+      const touch = e.changedTouches[0]
+      if (!touch || this.touchIdentifier !== touch.identifier) {
         return
       }
 
-      this.touchendX = e.changedTouches[0].screenX
-      this.touchendY = e.changedTouches[0].screenY
+      this.touchendX = touch.screenX
+      this.touchendY = touch.screenY
       this.handleGesture()
     },
     closeEvt() {
@@ -468,10 +505,11 @@ export default defineComponent({
       try {
         const settings = localStorage.getItem('ereaderSettings')
         if (settings) {
-          const _ereaderSettings = JSON.parse(settings)
-          for (const key in this.ereaderSettings) {
-            if (_ereaderSettings[key] !== undefined) {
-              this.ereaderSettings[key] = _ereaderSettings[key]
+          const saved = JSON.parse(settings) as Record<string, unknown>
+          const current = this.ereaderSettings as Record<string, unknown>
+          for (const key in current) {
+            if (saved[key] !== undefined) {
+              current[key] = saved[key]
             }
           }
           this.settingsUpdated()
@@ -532,7 +570,7 @@ export default defineComponent({
         console.error('Failed to allow sleep', error)
       })
     },
-    volumePressed(e) {
+    volumePressed(e: { direction: string }) {
       if (this.ereaderSettings.navigateWithVolume == 'enabled') {
         if (e.direction == 'up') {
           this.prev()

@@ -98,8 +98,8 @@ class DbService {
     return AbsDatabase.updateLocalMediaProgressFinished(payload)
   }
 
-  updateLocalEbookProgress(payload: Record<string, unknown>): Promise<unknown> {
-    return AbsDatabase.updateLocalEbookProgress(payload)
+  updateLocalEbookProgress(payload: Record<string, unknown>): Promise<{ localMediaProgress?: LocalMediaProgress | null }> {
+    return AbsDatabase.updateLocalEbookProgress(payload) as Promise<{ localMediaProgress?: LocalMediaProgress | null }>
   }
 
   updateDeviceSettings(payload: Record<string, unknown>): Promise<unknown> {

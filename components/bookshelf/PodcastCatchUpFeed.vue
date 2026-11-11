@@ -36,27 +36,30 @@
         v-for="episode in unfinishedEpisodes"
         :key="episode.id"
         :episode="episode"
-        :local-episode="localEpisodeMap[episode.id]"
+        :local-episode="localEpisodeFor(episode)"
         :library-item-id="episode.libraryItemId"
-        :local-library-item-id="localEpisodeMap[episode.id] && localEpisodeMap[episode.id].localLibraryItemId"
-        :local-cover-url="localCoverMap[episode.libraryItemId]"
+        :local-library-item-id="localEpisodeFor(episode)?.localLibraryItemId"
+        :local-cover-url="episode.libraryItemId ? localCoverMap[episode.libraryItemId] : undefined"
         @addToPlaylist="addEpisodeToPlaylist"
       />
     </div>
   </div>
 </template>
 
-<script>
-import { defineComponent } from 'vue'
+<script lang="ts">
+import { defineComponent, type PropType } from 'vue'
+import type { LibraryItem, PlayItemPayload, QueueItem } from '~/types'
+import type { LocalLibraryItemCover } from '~/composables/useCoverSource'
 import { useAutoPlaylistPodcastRules } from '~/composables/useAutoPlaylist'
 import { episodePublishedAt, orderListeningQueue, queueItemStartTime, toPlayQueueItems } from '~/composables/useListeningQueue'
+import type { ListeningEpisode, LocalEpisode } from '~/composables/useListeningQueue'
 import { useWearSync } from '~/composables/useWearSync'
 import { buildLocalCoverMap } from '~/composables/useCoverSource'
 
 export default defineComponent({
   props: {
     currentLibraryId: {
-      type: String,
+      type: String as PropType<string | null>,
       default: null
     }
   },
@@ -77,14 +80,14 @@ export default defineComponent({
   },
   data() {
     return {
-      episodes: [],
+      episodes: [] as ListeningEpisode[],
       isLoading: false,
-      localLibraryItems: [],
+      localLibraryItems: [] as LibraryItem[],
       offlineToastShown: false
     }
   },
   watch: {
-    currentLibraryId(newVal) {
+    currentLibraryId(newVal: string | null) {
       if (newVal) {
         void this.loadEpisodes()
       }
@@ -110,26 +113,25 @@ export default defineComponent({
       return this.appStore.serverReachable
     },
     localEpisodes() {
-      const episodes = []
+      const episodes: LocalEpisode[] = []
       this.localLibraryItems.forEach((li) => {
-        if (li.media.episodes && li.media.episodes.length) {
-          li.media.episodes.map((ep) => {
-            ep.localLibraryItemId = li.id
-            episodes.push(ep)
-          })
-        }
+        const localEpisodes = (li.media as { episodes?: LocalEpisode[] }).episodes
+        localEpisodes?.forEach((ep) => {
+          ep.localLibraryItemId = li.id
+          episodes.push(ep)
+        })
       })
       return episodes
     },
     localCoverMap() {
-      return buildLocalCoverMap(this.localLibraryItems)
+      // The device database's items carry coverContentUrl; the shared LibraryItem type does not.
+      return buildLocalCoverMap(this.localLibraryItems as LocalLibraryItemCover[])
     },
     localEpisodeMap() {
-      var epmap = {}
+      const epmap: Record<string, LocalEpisode> = {}
       this.localEpisodes.forEach((localEp) => {
-        if (localEp.serverEpisodeId) {
-          epmap[localEp.serverEpisodeId] = localEp
-        }
+        const serverEpisodeId = localEp.serverEpisodeId as string | undefined
+        if (serverEpisodeId) epmap[serverEpisodeId] = localEp
       })
       return epmap
     },
@@ -138,14 +140,14 @@ export default defineComponent({
       // matters on its own: the native layer writes a finish before the socket confirms it, so
       // without it a just-finished episode lingers in the list.
       return {
-        server: (libraryItemId, episodeId) => this.userStore.getUserMediaProgress(libraryItemId, episodeId),
-        local: (libraryItemId, episodeId) => this.globalsStore.getLocalMediaProgressByServerItemId(libraryItemId, episodeId)
+        server: (libraryItemId: string, episodeId: string | null) => this.userStore.getUserMediaProgress(libraryItemId, episodeId),
+        local: (libraryItemId: string, episodeId: string | null) => this.globalsStore.getLocalMediaProgressByServerItemId(libraryItemId, episodeId)
       }
     },
     wearQueueItems() {
       // The same mapping the play button uses, so the watch is handed exactly the queue a tap
       // on this screen would start - not a parallel list that could disagree with it.
-      return toPlayQueueItems(this.unfinishedEpisodes, (ep) => this.localEpisodeMap[ep.id])
+      return toPlayQueueItems(this.unfinishedEpisodes, (ep) => this.localEpisodeFor(ep))
     },
     unfinishedEpisodes() {
       // Oldest-first, with no resume reordering: this is a list someone is reading, and one that
@@ -155,6 +157,9 @@ export default defineComponent({
     }
   },
   methods: {
+    localEpisodeFor(episode: ListeningEpisode): LocalEpisode | undefined {
+      return episode.id ? this.localEpisodeMap[episode.id] : undefined
+    },
     async loadLocalPodcastLibraryItems() {
       this.localLibraryItems = await this.db.getLocalLibraryItems('podcast')
     },
@@ -163,11 +168,11 @@ export default defineComponent({
         await this.loadLocalPodcastLibraryItems()
       }
 
-      const cached = await this.localStore.getCachedLatestEpisodes(this.currentLibraryId)
+      const cached = this.currentLibraryId ? await this.localStore.getCachedLatestEpisodes(this.currentLibraryId) : []
       if (cached.length) {
-        this.episodes = cached
+        this.episodes = cached as ListeningEpisode[]
       } else {
-        this.episodes = [...this.localEpisodes].sort((a, b) => episodePublishedAt(b) - episodePublishedAt(a)).slice(0, 200)
+        this.episodes = ([...this.localEpisodes] as ListeningEpisode[]).sort((a, b) => episodePublishedAt(b) - episodePublishedAt(a)).slice(0, 200)
       }
 
       if (showToast && !this.offlineToastShown) {
@@ -203,7 +208,7 @@ export default defineComponent({
           throw new Error('Empty response payload')
         }
 
-        this.episodes = episodePayload.episodes || []
+        this.episodes = ((episodePayload as { episodes?: ListeningEpisode[] }).episodes) || []
         this.offlineToastShown = false
         void this.localStore.setCachedLatestEpisodes(this.currentLibraryId, this.episodes)
       } catch (error) {
@@ -229,7 +234,7 @@ export default defineComponent({
           ? {
               serverAddress,
               token,
-              userId: this.userStore.user?.id || '',
+              userId: (this.userStore.user?.id as string | undefined) || '',
               serverConnectionConfigId: this.userStore.getServerConnectionConfigId || ''
             }
           : null
@@ -244,10 +249,9 @@ export default defineComponent({
 
       // A queue of every unfinished episode, so playback continues without another tap - the
       // same pattern as a playlist's "play all".
-      const queue = toPlayQueueItems(episodes, (ep) => this.localEpisodeMap[ep.id])
-      if (!queue.length) return
-
+      const queue = toPlayQueueItems(episodes, (ep) => this.localEpisodeFor(ep))
       const first = queue[0]
+      if (!first) return
       const startTime = queueItemStartTime(first, this.progressLookup)
 
       this.appStore.setPlayQueue(queue)
@@ -255,19 +259,19 @@ export default defineComponent({
       this.appStore.playerIsStartingPlayback = true
       this.appStore.playerStartingPlaybackMediaId = first.serverEpisodeId || first.episodeId
 
-      const playPayload = {
+      const playPayload: PlayItemPayload = {
         libraryItemId: first.libraryItemId,
         episodeId: first.episodeId,
         serverLibraryItemId: first.serverLibraryItemId,
         serverEpisodeId: first.serverEpisodeId,
-        queue,
+        queue: queue as QueueItem[],
         queueIndex: 0
       }
       if (startTime) playPayload.startTime = startTime
 
       this.eventBus.emit('play-item', playPayload)
     },
-    async addEpisodeToPlaylist(episode) {
+    async addEpisodeToPlaylist(episode: ListeningEpisode) {
       const libraryItem = await this.nativeHttp.get(`/api/items/${episode.libraryItemId}`, { connectTimeout: 10000 }).catch((error) => {
         console.error('[PodcastCatchUpFeed] Failed to get library item', error)
         this.toast.error('Failed to get library item')
