@@ -63,7 +63,7 @@ const podcast = reactive({
   language: ''
 })
 
-const _podcastData = computed(() => (props.podcastData || {}) as Record<string, unknown>)
+const _podcastData = computed(() => (props.podcastData || {}))
 const feedMetadata = computed(() => {
   if (!props.podcastFeedData) return {}
   return (props.podcastFeedData.metadata as Record<string, unknown> | null | undefined) || {}
@@ -131,7 +131,7 @@ function submit() {
       const errorMsg = error.response?.data ? error.response.data : strings.ToastPodcastCreateFailed
       console.error('Failed to create podcast', error)
       emit('update:processing', false)
-      toast.error(errorMsg as string)
+      toast.error(errorMsg)
     })
 }
 

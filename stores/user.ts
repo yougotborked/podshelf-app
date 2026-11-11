@@ -51,12 +51,12 @@ export const useUserStore = defineStore('user', {
       const mediaProgress = (state.user?.mediaProgress as MediaProgress[] | null | undefined) || []
 
       for (const mp of mediaProgress) {
-        const libraryItemId = mp.libraryItemId as string | undefined
+        const libraryItemId = mp.libraryItemId
         if (!libraryItemId) continue
         // `find` returns the first match, so earlier entries win here too
         if (!byItem.has(libraryItemId)) byItem.set(libraryItemId, mp)
         if (mp.episodeId) {
-          const key = `${libraryItemId}|${mp.episodeId as string}`
+          const key = `${libraryItemId}|${mp.episodeId}`
           if (!byEpisode.has(key)) byEpisode.set(key, mp)
         }
       }

@@ -218,7 +218,7 @@ class LocalStorage {
   async setCachedCollection(collection: Record<string, unknown> | null | undefined): Promise<void> {
     try {
       if (!collection?.id) return
-      await Preferences.set({ key: this.ukey(`collection_${collection.id}`), value: JSON.stringify(collection) })
+      await Preferences.set({ key: this.ukey(`collection_${collection.id as string}`), value: JSON.stringify(collection) })
     } catch (error) {
       console.error('[LocalStorage] Failed to cache collection', error)
     }
@@ -237,7 +237,7 @@ class LocalStorage {
   async setCachedSeries(series: Record<string, unknown> | null | undefined): Promise<void> {
     try {
       if (!series?.id) return
-      await Preferences.set({ key: this.ukey(`series_${series.id}`), value: JSON.stringify(series) })
+      await Preferences.set({ key: this.ukey(`series_${series.id as string}`), value: JSON.stringify(series) })
     } catch (error) {
       console.error('[LocalStorage] Failed to cache series', error)
     }
@@ -347,7 +347,7 @@ class LocalStorage {
   async setCachedLibraryItem(libraryItem: Record<string, unknown> | null | undefined): Promise<void> {
     try {
       if (!libraryItem?.id) return
-      await Preferences.set({ key: this.ukey(`libraryItem_${libraryItem.id}`), value: JSON.stringify(libraryItem) })
+      await Preferences.set({ key: this.ukey(`libraryItem_${libraryItem.id as string}`), value: JSON.stringify(libraryItem) })
     } catch (error) {
       console.error('[LocalStorage] Failed to cache library item', error)
     }

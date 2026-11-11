@@ -695,7 +695,7 @@ async function loadServerLibraryItem() {
   }
 
   if (!fetchedItem) {
-    const fallbackLocal = (await db.getLocalLibraryItemByLId(libraryItemId).catch(() => null)) as LibraryItem | null
+    const fallbackLocal = (await db.getLocalLibraryItemByLId(libraryItemId).catch(() => null))
     if (fallbackLocal) {
       fetchedItem = fallbackLocal
       loadedFromCache.value = true
@@ -709,7 +709,7 @@ async function loadServerLibraryItem() {
   }
 
   try {
-    const localLibraryItemCheck = (await db.getLocalLibraryItemByLId(libraryItemId)) as LibraryItem | null
+    const localLibraryItemCheck = (await db.getLocalLibraryItemByLId(libraryItemId))
     if (localLibraryItemCheck) {
       fetchedItem.localLibraryItem = localLibraryItemCheck
     }
@@ -725,7 +725,7 @@ onMounted(async () => {
   const libItemId = libraryItemId
 
   if (libItemId.startsWith('local')) {
-    const localItem = (await db.getLocalLibraryItem(libItemId)) as LibraryItem | null
+    const localItem = (await db.getLocalLibraryItem(libItemId))
     if (!localItem) {
       await navigateTo('/?error=Failed to get downloaded library item', { replace: true })
       return
@@ -744,7 +744,7 @@ onMounted(async () => {
     }
 
     if (!localItem.isLocal) {
-      const localLi = (await db.getLocalLibraryItemByLId(localItem.id || libItemId)) as LibraryItem | null
+      const localLi = (await db.getLocalLibraryItemByLId(localItem.id || libItemId))
       if (localLi) {
         localItem.localLibraryItem = localLi
       }
@@ -756,7 +756,7 @@ onMounted(async () => {
     if (cachedItem) {
       loadedFromCache.value = true
     } else {
-      const fallbackLocal = (await db.getLocalLibraryItemByLId(libItemId)) as LibraryItem | null
+      const fallbackLocal = (await db.getLocalLibraryItemByLId(libItemId))
       if (fallbackLocal) {
         cachedItem = fallbackLocal
         loadedFromCache.value = true
@@ -767,7 +767,7 @@ onMounted(async () => {
     }
 
     if (!cachedItem.isLocal) {
-      const localLi = (await db.getLocalLibraryItemByLId(cachedItem.id || libItemId)) as LibraryItem | null
+      const localLi = (await db.getLocalLibraryItemByLId(cachedItem.id || libItemId))
       if (localLi) {
         cachedItem.localLibraryItem = localLi
       }

@@ -157,7 +157,7 @@ const userProgress = computed(() => userStore.getUserMediaProgress(libraryItemId
 const userProgressPercent = computed(() => (userProgress.value as Record<string, unknown> | null | undefined)?.progress as number || 0)
 const itemIsFinished = computed(() => !!(userProgress.value as Record<string, unknown> | null | undefined)?.isFinished)
 const isPlaying = computed(() => {
-  if (localLibraryItemId.value && appStore.getIsMediaStreaming(localLibraryItemId.value as string)) return true
+  if (localLibraryItemId.value && appStore.getIsMediaStreaming(localLibraryItemId.value)) return true
   return appStore.getIsMediaStreaming(libraryItemId.value)
 })
 const isStreaming = computed(() => isPlaying.value && !appStore.getIsCurrentSessionLocal)

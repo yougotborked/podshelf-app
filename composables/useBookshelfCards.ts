@@ -1,5 +1,4 @@
 import { createApp, type Component } from 'vue'
-import { createPinia } from 'pinia'
 
 // Dynamic imports for card components (resolved at runtime in Phase 2+)
 // These components will be created in Task 2.x — for now we use dynamic imports
@@ -38,9 +37,9 @@ export interface BookshelfCardsOptions {
   entities: { value: Record<string, unknown>[] }
   localLibraryItems: { value: Record<string, unknown>[] }
   localLibraryItemMap: { value: Map<string, Record<string, unknown>> | null }
-  filterBy: { value: string | null | unknown }
-  orderBy: { value: string | null | unknown }
-  sortingIgnorePrefix: { value: boolean | null | unknown }
+  filterBy: { value: unknown }
+  orderBy: { value: unknown }
+  sortingIgnorePrefix: { value: unknown }
 }
 
 export function useBookshelfCards(options: BookshelfCardsOptions) {
@@ -91,7 +90,7 @@ export function useBookshelfCards(options: BookshelfCardsOptions) {
     const container = document.createElement('div')
     const app = createApp(ComponentClass, props)
     // Share the same Pinia instance so stores are shared
-    app.use(nuxtApp.$pinia as ReturnType<typeof createPinia>)
+    app.use(nuxtApp.$pinia)
     const instance = app.mount(container) as unknown as {
       $el: HTMLElement
       setSelectionMode?: (v: boolean) => void
@@ -119,13 +118,13 @@ export function useBookshelfCards(options: BookshelfCardsOptions) {
       const entity = options.entities.value[index]
       componentRef.setEntity(entity)
 
-      if (options.isBookEntity.value && !(entity as Record<string, unknown>).isLocal) {
+      if (options.isBookEntity.value && !(entity).isLocal) {
         const localLibraryItemMap = options.localLibraryItemMap.value
         const localLibraryItems = options.localLibraryItems.value
         const localLibraryItem =
           (localLibraryItemMap && typeof localLibraryItemMap.get === 'function'
-            ? localLibraryItemMap.get((entity as Record<string, unknown>).id as string)
-            : localLibraryItems.find((lli) => (lli as Record<string, unknown>).libraryItemId == (entity as Record<string, unknown>).id)) || null
+            ? localLibraryItemMap.get((entity).id as string)
+            : localLibraryItems.find((lli) => (lli).libraryItemId == (entity).id)) || null
         if (localLibraryItem) componentRef.setLocalLibraryItem(localLibraryItem)
       }
     }

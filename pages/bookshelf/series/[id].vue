@@ -178,7 +178,7 @@ async function download(selectedLocalFolder: LocalFolder | null = null) {
   let fetchFinished = false
   missingFiles.value = 0
   missingFilesSize.value = 0
-  while (fetchFinished === false) {
+  while (!fetchFinished) {
     fetchFinished = await fetchSeriesEntities(page)
     page += 1
   }

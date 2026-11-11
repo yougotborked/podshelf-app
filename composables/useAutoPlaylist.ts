@@ -240,7 +240,7 @@ function createPlaylistEpisode(episode: Record<string, unknown> | null | undefin
 
 function sanitizeLocalEpisode(localEpisode: Record<string, unknown> | null): Record<string, unknown> | null {
   if (!localEpisode) return null
-  const { id, serverEpisodeId, localLibraryItemId, title, pubDate, publishedAt, duration, fileSize, audioTrack } = localEpisode as Record<string, unknown>
+  const { id, serverEpisodeId, localLibraryItemId, title, pubDate, publishedAt, duration, fileSize, audioTrack } = localEpisode
   return {
     id, serverEpisodeId, localLibraryItemId, title, pubDate, publishedAt, duration, fileSize,
     audioTrack: audioTrack ? { ...(audioTrack as Record<string, unknown>) } : undefined

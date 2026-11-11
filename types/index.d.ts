@@ -223,7 +223,7 @@ export interface LibraryItemMedia {
 export interface LibraryItem {
   id: string
   libraryId?: string
-  mediaType?: 'book' | 'podcast' | string
+  mediaType?: string
   media: LibraryItemMedia
   libraryFiles?: LibraryFile[]
   numFiles?: number

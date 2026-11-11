@@ -183,7 +183,7 @@ const sublistItems = computed(() => {
 watch(show, (newVal) => {
   if (!newVal) {
     if (sublist.value && !selectedItemSublist.value) sublist.value = null
-    if (!sublist.value && selectedItemSublist.value) sublist.value = selectedItemSublist.value as string
+    if (!sublist.value && selectedItemSublist.value) sublist.value = selectedItemSublist.value
   }
 })
 

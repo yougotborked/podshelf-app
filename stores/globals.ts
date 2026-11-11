@@ -34,7 +34,7 @@ interface GlobalsState {
   pageOverlayOpen: boolean
   itemDownloads: DownloadItem[]
   bookshelfListView: boolean
-  series: unknown | null
+  series: unknown
   localMediaProgress: LocalMediaProgress[]
   lastSearch: string | null
   jumpForwardSecondsOptions: number[]
@@ -43,10 +43,10 @@ interface GlobalsState {
   selectedPlaylistItems: unknown[]
   showPlaylistsAddCreateModal: boolean
   showSelectLocalFolderModal: boolean
-  localFolderSelectData: unknown | null
+  localFolderSelectData: unknown
   hapticFeedback: string
   showRSSFeedOpenCloseModal: boolean
-  rssFeedEntity: unknown | null
+  rssFeedEntity: unknown
 }
 
 export const useGlobalsStore = defineStore('globals', {
@@ -163,7 +163,7 @@ export const useGlobalsStore = defineStore('globals', {
     },
     getBookCoverAspectRatio: () => {
       const librariesStore = useLibrariesStore()
-      const settings = librariesStore.getCurrentLibrary?.settings as Record<string, unknown> | undefined
+      const settings = librariesStore.getCurrentLibrary?.settings
       if (isNaN(settings?.coverAspectRatio as number)) return 1
       return (settings?.coverAspectRatio as number) === BookCoverAspectRatio.STANDARD ? 1.6 : 1
     }

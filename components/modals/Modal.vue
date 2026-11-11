@@ -49,7 +49,7 @@ const content = ref<HTMLElement | null>(null)
 const el = ref<HTMLElement | null>(null)
 const justOpened = ref(false)
 
-const persistent = computed(() => props.persistent !== false)
+const persistent = computed(() => props.persistent)
 
 const show = computed({
   get() {

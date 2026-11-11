@@ -69,8 +69,24 @@ module.exports = {
         '@typescript-eslint/switch-exhaustiveness-check': 'error',
         // A check the types say can never be false: either dead code, or types that are wrong
         // about what the server sends.
-        '@typescript-eslint/no-unnecessary-condition': 'error'
+        '@typescript-eslint/no-unnecessary-condition': 'error',
+        // A cast the compiler already knows is true: noise that also hides the casts that matter.
+        '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+        '@typescript-eslint/no-base-to-string': 'error',
+        // An async function with no await: either a missing await (a real bug) or a function
+        // that should not return a promise.
+        '@typescript-eslint/require-await': 'error',
+        // `return promise` inside try/catch skips the catch; the rule wants `return await`.
+        '@typescript-eslint/return-await': ['error', 'in-try-catch'],
+        '@typescript-eslint/no-redundant-type-constituents': 'error',
+        '@typescript-eslint/no-unnecessary-boolean-literal-compare': 'error'
       }
+    },
+    {
+      // The Capacitor stubs and test doubles return promises because the real plugins do; they
+      // have nothing to await.
+      files: ['test/**'],
+      rules: { '@typescript-eslint/require-await': 'off' }
     },
     {
       files: ['*.js', '*.cjs', '*.mjs'],

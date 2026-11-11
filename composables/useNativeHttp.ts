@@ -158,7 +158,7 @@ async function request(method: string, _url: string, data: unknown, options: Req
     const appStore = useAppStore()
     appStore.serverReachable = true
     if (res.status === 401 && serverConnectionConfig) {
-      return handleTokenRefresh(method, url, data, headers, options, serverConnectionConfig as { id: string; address: string })
+      return await handleTokenRefresh(method, url, data, headers, options, serverConnectionConfig as { id: string; address: string })
     }
     if (res.status >= 400) {
       const error: HttpError = new Error(typeof res.data === 'string' ? res.data : `HTTP ${res.status}`)

@@ -51,7 +51,7 @@ const sizeMultiplier = computed(() => {
 const title = computed(() => series.value ? series.value.name as string : '')
 const books = computed(() => series.value ? (series.value.books as Record<string, unknown>[] | null | undefined) || [] : [])
 const seriesBookProgress = computed(() => {
-  return (books.value as Record<string, unknown>[])
+  return (books.value)
     .map((libraryItem) => userStore.getUserMediaProgress(libraryItem.id as string))
     .filter((p) => !!p)
 })

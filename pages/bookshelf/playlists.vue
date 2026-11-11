@@ -95,7 +95,7 @@ async function ensureDownloadedKeySet(): Promise<Set<string>> {
 
   const localLibraries = await db.getLocalLibraryItems('podcast')
   downloadedEpisodeKeys.value = collectDownloadedEpisodeKeys(localLibraries as Record<string, unknown>[])
-  return downloadedEpisodeKeys.value!
+  return downloadedEpisodeKeys.value
 }
 
 async function checkAutoDownload() {

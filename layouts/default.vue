@@ -175,7 +175,7 @@ async function attemptConnection() {
     return
   }
 
-  const { user, userDefaultLibraryId, serverSettings, ereaderDevices } = authRes as Record<string, unknown>
+  const { user, userDefaultLibraryId, serverSettings, ereaderDevices } = authRes
   appStore.setServerSettings(serverSettings as Record<string, unknown>)
   librariesStore.ereaderDevices = ereaderDevices as unknown[]
 
@@ -207,7 +207,7 @@ async function attemptConnection() {
   userStore.accessToken = (savedServerConnectionConfig.token || serverConfig.token) as string
   userStore.serverConnectionConfig = savedServerConnectionConfig as import('~/types').ServerConnectionConfig
 
-  useLocalStore().setUserId((userObj as Record<string, unknown>).id as string)
+  useLocalStore().setUserId((userObj).id as string)
   await userStore.loadUserSettings()
 
   useSocket().connect(savedServerConnectionConfig.address as string, savedServerConnectionConfig.token as string)
@@ -302,7 +302,7 @@ async function userMediaProgressUpdated(payload: Record<string, unknown>) {
   }
 
   if (newLocalMediaProgress?.id) {
-    await AbsLogger.info({ tag: 'default', message: `userMediaProgressUpdate: local media progress updated for ${newLocalMediaProgress.id}` })
+    await AbsLogger.info({ tag: 'default', message: `userMediaProgressUpdate: local media progress updated for ${newLocalMediaProgress.id as string}` })
     globalsStore.updateLocalMediaProgress(newLocalMediaProgress as Parameters<typeof globalsStore.updateLocalMediaProgress>[0])
   }
 }

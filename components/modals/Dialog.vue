@@ -70,7 +70,7 @@ function clickedOption(action: string) {
 function init() {
   const selectedVal = props.selected
   if (selectedVal && container.value) {
-    const itemEl = (container.value.querySelector(`[data-value="${selectedVal}"]`) || document.querySelector(`[id="item-${selectedVal}"]`)) as HTMLElement | null
+    const itemEl = (container.value.querySelector<HTMLElement>(`[data-value="${selectedVal}"]`) || document.querySelector<HTMLElement>(`[id="item-${selectedVal}"]`))
     if (itemEl) {
       const containerOffset = container.value.offsetTop + container.value.clientHeight / 2
       const scrollAmount = itemEl.offsetTop - containerOffset

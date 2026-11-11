@@ -211,8 +211,8 @@ export const useAppStore = defineStore('app', {
           await localStore.setPlaybackSession(session)
         }
         const idx = queue.findIndex((q) => {
-          const liId = (q.localLibraryItem as Record<string, unknown> | null | undefined)?.id || q.libraryItemId
-          const epId = (q.localEpisode as Record<string, unknown> | null | undefined)?.id || q.episodeId
+          const liId = (q.localLibraryItem)?.id || q.libraryItemId
+          const epId = (q.localEpisode)?.id || q.episodeId
           const curLi = (deviceSession.localLibraryItem as Record<string, unknown> | null | undefined)?.id || deviceSession.libraryItemId
           const curEp = deviceSession.localEpisodeId || deviceSession.episodeId
           return liId === curLi && epId === curEp
@@ -394,8 +394,8 @@ export const useAppStore = defineStore('app', {
 
       if (playbackSession && this.playQueue.length) {
         const idx = this.playQueue.findIndex((q) => {
-          const liId = (q.localLibraryItem as Record<string, unknown> | null | undefined)?.id || q.libraryItemId
-          const epId = (q.localEpisode as Record<string, unknown> | null | undefined)?.id || q.episodeId
+          const liId = (q.localLibraryItem)?.id || q.libraryItemId
+          const epId = (q.localEpisode)?.id || q.episodeId
           const curLi = (playbackSession.localLibraryItem as Record<string, unknown> | null | undefined)?.id || playbackSession.libraryItemId
           const curEp = playbackSession.localEpisodeId || playbackSession.episodeId
           return liId === curLi && epId === curEp

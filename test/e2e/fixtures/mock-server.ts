@@ -266,7 +266,7 @@ export type MockServerHandle = {
 }
 
 /** The JSON body for a server path, or undefined when the fixture has nothing specific. */
-export function mockResponseFor(pathname: string): unknown | undefined {
+export function mockResponseFor(pathname: string): unknown {
   if (pathname === '/api/authorize') {
     return {
       // With progress, as the real server sends it: the app reads it from here at sign-in and

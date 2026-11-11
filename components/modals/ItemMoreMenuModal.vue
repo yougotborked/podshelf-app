@@ -90,7 +90,7 @@ const serverLibraryItemId = computed(() => {
   if (isConnectedToServer.value) {
     return props.libraryItem.libraryItemId as string
   }
-  return (props.libraryItem.libraryItemId || props.libraryItem.id || null) as string | null
+  return (props.libraryItem.libraryItemId || props.libraryItem.id || null)
 })
 
 const isConnectedToServer = computed(() => {
@@ -111,7 +111,7 @@ const serverEpisodeId = computed(() => {
   if (isConnectedToServer.value) {
     return props.episode?.serverEpisodeId as string
   }
-  return (props.episode?.serverEpisodeId || props.episode?.id || null) as string | null
+  return (props.episode?.serverEpisodeId || props.episode?.id || null)
 })
 
 const mediaType = computed(() => props.libraryItem.mediaType as string)

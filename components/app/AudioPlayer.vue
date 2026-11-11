@@ -173,7 +173,7 @@ const emit = defineEmits<{
 const totalReadyTrack = ref<HTMLElement | null>(null)
 const totalBufferedTrack = ref<HTMLElement | null>(null)
 const totalPlayedTrack = ref<HTMLElement | null>(null)
-const cover = ref<unknown | null>(null)
+const cover = ref<unknown>(null)
 const titlewrapper = ref<HTMLElement | null>(null)
 const currentTimestamp = ref<HTMLElement | null>(null)
 const track = ref<HTMLElement | null>(null)
@@ -427,7 +427,7 @@ const chapters = computed(() => (playbackSession.value?.chapters as Chapter[] | 
 
 const currentChapterDuration = computed(() => {
   if (currentChapter.value) {
-    return (currentChapter.value.end as number) - (currentChapter.value.start as number)
+    return (currentChapter.value.end) - (currentChapter.value.start)
   }
   return totalDuration.value
 })
@@ -449,7 +449,7 @@ const totalTimeRemaining = computed(() => {
 const timeRemaining = computed(() => {
   const currentTimeToUse = isDraggingCursor.value ? draggingCurrentTime.value : currentTime.value
   if (playerSettings.value.useChapterTrack && currentChapter.value) {
-    const currChapTime = currentTimeToUse - (currentChapter.value.start as number)
+    const currChapTime = currentTimeToUse - (currentChapter.value.start)
     return (currentChapterDuration.value - currChapTime) / currentPlaybackRate.value
   }
   return totalTimeRemaining.value
@@ -485,11 +485,11 @@ const mediaId = computed(() => {
   if (isPodcast.value || !playbackSession.value) return null
   const session = playbackSession.value
   if (session.libraryItemId) {
-    return session.episodeId ? `${session.libraryItemId}-${session.episodeId}` : (session.libraryItemId as string)
+    return session.episodeId ? `${session.libraryItemId as string}-${session.episodeId as string}` : (session.libraryItemId as string)
   }
   const lli = session.localLibraryItem as Record<string, unknown> | null
   if (!lli) return null
-  return session.localEpisodeId ? `${lli.id}-${session.localEpisodeId}` : (lli.id as string)
+  return session.localEpisodeId ? `${lli.id as string}-${session.localEpisodeId as string}` : (lli.id as string)
 })
 
 // ── Watchers ──────────────────────────────────────────────────────────────────
@@ -508,7 +508,7 @@ watch(
       return
     }
 
-    if (!playbackSession.value || (playbackSession.value as Record<string, unknown>).id !== (val as Record<string, unknown>).id) {
+    if (!playbackSession.value || (playbackSession.value).id !== (val as Record<string, unknown>).id) {
       // Initialize the player UI when a session is restored or changed
       // so metadata like title and cover image are populated correctly.
       // Skip loading state so the play button stays interactive.
@@ -601,7 +601,7 @@ function clickTitleAndAuthor() {
 
 async function selectChapter(chapter: Chapter) {
   await hapticsImpact()
-  seek(chapter.start as number)
+  seek(chapter.start)
   showChapterModal.value = false
 }
 
@@ -654,18 +654,18 @@ async function jumpChapterStart() {
   }
 
   // If 4 seconds or less into current chapter, then go to previous
-  if (currentTime.value - (currentChapter.value.start as number) <= 4) {
+  if (currentTime.value - (currentChapter.value.start) <= 4) {
     const currChapterIndex = chapters.value.findIndex((ch) => Number(ch.start) <= currentTime.value && Number(ch.end) >= currentTime.value)
     if (currChapterIndex > 0) {
       const prevChapter = chapters.value[currChapterIndex - 1]
       if (prevChapter) seek(prevChapter.start)
     }
   } else {
-    seek(currentChapter.value.start as number)
+    seek(currentChapter.value.start)
   }
 }
 
-async function setPlaybackSpeed(speed: number) {
+function setPlaybackSpeed(speed: number) {
   console.log(`[AudioPlayer] Set Playback Rate: ${speed}`)
   currentPlaybackRate.value = speed
   updateTimestamp()
@@ -737,7 +737,7 @@ function updateTimestamp() {
 
   let ct = isDraggingCursor.value ? draggingCurrentTime.value : currentTime.value
   if (playerSettings.value.useChapterTrack && currentChapter.value) {
-    ct = Math.max(0, ct - (currentChapter.value.start as number))
+    ct = Math.max(0, ct - (currentChapter.value.start))
   }
   if (playerSettings.value.scaleElapsedTimeBySpeed) {
     ct = ct / currentPlaybackRate.value
@@ -772,9 +772,9 @@ function updateTrack() {
   const totalBufferedPercent = bufferedPercent
 
   if (playerSettings.value.useChapterTrack && currentChapter.value) {
-    const currChapTime = currentTimeToUse - (currentChapter.value.start as number)
+    const currChapTime = currentTimeToUse - (currentChapter.value.start)
     percentDone = currChapTime / currentChapterDuration.value
-    bufferedPercent = Math.max(0, Math.min(1, (bufferedTime.value - (currentChapter.value.start as number)) / currentChapterDuration.value))
+    bufferedPercent = Math.max(0, Math.min(1, (bufferedTime.value - (currentChapter.value.start)) / currentChapterDuration.value))
   }
 
   if (playedTrack.value) {
@@ -924,7 +924,7 @@ function touchmove(e: TouchEvent) {
   let maxTime = duration
   if (playerSettings.value.useChapterTrack && currentChapter.value) {
     duration = currentChapterDuration.value
-    minTime = currentChapter.value.start as number
+    minTime = currentChapter.value.start
     maxTime = minTime + duration
   }
 
@@ -1068,7 +1068,7 @@ function onMetadata(data: { duration: number; currentTime: number; playerState: 
 // When a playback session is started the native android/ios will send the session
 function onPlaybackSession(ps: Record<string, unknown>, opts?: { isLoading?: boolean }) {
   console.log('onPlaybackSession received', JSON.stringify(ps))
-  const isResync = !!(playbackSession.value && (playbackSession.value as Record<string, unknown>).id === ps.id)
+  const isResync = !!(playbackSession.value && (playbackSession.value).id === ps.id)
   playbackSession.value = ps
 
   isEnded.value = false
@@ -1107,14 +1107,14 @@ function onPlaybackSpeedChanged(data: { value?: number }) {
 async function init() {
   await loadPlayerSettings()
 
-  AbsAudioPlayer.addListener('onPlaybackSession', onPlaybackSession as unknown as Parameters<typeof AbsAudioPlayer.addListener>[1])
-  AbsAudioPlayer.addListener('onPlaybackClosed', onPlaybackClosed as unknown as Parameters<typeof AbsAudioPlayer.addListener>[1])
-  AbsAudioPlayer.addListener('onPlaybackFailed', onPlaybackFailed as unknown as Parameters<typeof AbsAudioPlayer.addListener>[1])
-  AbsAudioPlayer.addListener('onPlayingUpdate', onPlayingUpdate as unknown as Parameters<typeof AbsAudioPlayer.addListener>[1])
-  AbsAudioPlayer.addListener('onMetadata', onMetadata as unknown as Parameters<typeof AbsAudioPlayer.addListener>[1])
-  AbsAudioPlayer.addListener('onProgressSyncFailing', showProgressSyncIsFailing as unknown as Parameters<typeof AbsAudioPlayer.addListener>[1])
-  AbsAudioPlayer.addListener('onProgressSyncSuccess', showProgressSyncSuccess as unknown as Parameters<typeof AbsAudioPlayer.addListener>[1])
-  AbsAudioPlayer.addListener('onPlaybackSpeedChanged', onPlaybackSpeedChanged as unknown as Parameters<typeof AbsAudioPlayer.addListener>[1])
+  AbsAudioPlayer.addListener('onPlaybackSession', onPlaybackSession as unknown)
+  AbsAudioPlayer.addListener('onPlaybackClosed', onPlaybackClosed as unknown)
+  AbsAudioPlayer.addListener('onPlaybackFailed', onPlaybackFailed as unknown)
+  AbsAudioPlayer.addListener('onPlayingUpdate', onPlayingUpdate as unknown)
+  AbsAudioPlayer.addListener('onMetadata', onMetadata as unknown)
+  AbsAudioPlayer.addListener('onProgressSyncFailing', showProgressSyncIsFailing as unknown)
+  AbsAudioPlayer.addListener('onProgressSyncSuccess', showProgressSyncSuccess as unknown)
+  AbsAudioPlayer.addListener('onPlaybackSpeedChanged', onPlaybackSpeedChanged as unknown)
 }
 
 async function screenOrientationChange() {
