@@ -210,6 +210,9 @@ did not already know) and `noPropertyAccessFromIndexSignature` (~620, all `recor
 Options-API components written in a plain `<script>` (not `lang="ts"`) go through `defineComponent`,
 otherwise `this.someComputed` is typed as the function itself and every guard on it reads as dead
 code to the linter.
+`components/app/AudioPlayerContainer.vue` is the one component still plain JavaScript: converting it
+reports ~100 errors across 1,000 lines of playback orchestration, and that is not a change to make
+without a device to play something on. Its three `no-unnecessary-condition` suppressions say why.
 
 **Never run `npx vue-tsc` or `npx nuxi typecheck`.** Both resolve the latest release.
 vue-tsc 3.x aborts partway through this project and still prints `Found 0 errors` — a false
