@@ -47,7 +47,7 @@
       @removed-from-auto-playlist="onAutoPlaylistItemRemoved"
       @auto-playlist-rule-changed="onAutoPlaylistRuleChanged"
     />
-    <div v-show="processing" class="fixed top-0 left-0 w-screen h-screen flex items-center justify-center bg-black/50 z-50">
+    <div v-show="processing" class="fixed top-0 left-0 w-screen h-screen flex items-center justify-center bg-md-scrim/50 z-50">
       <ui-loading-indicator />
     </div>
   </div>

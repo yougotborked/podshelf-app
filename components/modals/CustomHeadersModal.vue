@@ -6,7 +6,7 @@
       </div>
     </template>
     <div class="w-full h-full overflow-hidden absolute top-0 left-0 flex items-center justify-center" @click="show = false">
-      <div ref="container" class="w-full rounded-lg bg-md-surface-3 border border-white/20 overflow-y-auto overflow-x-hidden" style="max-height: 80vh" @click.stop>
+      <div ref="container" class="w-full rounded-lg bg-md-surface-3 border border-md-outline-variant overflow-y-auto overflow-x-hidden" style="max-height: 80vh" @click.stop>
         <div class="w-full h-full p-4" v-if="showAddHeader">
           <div class="mb-4">
             <ui-icon-btn icon="arrow_back" borderless @click="showAddHeader = false" />
@@ -20,7 +20,7 @@
         </div>
         <div class="w-full h-full p-4" v-else>
           <template v-for="[key, value] in Object.entries(headersCopy)" :key="key">
-            <div class="w-full rounded-lg bg-white/5 py-2 pl-4 pr-12 relative mb-2">
+            <div class="w-full rounded-lg bg-md-on-surface/5 py-2 pl-4 pr-12 relative mb-2">
               <p class="text-base font-semibold text-md-on-surface leading-5">{{ key }}</p>
               <p class="text-sm text-md-on-surface-variant">{{ value }}</p>
 

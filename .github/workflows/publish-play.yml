@@ -202,9 +202,8 @@ jobs:
       # would be on testers' phones minutes later. So the same checks that gate a pull request
       # gate a publish.
       #
-      # Lint, typecheck and the JS tests only: the Kotlin tests are left to the Build APK
-      # workflow on the same commit, because running them here would install a 400MB SDK that
-      # the release build does not otherwise need.
+      # Lint, typecheck and the JS tests here; the Kotlin tests follow once Gradle and the SDK
+      # packages are set up, below, and also gate the build.
       - name: Run the checks that gate a publish
         run: |
           npm run lint
@@ -219,6 +218,20 @@ jobs:
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
+
+      # The same packages, from the same script, that the Build APK job installs - compileSdk 37
+      # is a minor-versioned platform an older sdkmanager cannot see.
+      - name: Install the Android SDK packages the build needs
+        run: scripts/install-android-sdk.sh
+
+      # A gate, like the JS checks above, and for the same reason: a push to master reaches
+      # testers' phones minutes after it lands, and the Build APK job runs these in parallel with
+      # this one, not before it, so a commit that broke only a Kotlin test could otherwise still be
+      # published. :wear-sync is a plain JVM module, so its tests hang off `test` and have to be
+      # named explicitly or they silently do not run.
+      - name: Run the Kotlin unit tests
+        working-directory: android
+        run: ./gradlew --no-daemon --build-cache testDebugUnitTest :wear-sync:test
 
       # Written outside the workspace so it cannot be picked up by anything that archives the
       # checkout, and removed again in the always() step at the end.

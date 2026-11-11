@@ -51,7 +51,7 @@
     <p class="text-sm text-md-on-surface mt-1.5 mb-0.5 default-style description-container" v-html="transformedDescription"></p>
 
     <!-- loading overlay -->
-    <div v-if="processing" class="absolute top-0 left-0 w-full h-full bg-black/30 flex items-center justify-center">
+    <div v-if="processing" class="absolute top-0 left-0 w-full h-full bg-md-scrim/30 flex items-center justify-center">
       <ui-loading-indicator />
     </div>
 

@@ -147,7 +147,7 @@
     </div>
 
     <!-- Processing overlay -->
-    <div v-if="addProcessing" class="absolute inset-0 bg-black/25 z-60 flex items-center justify-center pointer-events-auto">
+    <div v-if="addProcessing" class="absolute inset-0 bg-md-scrim/25 z-60 flex items-center justify-center pointer-events-auto">
       <ui-loading-indicator />
     </div>
   </div>

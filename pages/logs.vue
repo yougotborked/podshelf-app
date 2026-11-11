@@ -14,7 +14,7 @@
       </div>
       <div v-if="hasScrolled" class="sticky top-0 left-0 w-full h-10 bg-gradient-to-t from-transparent to-md-surface-0 z-10 pointer-events-none"></div>
 
-      <div v-for="(log, index) in logs" :key="log.id" class="py-2 px-4" :class="{ 'bg-white/5': index % 2 === 0 }">
+      <div v-for="(log, index) in logs" :key="log.id" class="py-2 px-4" :class="{ 'bg-md-on-surface/5': index % 2 === 0 }">
         <div class="flex items-center space-x-4 mb-1">
           <div class="text-xs uppercase font-bold" :class="{ 'text-error': log.level === 'error', 'text-info': log.level === 'info' }">{{ log.level }}</div>
           <div class="text-xs text-md-on-surface-variant">{{ formatEpochToDatetimeString(log.timestamp) }}</div>

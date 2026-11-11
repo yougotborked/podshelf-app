@@ -25,50 +25,6 @@ Any watch carrying a build from before the pin may need the one-time uninstall.
 
 **Clears when** the watch app ships through Play, which signs every build with the upload key.
 
-### 83 uses of text-white / bg-white are outside the token set
-
-**Where** `components/**`, `pages/**`, `layouts/**`
-
-`text-white`, `bg-white`, `text-black` and friends are fixed values that do not change between
-themes - the same defect as a raw `text-gray-400`, and the same one the Material token rule
-exists to prevent. The theme checker cannot see them: `paletteRe` requires a numeric suffix
-(`-\d{2,3}`), and `white` has none.
-
-One was found by looking at a light-theme screenshot: `ReadIconBtn` set `text-white` on the
-wrapper and the unread shield drew with `currentColor`, so the mark-as-finished control was a
-white icon on a near-white surface. That one is fixed. The other 82 are not audited.
-
-They are not all wrong. White on a cover thumbnail, on a scrim, or on a filled accent button is
-correct and should stay - which is exactly why this needs reading 82 call sites rather than a
-regex, and why the rule cannot simply be switched on: it would fail the build on every one of
-them at once.
-
-**Clears when** the call sites have been audited, the genuinely theme-independent ones moved to
-`ALLOW` with their reason, and `white|black` added to the checker so new ones cannot appear.
-
-### The publish gate does not run the Kotlin tests
-
-**Where** `.github/workflows/publish-play.yml`
-
-Every push to master now publishes to Play's internal testing track automatically, and the
-internal track has no review of its own, so a bad commit reaches testers within minutes. The
-publish job therefore runs the checks that gate a pull request first — lint, typecheck and the
-JS tests — and refuses to build if any fail.
-
-It does **not** run `:app`, `:wear` or `:wear-sync` unit tests. Those need the Android SDK, a
-~400MB install this job does not otherwise need because the release build uses the runner's
-preinstalled one. The Build APK workflow runs them on the same commit, but *in parallel* rather
-than before: a commit that breaks only a Kotlin test can still be published to internal testing,
-and the red run shows up next to a release that already went out.
-
-The hole is narrow — a Kotlin test failure that lint, typecheck and the JS suite all miss — and
-internal testing is the cheapest track to be wrong on. But it is a hole, not a judgement that
-Kotlin tests do not matter.
-
-**Clears when** either the publish job can get the Kotlin tests cheaply (a cached SDK that makes
-the install negligible), or the publish is restructured to trigger on Build APK completing green
-via `workflow_run` instead of on the push itself.
-
 ### The watch's queue still arrives from one screen
 
 **Where** `components/bookshelf/PodcastCatchUpFeed.vue`

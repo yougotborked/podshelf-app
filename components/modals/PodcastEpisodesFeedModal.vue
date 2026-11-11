@@ -6,14 +6,14 @@
       </div>
     </template>
     <div class="w-full h-full overflow-hidden absolute top-0 left-0 flex items-center justify-center" @click="show = false">
-      <div class="feed-content w-full overflow-x-hidden overflow-y-auto bg-md-surface-1 rounded-lg border border-white/20" @click.stop.prevent>
+      <div class="feed-content w-full overflow-x-hidden overflow-y-auto bg-md-surface-1 rounded-lg border border-md-outline-variant" @click.stop.prevent>
         <template v-for="(episode, index) in episodes" :key="index">
           <div class="relative" :class="itemEpisodeMap[(episode as any).enclosure.url] ? 'bg-md-surface-3/40' : selectedEpisodes[String(index)] ? 'bg-md-primary/10' : index % 2 == 0 ? 'bg-md-surface-3/25' : 'bg-md-surface-3/5'" @click="selectEpisode(episode, index)">
             <div class="absolute top-0 left-0 h-full flex items-center p-2">
               <span v-if="itemEpisodeMap[(episode as any).enclosure.url]" class="material-symbols text-md-primary text-xl">download_done</span>
               <ui-checkbox v-else :model-value="!!selectedEpisodes[String(index)]" small @update:model-value="selectedEpisodes[String(index)] = $event" checkbox-bg="md-surface-3" border-color="gray-600" />
             </div>
-            <div class="pl-9 pr-2 py-2 border-b border-white/10">
+            <div class="pl-9 pr-2 py-2 border-b border-md-outline-variant">
               <p v-if="(episode as any).episode" class="font-semibold text-md-on-surface text-xs">#{{ (episode as any).episode }}</p>
               <p class="break-words mb-1 text-sm">{{ (episode as any).title }}</p>
               <p v-if="(episode as any).subtitle" class="break-words mb-1 text-xs text-md-on-surface-variant episode-subtitle">{{ (episode as any).subtitle }}</p>

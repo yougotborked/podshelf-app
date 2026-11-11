@@ -6,8 +6,8 @@
         <div ref="inputWrapper" style="min-height: 36px" class="flex-wrap relative w-full shadow-sm flex items-center border border-md-outline-variant rounded px-2 py-1" :class="wrapperClass" @click.stop.prevent="clickWrapper" @mouseup.stop.prevent @mousedown.prevent>
           <div v-for="item in selected" :key="item" class="rounded-full px-2 py-1 mx-0.5 my-0.5 text-xs bg-md-surface-1 flex flex-nowrap break-all items-center relative">
             <div v-if="!disabled" class="w-full h-full rounded-full absolute top-0 left-0 px-1 bg-md-surface-1/75 flex items-center justify-end opacity-0 hover:opacity-100">
-              <span v-if="showEdit" class="material-symbols text-white hover:text-warning cursor-pointer" style="font-size: 1.1rem" @click.stop="editItem(item)">edit</span>
-              <span class="material-symbols text-white hover:text-error cursor-pointer" style="font-size: 1.1rem" @click.stop="removeItem(item)">close</span>
+              <span v-if="showEdit" class="material-symbols text-md-on-surface hover:text-warning cursor-pointer" style="font-size: 1.1rem" @click.stop="editItem(item)">edit</span>
+              <span class="material-symbols text-md-on-surface hover:text-error cursor-pointer" style="font-size: 1.1rem" @click.stop="removeItem(item)">close</span>
             </div>
             {{ item }}
           </div>
@@ -71,7 +71,7 @@ const showMenu = computed(() => isFocused.value)
 
 const wrapperClass = computed(() => {
   const classes: string[] = []
-  if (props.disabled) classes.push('bg-black-300')
+  if (props.disabled) classes.push('bg-md-on-surface/5')
   else classes.push('bg-md-surface-3')
   if (!props.readonly) classes.push('cursor-text')
   return classes.join(' ')

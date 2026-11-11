@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-md-surface-1 rounded-md shadow-lg border border-white/5 p-2 sm:p-4 mb-4">
+  <div class="bg-md-surface-1 rounded-md shadow-lg border border-md-outline-variant p-2 sm:p-4 mb-4">
     <!-- hack to get icon fonts loaded on init -->
     <div class="h-0 w-0 overflow-hidden opacity-0">
       <span class="material-symbols">close</span>
@@ -51,7 +51,7 @@
       </div>
 
       <!-- your server in review -->
-      <div v-if="isAdminOrUp" class="w-full max-w-[800px] mx-auto mb-2 mt-4 border-t pt-4 border-white/10">
+      <div v-if="isAdminOrUp" class="w-full max-w-[800px] mx-auto mb-2 mt-4 border-t pt-4 border-md-outline-variant">
         <div class="flex items-center justify-center mb-2">
           <!-- previous button -->
           <ui-btn small :disabled="!yearInReviewServerVariant || processingYearInReviewServer" class="inline-flex items-center font-semibold" @click="yearInReviewServerVariant--">

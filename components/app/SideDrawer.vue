@@ -1,6 +1,6 @@
 <template>
   <div class="fixed top-0 left-0 right-0 layout-wrapper w-full z-50 overflow-hidden pointer-events-none">
-    <div class="absolute top-0 left-0 w-full h-full transition-opacity duration-200" :class="show ? 'bg-black/60 pointer-events-auto' : 'bg-transparent'" @click="clickBackground" />
+    <div class="absolute top-0 left-0 w-full h-full transition-opacity duration-200" :class="show ? 'bg-md-scrim/60 pointer-events-auto' : 'bg-transparent'" @click="clickBackground" />
     <div class="absolute top-0 right-0 w-64 h-full bg-md-surface-1 transform transition-transform py-6 landscape:py-2 pointer-events-auto" :class="show ? '' : 'translate-x-64'" @click.stop>
       <div class="px-6 mb-4">
         <p v-if="user" class="text-base" v-html="getString('HeaderWelcome', [username])" />

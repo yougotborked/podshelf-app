@@ -9,7 +9,7 @@
       <div class="w-full rounded-lg bg-md-surface-3 border border-md-outline-variant overflow-y-auto overflow-x-hidden relative mt-16" style="max-height: 80vh" @click.stop.prevent>
         <div class="w-full h-full p-4" v-if="showBookmarkTitleInput">
           <div class="flex mb-4 items-center">
-            <div class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 cursor-pointer" @click.stop="showBookmarkTitleInput = false">
+            <div class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-md-on-surface/10 cursor-pointer" @click.stop="showBookmarkTitleInput = false">
               <span class="material-symbols text-3xl">arrow_back</span>
             </div>
             <p class="text-xl pl-2">{{ selectedBookmark ? 'Edit Bookmark' : 'New Bookmark' }}</p>
@@ -30,7 +30,7 @@
             <p class="text-xl">{{ strings.MessageNoBookmarks }}</p>
           </div>
         </div>
-        <div v-if="canCreateBookmark && !showBookmarkTitleInput" class="flex px-4 py-2 items-center text-center justify-between border-b border-md-on-surface/10 bg-md-primary cursor-pointer text-white/80 sticky bottom-0 left-0 w-full" @click.stop="createBookmark">
+        <div v-if="canCreateBookmark && !showBookmarkTitleInput" class="flex px-4 py-2 items-center text-center justify-between border-b border-md-on-surface/10 bg-md-primary cursor-pointer text-md-on-primary sticky bottom-0 left-0 w-full" @click.stop="createBookmark">
           <span class="material-symbols">add</span>
           <p class="text-base pl-2">{{ strings.ButtonCreateBookmark }}</p>
           <p class="text-sm font-mono">{{ utils.secondsToTimestamp(currentTime / _playbackRate) }}</p>
