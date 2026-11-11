@@ -25,29 +25,6 @@ Any watch carrying a build from before the pin may need the one-time uninstall.
 
 **Clears when** the watch app ships through Play, which signs every build with the upload key.
 
-### The publish gate does not run the Kotlin tests
-
-**Where** `.github/workflows/publish-play.yml`
-
-Every push to master now publishes to Play's internal testing track automatically, and the
-internal track has no review of its own, so a bad commit reaches testers within minutes. The
-publish job therefore runs the checks that gate a pull request first — lint, typecheck and the
-JS tests — and refuses to build if any fail.
-
-It does **not** run `:app`, `:wear` or `:wear-sync` unit tests. Those need the Android SDK, a
-~400MB install this job does not otherwise need because the release build uses the runner's
-preinstalled one. The Build APK workflow runs them on the same commit, but *in parallel* rather
-than before: a commit that breaks only a Kotlin test can still be published to internal testing,
-and the red run shows up next to a release that already went out.
-
-The hole is narrow — a Kotlin test failure that lint, typecheck and the JS suite all miss — and
-internal testing is the cheapest track to be wrong on. But it is a hole, not a judgement that
-Kotlin tests do not matter.
-
-**Clears when** either the publish job can get the Kotlin tests cheaply (a cached SDK that makes
-the install negligible), or the publish is restructured to trigger on Build APK completing green
-via `workflow_run` instead of on the push itself.
-
 ### The watch's queue still arrives from one screen
 
 **Where** `components/bookshelf/PodcastCatchUpFeed.vue`
