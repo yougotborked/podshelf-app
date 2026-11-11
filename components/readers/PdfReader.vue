@@ -217,6 +217,7 @@ export default defineComponent({
       // Force Vue to re-render the PDF component by creating a new object
       this.pdfDocInitParams = {
         url: this.ebookUrl,
+        isEvalSupported: false, // GHSA-wgrm-67xf-hhpq: see init()
         httpHeaders: {
           Authorization: `Bearer ${newAccessToken}`
         }
@@ -236,8 +237,12 @@ export default defineComponent({
       this.windowHeight = window.innerHeight
     },
     init() {
+      // pdfjs-dist 2.7 (pinned by @teckel/vue-pdf) runs JavaScript from a crafted PDF's font data
+      // when eval is allowed (GHSA-wgrm-67xf-hhpq). Upgrading needs a different PDF component;
+      // turning eval off is the fix pdf.js itself documents for the versions that cannot upgrade.
       this.pdfDocInitParams = {
         url: this.ebookUrl,
+        isEvalSupported: false,
         httpHeaders: {
           Authorization: `Bearer ${this.userToken}`
         }
