@@ -1,0 +1,26 @@
+name: Play status
+
+# Prints where the app stands in Google Play: tracks and their releases, testers, the store
+# listing's completeness. Read-only, run by hand, using the publish workflow's service account -
+# so it lives in the same `play` environment to reach the secret. It opens an edit to read from
+# and deletes it; nothing is committed, so it cannot disturb a release that is in review.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    environment: play
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --quiet google-auth requests
+      - name: Print the app's state in Play
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: python3 scripts/play-status.py
