@@ -18,9 +18,7 @@
         </div>
       </template>
 
-      <template v-for="(line, index) in pointLines" :key="`line-${index}`">
-        <div class="absolute h-0.5 bg-md-primary origin-bottom-left pointer-events-none" :style="{ width: line.width + 'px', left: line.x + 'px', bottom: line.y + 'px', transform: `rotate(${line.angle}deg)` }" />
-      </template>
+      <div v-for="(line, index) in pointLines" :key="`line-${index}`" class="absolute h-0.5 bg-md-primary origin-bottom-left pointer-events-none" :style="{ width: line.width + 'px', left: line.x + 'px', bottom: line.y + 'px', transform: `rotate(${line.angle}deg)` }" />
 
       <div class="absolute -bottom-2 left-0 flex ml-6">
         <template v-for="dayObj in last7Days" :key="dayObj.date">

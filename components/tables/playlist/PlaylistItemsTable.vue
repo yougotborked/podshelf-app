@@ -12,13 +12,13 @@
     </div>
     <div ref="listEl">
       <div v-if="topSpacerHeight" :style="{ height: `${topSpacerHeight}px` }" />
-      <template v-for="item in visibleItems" :key="itemKey(item)">
-        <tables-playlist-item-table-row
-          :item="item"
-          :playlist-id="playlistId"
-          @showMore="showMore"
-        />
-      </template>
+      <tables-playlist-item-table-row
+        v-for="item in visibleItems"
+        :key="itemKey(item)"
+        :item="item"
+        :playlist-id="playlistId"
+        @showMore="showMore"
+      />
       <div v-if="bottomSpacerHeight" :style="{ height: `${bottomSpacerHeight}px` }" />
     </div>
   </div>

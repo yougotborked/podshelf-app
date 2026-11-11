@@ -252,7 +252,7 @@ function parseDescription(desc: string) {
   }
 
   return desc
-    .replace(timeMarkerLinkRegex, (match: string, href: string, displayTime: string) => {
+    .replace(timeMarkerLinkRegex, (match: string, _href: string, displayTime: string) => {
       const timeMatch = displayTime.match(timeMarkerRegex)
       if (!timeMatch) return match
       const time = timeMatch[0]
