@@ -69,15 +69,26 @@ def probe_production(s: requests.Session, edit: str, tracks: list) -> None:
     if not codes:
         print('  (skipped: no closed-testing release to promote)')
         return
-    # Open testing first, as the control: it has no closed-testing prerequisite, so if it takes the
-    # same release and production does not, the block is specific to production.
-    for name in ('beta', 'production'):
-        body = {'track': name, 'releases': [{'status': 'completed', 'versionCodes': codes,
+    # Calibrate before concluding anything. Each track the app already has a release on is given
+    # *its own* current release back (which must be accepted, or this probe means nothing), then
+    # the not-yet-used tracks get the closed-testing build.
+    by_track = {t['track']: t for t in tracks}
+
+    def attempt(name: str, version_codes: list) -> bool:
+        body = {'track': name, 'releases': [{'status': 'completed', 'versionCodes': version_codes,
                                                'releaseNotes': [{'language': 'en-US', 'text': 'Probe'}]}]}
         r = s.put(f'{BASE}/edits/{edit}/tracks/{name}', json=body, timeout=60)
-        print(f'  assign to {name}: HTTP {r.status_code}' + ('' if r.status_code == 200 else f' {r.text.strip()[:400]}'))
-        if name == 'production' and r.status_code != 200:
-            return
+        shown = '' if r.status_code == 200 else ' ' + r.text.strip().replace('\n', ' ')[:300]
+        print(f'  assign {version_codes} to {name}: HTTP {r.status_code}{shown}')
+        return r.status_code == 200
+
+    for name in ('internal', 'alpha'):
+        rels = by_track.get(name, {}).get('releases', [])
+        if rels:
+            attempt(name, [int(c) for c in rels[0].get('versionCodes', [])])
+    attempt('beta', codes)
+    if not attempt('production', codes):
+        return
     r = s.post(f'{BASE}/edits/{edit}:validate', timeout=60)
     if r.status_code == 200:
         print(f'  validate: OK - production would accept version code(s) {codes}')
