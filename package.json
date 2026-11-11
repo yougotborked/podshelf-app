@@ -87,6 +87,9 @@
     },
     "@capacitor-community/volume-buttons": {
       "@capacitor/core": "$@capacitor/core"
+    },
+    "epubjs": {
+      "@xmldom/xmldom": "0.8.15"
     }
   }
 }

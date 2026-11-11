@@ -5,7 +5,7 @@
   <div v-else class="w-full h-full px-3 py-4 overflow-y-auto overflow-x-hidden relative bg-md-surface-0">
     <div class="flex mb-2">
       <div class="w-10 min-w-10">
-        <covers-preview-cover :src="coverUrl" :width="40" :book-cover-aspect-ratio="bookCoverAspectRatio" :show-resolution="false" class="md:hidden" />
+        <covers-preview-cover :src="coverUrl" :width="40" :book-cover-aspect-ratio="bookCoverAspectRatio" :show-resolution="false" />
       </div>
       <div class="flex-grow px-2">
         <div class="-mt-0.5 mb-0.5">
