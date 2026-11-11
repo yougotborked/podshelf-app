@@ -76,7 +76,7 @@ async function init() {
   await appStore.setupNetworkListener()
 
   const localItems = (await db.getLocalLibraryItems().catch(() => [])) as unknown[]
-  hasDownloads.value = !!localItems?.length
+  hasDownloads.value = !!localItems.length
 
   // A saved server is enough to work offline against: its cached libraries and downloads are
   // already on the device. Prefer the one last used, otherwise the only one there is.

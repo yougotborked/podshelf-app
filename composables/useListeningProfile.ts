@@ -76,7 +76,7 @@ export function describeBand(band: DurationBandId | null): string {
  * verdict, and counting both together lets a show someone abandoned twice argue for more like
  * itself.
  */
-export function buildListeningProfile(progress: ProgressRow[] = [], podcastsById: Record<string, ProfilePodcast> = {}): ListeningProfile {
+export function buildListeningProfile(progress: (ProgressRow | null | undefined)[] = [], podcastsById: Record<string, ProfilePodcast> = {}): ListeningProfile {
   const bandCounts: Record<DurationBandId, number> = { short: 0, medium: 0, long: 0, marathon: 0 }
   const genreWeights: Record<string, number> = {}
   let episodesFinished = 0

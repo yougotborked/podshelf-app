@@ -126,11 +126,12 @@
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { VolumeButtons } from '@capacitor-community/volume-buttons'
 import { KeepAwake } from '@capacitor-community/keep-awake'
 
-export default {
+export default defineComponent({
   setup() {
     const appStore = useAppStore()
     const eventBus = useEventBus()
@@ -179,7 +180,7 @@ export default {
     isPlayerOpen(newVal, oldVal) {
       // Closed player
       if (!newVal && oldVal) {
-        this.initWatchVolume()
+        void this.initWatchVolume()
       }
     }
   },
@@ -550,5 +551,5 @@ export default {
   beforeUnmount() {
     this.unregisterListeners()
   }
-}
+})
 </script>

@@ -485,11 +485,11 @@ async function toggleFinished() {
     const isFinished = !userIsFinished.value
     const lliId = localLibraryItemId.value
     const leId = localEpisodeId.value
-    const payload = await db.updateLocalMediaProgressFinished({ localLibraryItemId: lliId, localEpisodeId: leId, isFinished }) as Record<string, unknown> | null
+    const payload = await db.updateLocalMediaProgressFinished({ localLibraryItemId: lliId, localEpisodeId: leId, isFinished })
     console.log('toggleFinished payload', JSON.stringify(payload))
 
     if (payload?.error) {
-      toast.error((payload?.error as string) || 'Unknown error')
+      toast.error(payload.error || 'Unknown error')
     } else {
       const localMediaProgress = payload?.localMediaProgress
       console.log('toggleFinished localMediaProgress', JSON.stringify(localMediaProgress))
@@ -563,7 +563,7 @@ onMounted(async () => {
     if (canRequest) {
       fetchedLibraryItem = (await nativeHttp.get(`/api/items/${libItemId}?expanded=1`, { connectTimeout: 10000 }).catch((error: HttpError) => {
         console.error('Failed', error)
-        AbsLogger.error({ tag: 'EpisodePage', message: `Failed to fetch library item ${libItemId}: ${error?.message || error}` })
+        AbsLogger.error({ tag: 'EpisodePage', message: `Failed to fetch library item ${libItemId}: ${error.message || error}` })
         return null
       })) as LibraryItem | null
 

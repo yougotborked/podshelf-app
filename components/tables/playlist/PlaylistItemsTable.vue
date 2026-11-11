@@ -85,10 +85,10 @@ const totalDuration = computed(() => {
 const totalDurationPretty = computed(() => utils.elapsedPrettyExtended(totalDuration.value))
 
 function itemKey(item: Record<string, unknown>) {
-  if (item?.id) return item.id as string
-  const ep = item?.episode as Record<string, unknown> | undefined
-  const episodeId = (item?.episodeId as string) || (ep?.serverEpisodeId as string) || (ep?.id as string) || 'book'
-  const libraryItemId = (item?.libraryItemId as string) || ((item?.libraryItem as Record<string, unknown> | null | undefined)?.id as string) || 'unknown'
+  if (item.id) return item.id as string
+  const ep = item.episode as Record<string, unknown> | undefined
+  const episodeId = (item.episodeId as string) || (ep?.serverEpisodeId as string) || (ep?.id as string) || 'book'
+  const libraryItemId = (item.libraryItemId as string) || ((item.libraryItem as Record<string, unknown> | null | undefined)?.id as string) || 'unknown'
   return `${libraryItemId}_${episodeId}`
 }
 

@@ -169,10 +169,6 @@ const isPlayerOpen = computed(() => appStore.getIsPlayerOpen)
 const isIos = computed(() => platform === 'ios')
 const localFiles = computed(() => localLibraryItem.value?.localFiles || [])
 const otherFiles = computed(() => {
-  if (!localFiles.value.filter) {
-    console.error('Invalid local files', localFiles.value)
-    return []
-  }
   return localFiles.value.filter((lf) => {
     if (localFileForEbook.value?.id === lf.id) return false
     return !audioTracks.value.find((at) => at.localFileId == lf.id)

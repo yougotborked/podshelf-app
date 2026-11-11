@@ -27,9 +27,7 @@ const inputValue = computed({
 })
 
 function blur() {
-  if (input.value && input.value.blur) {
-    input.value.blur()
-  }
+  input.value?.blur()
 }
 
 defineExpose({ blur })

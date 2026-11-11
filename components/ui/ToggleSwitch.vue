@@ -44,7 +44,7 @@ const emit = defineEmits<{
 }>()
 
 const toggleValue = computed({
-  get() { return props.modelValue ?? false },
+  get() { return props.modelValue },
   set(v: boolean) { emit('update:modelValue', v) }
 })
 

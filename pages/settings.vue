@@ -357,9 +357,9 @@ const enableBookshelfView = computed({
 
 const isiOS = computed(() => usePlatform() === 'ios')
 
-const jumpForwardSecondsOptions = computed(() => globalsStore.jumpForwardSecondsOptions || [])
-const jumpBackwardsSecondsOptions = computed(() => globalsStore.jumpBackwardsSecondsOptions || [])
-const languageOptionItems = computed(() => languageCodeOptions || [])
+const jumpForwardSecondsOptions = computed(() => globalsStore.jumpForwardSecondsOptions)
+const jumpBackwardsSecondsOptions = computed(() => globalsStore.jumpBackwardsSecondsOptions)
+const languageOptionItems = computed(() => languageCodeOptions)
 
 const jumpForwardOption = computed(() => getJumpLabel(settings.jumpForwardTime))
 const jumpBackwardsOption = computed(() => getJumpLabel(settings.jumpBackwardsTime))

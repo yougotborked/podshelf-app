@@ -755,10 +755,8 @@ function timeupdate() {
 
   if (seekLoading.value) {
     setSeekLoading(false)
-    if (playedTrack.value) {
-      playedTrack.value.classList.remove('bg-track-cursor')
-      playedTrack.value.classList.add('bg-track')
-    }
+    playedTrack.value.classList.remove('bg-track-cursor')
+    playedTrack.value.classList.add('bg-track')
   }
 
   updateTimestamp()
@@ -820,7 +818,7 @@ function seek(time: number) {
 }
 
 async function touchstartCursor(e: TouchEvent) {
-  if (!e || !e.touches || !track.value || !showFullscreen.value || playerSettings.value.lockUi) return
+  if (!track.value || !showFullscreen.value || playerSettings.value.lockUi) return
 
   await hapticsImpact()
   isDraggingCursor.value = true
@@ -873,7 +871,7 @@ function resetStream(_startTime: number) {
 }
 
 function touchstart(e: TouchEvent) {
-  if (!e.changedTouches || globalsStore.isModalOpen) return
+  if (globalsStore.isModalOpen) return
   const touchPosY = e.changedTouches[0]?.pageY ?? 0
   // when minimized only listen to touchstart on the player
   if (!showFullscreen.value && touchPosY < window.innerHeight - 120) return
@@ -889,7 +887,6 @@ function touchstart(e: TouchEvent) {
 }
 
 function touchend(e: TouchEvent) {
-  if (!e.changedTouches) return
   const touchDuration = Date.now() - touchStartTime.value
   const touchEndY = e.changedTouches[0]?.pageY ?? 0
   const touchDistanceY = touchEndY - touchStartY.value
@@ -919,7 +916,7 @@ function touchend(e: TouchEvent) {
 }
 
 function touchmove(e: TouchEvent) {
-  if (!isDraggingCursor.value || !e.touches) return
+  if (!isDraggingCursor.value) return
 
   const distanceMoved = (e.touches[0]?.pageX ?? draggingTouchStartX.value) - draggingTouchStartX.value
   let duration = totalDuration.value
@@ -1210,7 +1207,7 @@ function showProgressSyncSuccess() {
 }
 
 async function registerAppStateListener() {
-  if (!Capacitor?.isPluginAvailable || !Capacitor.isPluginAvailable('App')) return
+  if (!Capacitor.isPluginAvailable('App')) return
   try {
     appStateListener.value = await App.addListener('appStateChange', onAppStateChangeListener)
   } catch (error) {
@@ -1219,7 +1216,6 @@ async function registerAppStateListener() {
 }
 
 async function onAppStateChange(state: { isActive: boolean }) {
-  if (!state) return
   if (state.isActive) {
     await refreshCurrentPlaybackPosition()
     maybeRestartPolling()

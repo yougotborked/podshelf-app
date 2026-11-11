@@ -78,7 +78,7 @@ class ServerSocket extends EventEmitter {
   removeListeners(): void {
     if (!this.socket) return
     this.socket.removeAllListeners()
-    if (this.socket.io?.removeAllListeners) this.socket.io.removeAllListeners()
+    this.socket.io.removeAllListeners()
   }
 
   onConnect(): void {

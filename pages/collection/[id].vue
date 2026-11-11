@@ -168,11 +168,11 @@ onMounted(async () => {
 
     // Lookup matching local items and attach to collection items
     if (fetchedCollection.books.length) {
-      const localLibraryItems = (await db.getLocalLibraryItems('book')) || []
+      const localLibraryItems = (await db.getLocalLibraryItems('book'))
       if (localLibraryItems.length) {
         const localLibraryItemMap = new Map<string, LibraryItem>()
         localLibraryItems.forEach((item) => {
-          if (item?.libraryItemId) {
+          if (item.libraryItemId) {
             localLibraryItemMap.set(item.libraryItemId, item)
           }
         })

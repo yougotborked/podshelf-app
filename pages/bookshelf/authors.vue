@@ -60,7 +60,7 @@ async function init() {
   }
 
   if (!authorList.length) {
-    authorList = ((await localStore.getCachedAuthors(currentLibraryId.value)) || []) as AuthorEntity[]
+    authorList = ((await localStore.getCachedAuthors(currentLibraryId.value))) as AuthorEntity[]
   }
 
   if (!authorList.length) {

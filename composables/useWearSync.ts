@@ -1,4 +1,4 @@
-import { registerPlugin } from '@capacitor/core'
+import { Capacitor, registerPlugin } from '@capacitor/core'
 import { episodeProgress } from '~/composables/useListeningQueue'
 import { isProgressFinished } from '~/composables/useMediaProgress'
 import type { ListeningEpisode, ProgressLookup, PlayQueueItem } from '~/composables/useListeningQueue'
@@ -80,7 +80,7 @@ export function toWearQueueEntries(items: PlayQueueItem[] = [], lookup: Progress
 
   for (const item of items) {
     if (entries.length >= limit) break
-    const episode: ListeningEpisode | undefined = item?.episode
+    const episode = item.episode as ListeningEpisode | null | undefined
     if (!episode) continue
 
     const progress = episodeProgress(episode, lookup)
@@ -143,7 +143,7 @@ export function useWearSync() {
   async function publish(session: WearSessionPayload | null, items: PlayQueueItem[] | null, lookup: ProgressLookup = {}) {
     // Native-only, and a missing bridge is not an error worth surfacing: the web build and iOS
     // have no watch to talk to.
-    if (!AbsWearSync?.publish) return
+    if (!Capacitor.isPluginAvailable('AbsWearSync')) return
 
     try {
       await AbsWearSync.publish({

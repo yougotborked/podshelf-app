@@ -6,7 +6,7 @@
  * guard it (the fullscreen cover) would throw on an iPhone the first time it opened. Going through
  * this makes "might not exist" part of the type, so a missing guard is a compile error.
  */
-export function getScreenOrientation(): (ScreenOrientation & { lock?: (orientation: string) => Promise<void>; unlock?: () => void }) | undefined {
+export function getScreenOrientation(): (Omit<ScreenOrientation, 'lock' | 'unlock'> & { lock?: (orientation: string) => Promise<void>; unlock?: () => void }) | undefined {
   const screenObject = (globalThis as { screen?: { orientation?: ScreenOrientation } }).screen
   return screenObject?.orientation as ReturnType<typeof getScreenOrientation>
 }

@@ -390,7 +390,7 @@ function cancelAddFlow() {
 async function onCardClick(podcast: PodcastCandidate) {
   // Already in the library: open it rather than offering a preview and an Add button for
   // something that is one tap away in full.
-  const existingId = libraryItemIdFor(podcast?.feedUrl)
+  const existingId = libraryItemIdFor(podcast.feedUrl)
   if (existingId) {
     void router.push(`/item/${existingId}`)
     return

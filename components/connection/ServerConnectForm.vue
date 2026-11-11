@@ -764,7 +764,7 @@ function validateLoginFormResponse(statusData: { url: string; data?: unknown } |
   }
 
   // Check content of response now
-  if (!statusData || !statusData.data || Object.keys(statusData).length === 0) {
+  if (!statusData.data || Object.keys(statusData).length === 0) {
     error.value = 'Response from server was empty' // Usually some kind of config error on server side
     console.error('[ServerConnectForm] Received empty response')
     return false
@@ -886,7 +886,6 @@ async function submitAuth() {
 }
 
 async function setUserAndConnection({ user, userDefaultLibraryId, serverSettings, ereaderDevices }: AuthorizePayload) {
-  if (!user) return
 
   console.log('Successfully logged in', JSON.stringify(user))
 

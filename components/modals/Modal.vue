@@ -99,8 +99,8 @@ watch(show, (newVal) => {
 function clickBg(ev: MouseEvent) {
   if (justOpened.value) return
   if (props.processing && persistent.value) return
-  const target = ev?.target as HTMLElement
-  if (target && target.classList && target.classList.contains('modal-bg')) {
+  const target = ev.target as HTMLElement | null
+  if (target?.classList.contains('modal-bg')) {
     show.value = false
   }
 }

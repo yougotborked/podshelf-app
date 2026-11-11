@@ -10,6 +10,7 @@
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 import { AbsAudioPlayer, AbsLogger } from '@/plugins/capacitor'
 import { Dialog } from '@capacitor/dialog'
 import { useCellularPermission } from '@/composables/useCellularPermission'
@@ -34,13 +35,12 @@ function formatForLog(payload) {
   }
 }
 
-export default {
+export default defineComponent({
   data() {
     return {
       isReady: false,
       settingsLoaded: false,
       audioPlayerReady: false,
-      stream: null,
       download: null,
       showPlaybackSpeedModal: false,
       showBookmarksModal: false,
@@ -88,6 +88,7 @@ export default {
       }
     },
     bookmarks() {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- data() infers this field as `null` in a plain <script>; it is assigned a string elsewhere
       if (!this.serverLibraryItemId) return []
       return this.userStore.getUserBookmarksForItem(this.serverLibraryItemId)
     },
@@ -223,7 +224,7 @@ export default {
         return entryEpisodeId === normalizedEpisodeId
       })
       if (idx >= 0) return idx
-      const safeFallback = Math.max(0, Math.min(fallbackIndex ?? 0, queuePayload.length - 1))
+      const safeFallback = Math.max(0, Math.min(fallbackIndex, queuePayload.length - 1))
       return safeFallback
     },
     resolvePlaybackTarget({ ids, preferServerIds, forceLocal }) {
@@ -313,33 +314,6 @@ export default {
       AbsLogger.info({ tag: 'AudioPlayerContainer', message: 'Canceling sleep timer' })
       await AbsAudioPlayer.cancelSleepTimer()
     },
-    streamClosed() {
-      AbsLogger.info({ tag: 'AudioPlayerContainer', message: 'Stream Closed' })
-    },
-    streamProgress(data) {
-      if (!data.numSegments) return
-      const chunks = data.chunks
-      if (this.$refs.audioPlayer) {
-        this.$refs.audioPlayer.setChunksReady(chunks, data.numSegments)
-      }
-    },
-    streamReady() {
-      AbsLogger.info({ tag: 'AudioPlayerContainer', message: '[StreamContainer] Stream Ready' })
-      if (this.$refs.audioPlayer) {
-        this.$refs.audioPlayer.setStreamReady()
-      }
-    },
-    streamReset({ streamId, startTime }) {
-        AbsLogger.info({
-          tag: 'AudioPlayerContainer',
-          message: `received stream reset: ${formatForLog({ streamId, startTime })}`
-        })
-      if (this.$refs.audioPlayer) {
-        if (this.stream && this.stream.id === streamId) {
-          this.$refs.audioPlayer.resetStream(startTime)
-        }
-      }
-    },
     updatePlaybackSpeed(speed) {
       if (this.$refs.audioPlayer) {
         AbsLogger.info({
@@ -348,14 +322,14 @@ export default {
         })
         this.$refs.audioPlayer.setPlaybackSpeed(speed)
       }
-      this.userStore.updateUserSettings({ playbackRate: speed })
+      void this.userStore.updateUserSettings({ playbackRate: speed })
     },
     changePlaybackSpeed(speed) {
       AbsLogger.info({
         tag: 'AudioPlayerContainer',
         message: `[AudioPlayerContainer] Change Playback Speed: ${speed}`
       })
-      this.userStore.updateUserSettings({ playbackRate: speed })
+      void this.userStore.updateUserSettings({ playbackRate: speed })
     },
     settingsUpdated(settings) {
       AbsLogger.info({
@@ -386,6 +360,7 @@ export default {
     castLocalItem() {
       let libraryItemId = this.serverLibraryItemId
       let episodeId = this.serverEpisodeId
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- data() infers this field as `null` in a plain <script>; it is assigned a string elsewhere
       if (!libraryItemId) {
         const session = this.appStore.currentPlaybackSession
         if (session) {
@@ -398,6 +373,7 @@ export default {
           }
         }
       }
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- data() infers this field as `null` in a plain <script>; it is assigned a string elsewhere
       if (!libraryItemId) {
         this.toast.error(`Cannot cast locally downloaded media`)
         return
@@ -435,6 +411,14 @@ export default {
           console.error('Failed', error)
           this.toast.error('Failed to play')
         })
+    },
+    // The event bus does not await its listeners; these keep the promise from being dropped
+    // silently (a rejection reaches the global unhandledrejection log).
+    playLibraryItemListener(payload) {
+      void this.playLibraryItem(payload)
+    },
+    deviceFocusedListener(hasFocus) {
+      void this.deviceFocused(hasFocus)
     },
     async playLibraryItem(payload) {
       await AbsLogger.info({
@@ -981,13 +965,13 @@ export default {
     })
 
     this.eventBus.on('abs-ui-ready', this.onReady)
-    this.eventBus.on('play-item', this.playLibraryItem)
+    this.eventBus.on('play-item', this.playLibraryItemListener)
     this.eventBus.on('pause-item', this.pauseItem)
     this.eventBus.on('close-stream', this.closeStreamOnly)
     this.eventBus.on('cast-local-item', this.castLocalItem)
     this.eventBus.on('user-settings', this.settingsUpdated)
     this.eventBus.on('playback-time-update', this.playbackTimeUpdate)
-    this.eventBus.on('device-focus-update', this.deviceFocused)
+    this.eventBus.on('device-focus-update', this.deviceFocusedListener)
     this.eventBus.on('socket-reconnected', this.onSocketReconnected)
     this.eventBus.on('playback-ended', this.onPlaybackEnded)
     // Minimal mode has its own transport controls and the player component it would normally
@@ -1020,17 +1004,17 @@ export default {
     this.onQueueIndexUpdateListener?.remove()
 
     this.eventBus.off('abs-ui-ready', this.onReady)
-    this.eventBus.off('play-item', this.playLibraryItem)
+    this.eventBus.off('play-item', this.playLibraryItemListener)
     this.eventBus.off('pause-item', this.pauseItem)
     this.eventBus.off('close-stream', this.closeStreamOnly)
     this.eventBus.off('cast-local-item', this.castLocalItem)
     this.eventBus.off('user-settings', this.settingsUpdated)
     this.eventBus.off('playback-time-update', this.playbackTimeUpdate)
-    this.eventBus.off('device-focus-update', this.deviceFocused)
+    this.eventBus.off('device-focus-update', this.deviceFocusedListener)
     this.eventBus.off('socket-reconnected', this.onSocketReconnected)
     this.eventBus.off('playback-ended', this.onPlaybackEnded)
     this.eventBus.off('skip-next-queue', this.onSkipNextRequest)
     clearTimeout(this.queueAdvanceFallbackTimeout)
   }
-}
+})
 </script>

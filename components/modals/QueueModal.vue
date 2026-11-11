@@ -50,10 +50,10 @@ watch(() => props.queue, (newVal) => {
 })
 
 function itemTitle(item: Record<string, unknown>) {
-  const ep = item.episode as Record<string, unknown>
-  const le = item.localEpisode as Record<string, unknown>
-  const li = item.libraryItem as Record<string, unknown>
-  const lli = item.localLibraryItem as Record<string, unknown>
+  const ep = item.episode as Record<string, unknown> | null | undefined
+  const le = item.localEpisode as Record<string, unknown> | null | undefined
+  const li = item.libraryItem as Record<string, unknown> | null | undefined
+  const lli = item.localLibraryItem as Record<string, unknown> | null | undefined
   if (ep) return ep.title as string
   if (le) return le.title as string
   if (li?.media) return ((li.media as Record<string, unknown>).metadata as Record<string, unknown> | null | undefined)?.title as string

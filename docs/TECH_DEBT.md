@@ -176,33 +176,3 @@ hundred source files is a large risky diff for no visible gain. Listed here only
 mistakes it for an oversight.
 
 **Clears when** there is an unrelated reason to touch every file in the module anyway.
-
-### The stricter TypeScript flags are on, with their existing errors baselined
-
-**Where** `tsconfig.json`, `scripts/typecheck-baseline.json`
-
-`noUncheckedIndexedAccess`, `noImplicitReturns`, `noFallthroughCasesInSwitch` and
-`noImplicitOverride` are on. `noUncheckedIndexedAccess` types `arr[i]` and `record[key]` as
-possibly `undefined` - the empty-array and missing-key crashes `strict` alone lets through.
-
-Turning them on reported 106 errors in existing code, mostly in UI components with no test
-coverage. Fixing one means adding a guard, and a guard is a behaviour decision - skip the row,
-show a placeholder, bail out - not a type annotation, so they were not mass-fixed with `!`.
-They are in the typecheck baseline instead. This used to be argued the other way (one visible
-`false` in tsconfig rather than 102 hidden baseline entries); what changed it is that with the
-flag off, *new* code was not checked either. Now every new index access is.
-
-The `noImplicitReturns` entries are the `return toast.error(...)` early-exit idiom, not bugs.
-
-**Clears when** the baseline entries for these codes (TS18048, TS2532, TS2538, TS7030 and the
-TS2322/TS2345 that come from an index access) are gone - a file at a time, each guard chosen.
-
-### 56 pre-existing type errors
-
-**Where** `scripts/typecheck-baseline.json`
-
-Left by the Nuxt 2 → 3 migration. `scripts/typecheck.mjs` fails only on a *new* error, so the
-baseline keeps the check useful without a 56-error cleanup blocking everything else. Tighten it
-with `npm run typecheck:update` after fixing any of them.
-
-**Clears when** the baseline file is empty.

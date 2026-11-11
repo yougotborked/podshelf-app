@@ -96,8 +96,8 @@ const episodeDownloadsQueued = ref<Record<string, unknown>[]>([])
 const isAdminOrUp = computed(() => userStore.getIsAdminOrUp)
 const socketConnected = computed(() => appStore.socketConnected)
 const networkConnected = computed(() => !appStore.isOffline)
-const libraryItemId = computed(() => (props.libraryItem?.id as string) || null)
-const media = computed(() => (props.libraryItem?.media as Record<string, unknown> | null | undefined) || {})
+const libraryItemId = computed(() => (props.libraryItem.id as string) || null)
+const media = computed(() => (props.libraryItem.media as Record<string, unknown> | null | undefined) || {})
 const mediaMetadata = computed(() => (media.value.metadata as Record<string, unknown> | null | undefined) || {})
 
 const episodeSortItems = computed(() => [

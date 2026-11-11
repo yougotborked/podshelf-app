@@ -178,26 +178,32 @@ A warning nobody has to act on is a warning nobody reads, so nothing here only w
 |---|---|---|
 | Kotlin (`:app`, `:wear`, `:wear-sync`) | `allWarningsAsErrors` + `-Wextra`, in `android/build.gradle` | none — all fixed |
 | Android lint (both apps) | `checkAllWarnings`, `warningsAsErrors`, `abortOnError`, in `android/build.gradle` | none — fixed or suppressed in place with the reason |
-| TypeScript | `strict` + `noUncheckedIndexedAccess`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noImplicitOverride` | `scripts/typecheck-baseline.json` |
-| ESLint (`.ts`, `.vue`, `.js`) | type-aware: `no-floating-promises`, `no-misused-promises`, `no-unnecessary-condition`, `switch-exhaustiveness-check` … | `scripts/lint-baseline.json` |
+| TypeScript | `strict` + `noUncheckedIndexedAccess`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noImplicitOverride` | none — baseline is empty |
+| ESLint (`.ts`, `.vue`, `.js`) | type-aware: `no-floating-promises`, `no-misused-promises`, `no-unnecessary-condition`, `switch-exhaustiveness-check` … | none — baseline is empty |
 
-The two baselines hold what predates the rule, keyed by file + rule + message rather than line,
-and fail on anything new. **Never add to a baseline to get a change through** — fix the finding,
-or suppress that one line with the reason next to it. After fixing baselined findings, tighten
-with `npm run lint:update` / `npm run typecheck:update`.
+Both TypeScript baselines (`scripts/typecheck-baseline.json`, `scripts/lint-baseline.json`) are
+**empty, and the mechanism stays as a ratchet**: the scripts fail on any finding not in the file,
+and a finding is keyed by file + rule + message rather than line. **Never add to a baseline to get a
+change through** — fix the finding, or suppress that one line with the reason next to it
+(`// eslint-disable-next-line <rule> -- why the type is wrong here`). A suppression is for a type that
+cannot be expressed (lib.dom typing `navigator.share` as always present, epubjs typing `Spine.get`
+as never null); a guard against data that can really be null is fixed by widening the type, not by
+suppressing the rule.
 
 None of this would have caught the R8 launch crash: R8 did exactly what the keep rules said and
 printed nothing. Problems that only exist in the built artifact need a check that reads the
 artifact — that is what `scripts/r8-check/constructors.py` is.
 
-### Typecheck runs against a baseline
+### Typecheck and lint run against a baseline
 
-The Nuxt 2 → 3 migration left pre-existing type errors (56 at the time of writing), so a
-bare `vue-tsc` run always fails and gets ignored. `scripts/typecheck.mjs` compares against
-`scripts/typecheck-baseline.json` and fails only on a **new** error. Entries are keyed by
-file + error code + message, not line number, so edits above an error do not look new.
+`scripts/typecheck.mjs` and `scripts/lint.mjs` compare against their baseline files and fail only on
+a **new** finding. Both files are currently empty, so in practice any finding fails. If a rule is
+ever tightened and reports old code, `npm run typecheck:update` / `npm run lint:update` records it —
+run the script *without* `--update` first, so a real regression is not baselined by accident.
 
-After fixing baselined errors, tighten the baseline with `npm run typecheck:update`.
+Options-API components written in a plain `<script>` (not `lang="ts"`) go through `defineComponent`,
+otherwise `this.someComputed` is typed as the function itself and every guard on it reads as dead
+code to the linter.
 
 **Never run `npx vue-tsc` or `npx nuxi typecheck`.** Both resolve the latest release.
 vue-tsc 3.x aborts partway through this project and still prints `Found 0 errors` — a false

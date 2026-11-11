@@ -76,26 +76,26 @@ const show = computed({
 
 const userIsAdminOrUp = computed(() => userStore.getIsAdminOrUp)
 
-const isLocal = computed(() => !!props.libraryItem?.isLocal)
+const isLocal = computed(() => !!props.libraryItem.isLocal)
 
 const localLibraryItem = computed(() => {
   if (isLocal.value) return props.libraryItem
-  return (props.libraryItem?.localLibraryItem as Record<string, unknown> | null | undefined) || null
+  return (props.libraryItem.localLibraryItem as Record<string, unknown> | null | undefined) || null
 })
 
 const localLibraryItemId = computed(() => (localLibraryItem.value?.id as string) || null)
 
 const serverLibraryItemId = computed(() => {
-  if (!isLocal.value) return (props.libraryItem?.id || props.libraryItem?.libraryItemId) as string
+  if (!isLocal.value) return (props.libraryItem.id || props.libraryItem.libraryItemId) as string
   if (isConnectedToServer.value) {
     return props.libraryItem.libraryItemId as string
   }
-  return (props.libraryItem?.libraryItemId || props.libraryItem?.id || null) as string | null
+  return (props.libraryItem.libraryItemId || props.libraryItem.id || null) as string | null
 })
 
 const isConnectedToServer = computed(() => {
   if (!isLocal.value) return true
-  if (!props.libraryItem?.serverAddress) return false
+  if (!props.libraryItem.serverAddress) return false
   return userStore.getServerAddress === props.libraryItem.serverAddress
 })
 
@@ -114,9 +114,9 @@ const serverEpisodeId = computed(() => {
   return (props.episode?.serverEpisodeId || props.episode?.id || null) as string | null
 })
 
-const mediaType = computed(() => props.libraryItem?.mediaType as string)
+const mediaType = computed(() => props.libraryItem.mediaType as string)
 const isPodcast = computed(() => mediaType.value == 'podcast')
-const media = computed(() => (props.libraryItem?.media as Record<string, unknown> | null | undefined) || {})
+const media = computed(() => (props.libraryItem.media as Record<string, unknown> | null | undefined) || {})
 const mediaMetadata = computed(() => (media.value.metadata as Record<string, unknown> | null | undefined) || {})
 const title = computed(() => mediaMetadata.value.title as string)
 const tracks = computed(() => (media.value.tracks as unknown[] | null | undefined) || [])
@@ -160,7 +160,7 @@ const progressPercent = computed(() => {
 })
 
 const ereaderDeviceItems = computed(() => {
-  if (!ebookFile.value || !librariesStore.ereaderDevices?.length) return []
+  if (!ebookFile.value || !librariesStore.ereaderDevices.length) return []
   return librariesStore.ereaderDevices.map((d) => {
     const device = d as Record<string, string>
     return { text: device.name ?? '', value: device.name ?? '' }
@@ -379,15 +379,15 @@ async function toggleFinished() {
 
   if (isLocal.value) {
     const isFinished = !userIsFinished.value
-    const payload = await db.updateLocalMediaProgressFinished({ localLibraryItemId: localLibraryItemId.value, isFinished }) as Record<string, unknown>
+    const payload = await db.updateLocalMediaProgressFinished({ localLibraryItemId: localLibraryItemId.value, isFinished })
     console.log('toggleFinished payload', JSON.stringify(payload))
     if (payload?.error) {
-      toast.error((payload?.error || 'Unknown error') as string)
+      toast.error(payload.error || 'Unknown error')
     } else {
-      const localMediaProgress = payload.localMediaProgress as Record<string, unknown>
+      const localMediaProgress = payload?.localMediaProgress
       console.log('toggleFinished localMediaProgress', JSON.stringify(localMediaProgress))
       if (localMediaProgress) {
-        globalsStore.updateLocalMediaProgress(localMediaProgress as Parameters<typeof globalsStore.updateLocalMediaProgress>[0])
+        globalsStore.updateLocalMediaProgress(localMediaProgress)
         markFinishedSucceeded = true
       }
     }
@@ -406,7 +406,7 @@ async function toggleFinished() {
 
     const updatePayload = { isFinished: !userIsFinished.value }
     AbsLogger.info({ tag: 'ItemMoreMenuModal', message: `toggleFinished server request: ${JSON.stringify({ _serverLibraryItemId, payload: updatePayload })}` })
-    let serverError = null
+    let serverError: unknown = null
     await nativeHttp.patch(`/api/me/progress/${_serverLibraryItemId}`, updatePayload, { connectTimeout: 10000 }).catch(async (error) => {
       serverError = error
       const status = (error?.response?.status as number)
@@ -443,16 +443,16 @@ async function toggleEpisodeFinished() {
     const isFinished = !userIsFinished.value
     const _localLibraryItemId = localLibraryItemId.value
     const _localEpisodeId = localEpisodeId.value
-    const payload = await db.updateLocalMediaProgressFinished({ localLibraryItemId: _localLibraryItemId, localEpisodeId: _localEpisodeId, isFinished }) as Record<string, unknown>
+    const payload = await db.updateLocalMediaProgressFinished({ localLibraryItemId: _localLibraryItemId, localEpisodeId: _localEpisodeId, isFinished })
     console.log('toggleFinished payload', JSON.stringify(payload))
 
     if (payload?.error) {
-      toast.error((payload?.error || 'Unknown error') as string)
+      toast.error(payload.error || 'Unknown error')
     } else {
-      const localMediaProgress = payload.localMediaProgress as Record<string, unknown>
+      const localMediaProgress = payload?.localMediaProgress
       console.log('toggleFinished localMediaProgress', JSON.stringify(localMediaProgress))
       if (localMediaProgress) {
-        globalsStore.updateLocalMediaProgress(localMediaProgress as Parameters<typeof globalsStore.updateLocalMediaProgress>[0])
+        globalsStore.updateLocalMediaProgress(localMediaProgress)
         markFinishedSucceeded = true
       }
     }
@@ -479,7 +479,7 @@ async function toggleEpisodeFinished() {
 
     const updatePayload = { isFinished: !userIsFinished.value }
     AbsLogger.info({ tag: 'ItemMoreMenuModal', message: `toggleEpisodeFinished server request: ${JSON.stringify({ _serverLibraryItemId, _serverEpisodeId, payload: updatePayload })}` })
-    let serverError = null
+    let serverError: unknown = null
     await nativeHttp.patch(`/api/me/progress/${_serverLibraryItemId}/${_serverEpisodeId}`, updatePayload, { connectTimeout: 10000 }).catch(async (error) => {
       serverError = error
       const status = (error?.response?.status as number)
@@ -552,7 +552,7 @@ async function deleteLocalEpisode() {
     message: getString('MessageConfirmDeleteLocalEpisode', [localFile.basePath as string]) || strings.MessageConfirmDeleteLocalFiles
   })
   if (value) {
-    const res = await AbsFileSystem.deleteTrackFromItem({ id: localLibraryItemId.value, trackLocalFileId: localFile.id, trackContentUrl: localEpisodeAudioTrack.contentUrl }) as Record<string, unknown>
+    const res = await AbsFileSystem.deleteTrackFromItem({ id: localLibraryItemId.value, trackLocalFileId: localFile.id, trackContentUrl: localEpisodeAudioTrack.contentUrl }) as Record<string, unknown> | null | undefined
     if (res?.id) {
       if (isLocal.value) {
         if (serverEpisodeId.value) {
@@ -576,7 +576,7 @@ async function deleteLocalItem() {
     message: strings.MessageConfirmDeleteLocalFiles
   })
   if (value) {
-    const res = await AbsFileSystem.deleteItem(localLibraryItem.value) as Record<string, unknown>
+    const res = await AbsFileSystem.deleteItem(localLibraryItem.value) as Record<string, unknown> | null | undefined
     if (res?.success) {
       if (isLocal.value) {
         if (serverLibraryItemId.value) {
@@ -692,19 +692,19 @@ async function forceMarkFinished() {
         localLibraryItemId: localLibraryItemId.value,
         localEpisodeId: localEpisodeId.value,
         isFinished: true
-      }) as Record<string, unknown>
+      })
 
       if (payload?.error) {
-        toast.error((payload?.error || 'Unknown error') as string)
+        toast.error(payload.error || 'Unknown error')
         return
       }
 
       if (payload?.localMediaProgress) {
-        globalsStore.updateLocalMediaProgress(payload.localMediaProgress as Parameters<typeof globalsStore.updateLocalMediaProgress>[0])
+        globalsStore.updateLocalMediaProgress(payload.localMediaProgress)
         markFinishedSucceeded = true
       }
     } else if (serverLibraryItemId.value && serverEpisodeId.value) {
-      let serverError = null
+      let serverError: unknown = null
       await nativeHttp
         .patch(`/api/me/progress/${serverLibraryItemId.value}/${serverEpisodeId.value}`, { isFinished: true })
         .catch((error) => {
@@ -722,19 +722,19 @@ async function forceMarkFinished() {
       const payload = await db.updateLocalMediaProgressFinished({
         localLibraryItemId: localLibraryItemId.value,
         isFinished: true
-      }) as Record<string, unknown>
+      })
 
       if (payload?.error) {
-        toast.error((payload?.error || 'Unknown error') as string)
+        toast.error(payload.error || 'Unknown error')
         return
       }
 
       if (payload?.localMediaProgress) {
-        globalsStore.updateLocalMediaProgress(payload.localMediaProgress as Parameters<typeof globalsStore.updateLocalMediaProgress>[0])
+        globalsStore.updateLocalMediaProgress(payload.localMediaProgress)
         markFinishedSucceeded = true
       }
     } else if (serverLibraryItemId.value) {
-      let serverError = null
+      let serverError: unknown = null
       await nativeHttp
         .patch(`/api/me/progress/${serverLibraryItemId.value}`, { isFinished: true })
         .catch((error) => {
@@ -760,15 +760,15 @@ async function setLocalProgressFinished({ isEpisode, isFinished }: { isEpisode: 
     localLibraryItemId: localLibraryItemId.value,
     localEpisodeId: isEpisode ? localEpisodeId.value : null,
     isFinished
-  }) as Record<string, unknown>
+  })
 
   if (payload?.error) {
-    toast.error((payload?.error || 'Unknown error') as string)
+    toast.error(payload.error || 'Unknown error')
     return false
   }
 
   if (payload?.localMediaProgress) {
-    globalsStore.updateLocalMediaProgress(payload.localMediaProgress as Parameters<typeof globalsStore.updateLocalMediaProgress>[0])
+    globalsStore.updateLocalMediaProgress(payload.localMediaProgress)
     const message = isFinished ? strings.ToastItemMarkedAsFinished : strings.ToastItemMarkedAsNotFinished
     toast.success(message ?? '')
     return true

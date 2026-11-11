@@ -225,11 +225,11 @@ const localLibraryItemId = computed(() => localLibraryItem.value?.id || null)
 const localLibraryItemEpisodes = computed(() => {
   if (!isPodcast.value || !localLibraryItem.value) return []
   const podcastMedia = localLibraryItem.value.media
-  return podcastMedia?.episodes || []
+  return podcastMedia.episodes || []
 })
 const serverLibraryItemId = computed(() => {
   if (!isLocal.value) return libraryItem.value?.id
-  if (!libraryItem.value?.serverAddress || !libraryItem.value?.libraryItemId) return null
+  if (!libraryItem.value?.serverAddress || !libraryItem.value.libraryItemId) return null
   if (currentServerAddress.value === libraryItem.value.serverAddress) {
     return libraryItem.value.libraryItemId
   }
@@ -259,7 +259,7 @@ const isPodcast = computed(() => mediaType.value == 'podcast')
 const EMPTY_MEDIA: LibraryItemMedia = { metadata: {} }
 const media = computed(() => libraryItem.value?.media ?? EMPTY_MEDIA)
 const tags = computed(() => media.value.tags || [])
-const mediaMetadata = computed(() => media.value.metadata || {})
+const mediaMetadata = computed(() => media.value.metadata)
 const title = computed(() => mediaMetadata.value.title)
 const subtitle = computed(() => mediaMetadata.value.subtitle)
 const genres = computed(() => mediaMetadata.value.genres || [])
@@ -393,7 +393,7 @@ function moreButtonPress() {
 }
 
 function readBook() {
-  if (localLibraryItem.value?.media?.ebookFile) {
+  if (localLibraryItem.value?.media.ebookFile) {
     appStore.selectedLibraryItem = localLibraryItem.value
     appStore.ereaderKeepProgress = true
     appStore.showReader = true
@@ -472,7 +472,7 @@ async function play(startTime: number | null = null) {
       playLibraryItemId = localLibraryItem.value.id
     }
 
-    if (startTime !== null && startTime !== undefined && !appStore.getIsMediaStreaming(playLibraryItemId, null)) {
+    if (startTime !== null && !appStore.getIsMediaStreaming(playLibraryItemId, null)) {
       const { value } = await Dialog.confirm({
         title: useNuxtApp().$strings.HeaderConfirm,
         message: useNuxtApp().$getString('MessageConfirmPlaybackTime', [title.value ?? '', useNuxtApp().$secondsToTimestamp(startTime)])
@@ -731,9 +731,9 @@ onMounted(async () => {
       return
     }
 
-    if (localItem?.libraryItemId?.startsWith('li_')) {
+    if (localItem.libraryItemId?.startsWith('li_')) {
       console.error('Local library item has old server library item id', localItem.libraryItemId)
-    } else if (query.noredirect !== '1' && localItem?.libraryItemId && localItem?.serverAddress === userStore.getServerAddress && appStore.socketConnected) {
+    } else if (query.noredirect !== '1' && localItem.libraryItemId && localItem.serverAddress === userStore.getServerAddress && appStore.socketConnected) {
       const queryParams = new URLSearchParams()
       queryParams.set('localLibraryItemId', libItemId)
       if (localItem.mediaType === 'podcast') {
@@ -743,7 +743,7 @@ onMounted(async () => {
       return
     }
 
-    if (localItem && !localItem.isLocal) {
+    if (!localItem.isLocal) {
       const localLi = (await db.getLocalLibraryItemByLId(localItem.id || libItemId)) as LibraryItem | null
       if (localLi) {
         localItem.localLibraryItem = localLi
@@ -766,7 +766,7 @@ onMounted(async () => {
       }
     }
 
-    if (cachedItem && !cachedItem.isLocal) {
+    if (!cachedItem.isLocal) {
       const localLi = (await db.getLocalLibraryItemByLId(cachedItem.id || libItemId)) as LibraryItem | null
       if (localLi) {
         cachedItem.localLibraryItem = localLi

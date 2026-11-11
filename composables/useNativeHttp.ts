@@ -29,7 +29,7 @@ async function refreshAccessToken(refreshToken: string, serverAddress: string): 
     })
     if (response.status !== 200) return null
     const userData = response.data as Record<string, unknown>
-    const user = userData.user as Record<string, unknown>
+    const user = userData.user as Record<string, unknown> | null | undefined
     if (!user?.accessToken) return null
     return { accessToken: user.accessToken as string, refreshToken: user.refreshToken as string }
   } catch {
@@ -64,7 +64,7 @@ async function updateTokens(tokens: { accessToken: string; refreshToken?: string
   const userStore = useUserStore()
   userStore.accessToken = tokens.accessToken
   const socket = useSocket()
-  if (socket?.connected) socket.sendAuthenticate()
+  if (socket.connected) socket.sendAuthenticate()
   if (savedConfig) {
     userStore.serverConnectionConfig = savedConfig as import('~/types').ServerConnectionConfig
   }
@@ -101,7 +101,7 @@ async function handleTokenRefresh(
     const err = error as HttpError
     const status = err.status ?? err.response?.status
     const isTokenRejected = status === 401 || status === 403
-    await handleRefreshFailure(serverConnectionConfig?.id, isTokenRejected)
+    await handleRefreshFailure(serverConnectionConfig.id, isTokenRejected)
     throw error
   }
 }

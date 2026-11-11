@@ -26,7 +26,7 @@ export interface LocalLibraryItemCover {
  * Keyed by the server id on purpose: that is the id an episode carries, so a list of episodes
  * from the server can be matched against downloads without another lookup.
  */
-export function buildLocalCoverMap(localLibraryItems: LocalLibraryItemCover[] = []): Record<string, string> {
+export function buildLocalCoverMap(localLibraryItems: (LocalLibraryItemCover | null | undefined)[] = []): Record<string, string> {
   const map: Record<string, string> = {}
   for (const item of localLibraryItems) {
     if (item?.libraryItemId && item.coverContentUrl) map[item.libraryItemId] = item.coverContentUrl

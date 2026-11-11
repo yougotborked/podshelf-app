@@ -168,7 +168,7 @@ watch(() => props.seriesId, () => {
 })
 
 // Methods
-function buildLocalLibraryItemMap(items: Record<string, unknown>[] = []) {
+function buildLocalLibraryItemMap(items: (Record<string, unknown> | null | undefined)[] = []) {
   const map = new Map<string, Record<string, unknown>>()
   items.forEach((item) => {
     if (item?.libraryItemId) {
@@ -209,14 +209,14 @@ async function fetchEntities(page: number) {
     return { results: [], total: 0 }
   }
 
-  let payload: { results: Record<string, unknown>[]; total: number } | null
+  let payload: { results?: Record<string, unknown>[]; total?: number } | null
   if (appStore.isOffline) {
     payload = await fetchFromDevice()
   } else {
     payload = (await nativeHttp.get(`/api/libraries/${currentLibraryId.value}/${entityPath}${fullQueryString}`, { connectTimeout: 10000 }).catch((error: unknown) => {
       console.error('failed to fetch books', error)
       return null
-    })) as { results: Record<string, unknown>[]; total: number } | null
+    })) as { results?: Record<string, unknown>[]; total?: number } | null
     if (payload && entityName.value === 'playlists' && payload.results) {
       void localStore.setCachedPlaylists(currentLibraryId.value, payload.results)
     }
@@ -234,11 +234,11 @@ async function fetchEntities(page: number) {
     void resetEntities()
     return
   }
-  if (payload && payload.results) {
+  if (payload.results) {
     console.log('Received payload', payload)
     if (!initialized.value) {
       initialized.value = true
-      totalEntities.value = payload.total
+      totalEntities.value = payload.total ?? payload.results.length
       totalShelves.value = Math.ceil(totalEntities.value / entitiesPerShelf.value)
       entities.value = new Array(totalEntities.value)
       eventBus.emit('bookshelf-total-entities', totalEntities.value)
@@ -417,7 +417,7 @@ async function init() {
 }
 
 function scroll(e: Event) {
-  if (!e || !e.target) return
+  if (!e.target) return
   if (!user.value) return
   var { scrollTop } = e.target as HTMLElement
   handleScroll(scrollTop)
@@ -504,7 +504,7 @@ function libraryItemAdded(libraryItem: Record<string, unknown>) {
 function libraryItemUpdated(libraryItem: Record<string, unknown>) {
   console.log('Item updated', libraryItem)
   if (entityName.value === 'books' || entityName.value === 'series-books') {
-    var indexOf = entities.value.findIndex((ent) => ent && ent.id === libraryItem.id)
+    var indexOf = entities.value.findIndex((ent) => ent.id === libraryItem.id)
     if (indexOf >= 0) {
       entities.value[indexOf] = libraryItem
       const cardRef = entityComponentRefs[indexOf]
@@ -524,7 +524,7 @@ function libraryItemUpdated(libraryItem: Record<string, unknown>) {
 
 function libraryItemRemoved(libraryItem: Record<string, unknown>) {
   if (entityName.value === 'books' || entityName.value === 'series-books') {
-    var indexOf = entities.value.findIndex((ent) => ent && ent.id === libraryItem.id)
+    var indexOf = entities.value.findIndex((ent) => ent.id === libraryItem.id)
     if (indexOf >= 0) {
       entities.value = entities.value.filter((ent) => ent.id !== libraryItem.id)
       totalEntities.value = entities.value.length

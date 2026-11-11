@@ -164,7 +164,7 @@ async function init() {
 
 onBeforeUnmount(() => {
   if (coverWrapperEl.value) coverWrapperEl.value.remove()
-  if (coverImageEls.value && coverImageEls.value.length) {
+  if (coverImageEls.value.length) {
     coverImageEls.value.forEach((el) => el.remove())
   }
   if (coverDiv.value) coverDiv.value.remove()
