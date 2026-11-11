@@ -220,9 +220,8 @@ notification showing progress, and the episode playing offline afterwards covers
 
 ## 7c. The two upload warnings, and why both are ignorable
 
-**"No deobfuscation file."** `minifyEnabled` is false, so nothing is obfuscated and there is no
-mapping file to upload. The warning is conditional on using obfuscation. The upside is that crash
-stack traces arrive readable.
+**"No deobfuscation file."** Release builds are R8-minified now and the publish workflow uploads the
+mapping files, so this warning should not appear. If it does, the upload step failed.
 
 **Do not enable R8 to silence it.** Three dependencies resolve types reflectively â€” Jackson
 serialises every data class, paperdb does the same for storage, and Capacitor resolves plugins by
@@ -496,6 +495,49 @@ the two codes were *equal*, which a constant non-zero offset makes impossible â€
 not fail, and so it did not notice the overlap above. Play's own error names the upload rather
 than the codes, and an `.aab` is not an APK, so a workflow step that tried to read the codes back
 out of the artifacts would silently pass.
+
+---
+
+## Path to production
+
+Read from the Publishing API with `play-status.yml` (Actions -> Play status -> Run workflow), which
+also asks Play whether it would accept the build on each track. As of 2026-11-11:
+
+| Track | State |
+|---|---|
+| `internal`, `wear:internal` | live, 0.14.0-dev.68 |
+| `alpha` (closed testing) | live, 0.14.0 |
+| `beta` (open testing), `production`, `wear:production` | empty, and **Play refuses to assign a release to `beta` or `production`** (`FAILED_PRECONDITION`) |
+
+The refusal is real and not a quirk of the probe: the same release is accepted on `internal` and
+`alpha` in the same edit, and rejected on `beta` and `production`. It is the personal-account rule
+from section 0 - no open testing or production until a closed test has run with at least 12 testers
+opted in for 14 days **and Google has granted production access** - so the next steps are a clock,
+and one click that only the account owner has.
+
+The store listing is not what is in the way: title, short and full description, four phone
+screenshots, two watch screenshots, icon, feature graphic, contact email and website are all
+present. Tablet screenshots (7" and 10") are absent; they are not required, but they help on a
+tablet's store page.
+
+1. **Get 12+ testers into the closed test and keep them there for 14 days.** Play Console ->
+   Testing -> Closed testing -> Testers. The API shows no tester groups for any track, and does not
+   expose individual email lists, so the real count has to be read in the Console. The 14 days run
+   from when the 12th tester opted in, and they must stay opted in continuously.
+2. **Keep a current build in front of them.** A tag publishes to `alpha` (reviewed by Google).
+   Cut one when there is something worth testing, and not more often than that: every listing or
+   release commit while a release is in review restarts the review (see *Why committing an edit
+   cancels a review*).
+3. **Watch for crashes** with `play-vitals.yml` while the clock runs. A crash-free 14 days is also
+   what makes the production application read well.
+4. **Apply for production access** (Console -> Dashboard -> "Apply for production"), which asks
+   how testing went. Only the account owner can; there is no API.
+5. **Then** promote the tested build to `production` (and the matching watch build to
+   `wear:production`). Start with a staged rollout - 10-20% - and widen it while vitals stay clean.
+
+Also confirm once, in the Console, that the Dashboard's setup tasks are all ticked (content rating,
+data safety, target audience, ads declaration, app access). They are not visible through the API,
+and a missing one blocks the release at the last step rather than at the first.
 
 ---
 

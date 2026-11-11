@@ -37,8 +37,8 @@ def session() -> requests.Session:
     return s
 
 
-def call(s: requests.Session, method: str, path: str, ok=(200,), soft=False):
-    r = s.request(method, f'{BASE}/{path}', timeout=60)
+def call(s: requests.Session, method: str, path: str, ok=(200,), soft=False, body=None):
+    r = s.request(method, f'{BASE}/{path}', json=body, timeout=60)
     if r.status_code in ok:
         return r.json() if r.content else {}
     msg = f'{method} {path} -> HTTP {r.status_code}: {r.text.strip()[:300]}'
@@ -51,6 +51,51 @@ def call(s: requests.Session, method: str, path: str, ok=(200,), soft=False):
 
 def who(code: int) -> str:
     return f'{code} (watch, phone-equivalent {code - WEAR_OFFSET})' if code >= WEAR_OFFSET else f'{code}'
+
+
+def probe_production(s: requests.Session, edit: str, tracks: list) -> None:
+    """Ask Play whether a production release would be accepted, without making one.
+
+    Puts the newest closed-testing release on the production track *inside this edit* and calls
+    validate, which reports what would stop a commit - an account that has not met the closed
+    testing requirement, a missing declaration - in Play's own words. The edit is deleted
+    afterwards in main(), so no release is created and nothing goes to review.
+    """
+    print('\n== Would production accept a release?')
+    alpha = next((t for t in tracks if t['track'] == 'alpha'), None)
+    codes = []
+    for rel in (alpha or {}).get('releases', []):
+        # The API returns int64 as strings but only accepts integers back.
+        codes = [int(c) for c in rel.get('versionCodes', [])] or codes
+    if not codes:
+        print('  (skipped: no closed-testing release to promote)')
+        return
+    # Calibrate before concluding anything. Each track the app already has a release on is given
+    # *its own* current release back (which must be accepted, or this probe means nothing), then
+    # the not-yet-used tracks get the closed-testing build.
+    by_track = {t['track']: t for t in tracks}
+
+    def attempt(name: str, version_codes: list) -> bool:
+        body = {'track': name, 'releases': [{'status': 'completed', 'versionCodes': version_codes,
+                                               'releaseNotes': [{'language': 'en-US', 'text': 'Probe'}]}]}
+        r = s.put(f'{BASE}/edits/{edit}/tracks/{name}', json=body, timeout=60)
+        shown = '' if r.status_code == 200 else ' ' + r.text.strip().replace('\n', ' ')[:300]
+        print(f'  assign {version_codes} to {name}: HTTP {r.status_code}{shown}')
+        return r.status_code == 200
+
+    for name in ('internal', 'alpha'):
+        rels = by_track.get(name, {}).get('releases', [])
+        if rels:
+            attempt(name, [int(c) for c in rels[0].get('versionCodes', [])])
+    attempt('beta', codes)
+    if not attempt('production', codes):
+        return
+    r = s.post(f'{BASE}/edits/{edit}:validate', timeout=60)
+    if r.status_code == 200:
+        print(f'  validate: OK - production would accept version code(s) {codes}')
+    else:
+        print(f'  validate: HTTP {r.status_code}')
+        print('  ' + r.text.strip().replace('\n', '\n  ')[:1500])
 
 
 def main() -> None:
@@ -97,6 +142,7 @@ def main() -> None:
         bundles = (call(s, 'GET', f'edits/{edit}/bundles', soft=True) or {}).get('bundles', [])
         print(f'  {len(bundles)} bundle(s); newest version codes: ' +
               ', '.join(who(b['versionCode']) for b in sorted(bundles, key=lambda b: -b['versionCode'])[:6]))
+        probe_production(s, edit, tracks)
     finally:
         call(s, 'DELETE', f'edits/{edit}', ok=(200, 204), soft=True)
         print('\n(edit deleted; nothing was committed)')
