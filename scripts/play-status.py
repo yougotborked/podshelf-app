@@ -69,11 +69,15 @@ def probe_production(s: requests.Session, edit: str, tracks: list) -> None:
     if not codes:
         print('  (skipped: no closed-testing release to promote)')
         return
-    body = {'track': 'production', 'releases': [{'status': 'completed', 'versionCodes': codes,
-                                                   'releaseNotes': [{'language': 'en-US', 'text': 'Probe'}]}]}
-    put = call(s, 'PUT', f'edits/{edit}/tracks/production', soft=True, body=body)
-    if put is None:
-        return
+    # Open testing first, as the control: it has no closed-testing prerequisite, so if it takes the
+    # same release and production does not, the block is specific to production.
+    for name in ('beta', 'production'):
+        body = {'track': name, 'releases': [{'status': 'completed', 'versionCodes': codes,
+                                               'releaseNotes': [{'language': 'en-US', 'text': 'Probe'}]}]}
+        r = s.put(f'{BASE}/edits/{edit}/tracks/{name}', json=body, timeout=60)
+        print(f'  assign to {name}: HTTP {r.status_code}' + ('' if r.status_code == 200 else f' {r.text.strip()[:400]}'))
+        if name == 'production' and r.status_code != 200:
+            return
     r = s.post(f'{BASE}/edits/{edit}:validate', timeout=60)
     if r.status_code == 200:
         print(f'  validate: OK - production would accept version code(s) {codes}')
