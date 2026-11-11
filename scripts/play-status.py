@@ -65,7 +65,8 @@ def probe_production(s: requests.Session, edit: str, tracks: list) -> None:
     alpha = next((t for t in tracks if t['track'] == 'alpha'), None)
     codes = []
     for rel in (alpha or {}).get('releases', []):
-        codes = rel.get('versionCodes', []) or codes
+        # The API returns int64 as strings but only accepts integers back.
+        codes = [int(c) for c in rel.get('versionCodes', [])] or codes
     if not codes:
         print('  (skipped: no closed-testing release to promote)')
         return
