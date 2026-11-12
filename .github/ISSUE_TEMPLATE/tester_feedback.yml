@@ -1,0 +1,62 @@
+name: 🧪 Beta tester feedback
+description: Tell us how the closed beta on Google Play is going - a crash, a rough edge, or a thing you liked.
+title: '[Beta]: '
+labels: ['beta-feedback']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for testing Podshelf. **One line is enough** - every field below except the first is optional.
+        If you have not joined yet, the opt-in link and a demo server are in the [README](https://github.com/yougotborked/podshelf-app#try-it-from-google-play-closed-beta).
+  - type: textarea
+    id: feedback
+    attributes:
+      label: What happened, or what would you change?
+      description: A bug, something confusing, something missing, or something you liked.
+      placeholder: 'e.g. Catch up showed an episode I had already finished, after going offline and back online.'
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where in the app?
+      multiple: true
+      options:
+        - Catch up (home)
+        - Minimal mode
+        - Player / lock screen / notification
+        - Downloads and offline use
+        - Android Auto
+        - Wear OS watch
+        - Stats and badges
+        - Connecting to a server / login
+        - Settings
+        - Something else
+  - type: dropdown
+    id: server
+    attributes:
+      label: Which server were you using?
+      options:
+        - My own Audiobookshelf server
+        - The public demo (audiobooks.dev)
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Shown at the bottom of the side drawer, for example 0.15.0.
+      placeholder: '0.15.0'
+  - type: input
+    id: device
+    attributes:
+      label: Device and Android version
+      placeholder: 'e.g. Pixel 8, Android 15 - or Galaxy Z Fold, Android 16'
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Only if you can - a rough idea is fine.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log or screenshot
+      description: 'The side drawer has a Logs page you can copy from. Drag a screenshot in here if it helps.'

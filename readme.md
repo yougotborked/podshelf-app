@@ -80,6 +80,34 @@ connect to** and provides no content of its own.
 
 Under the hood this fork has also moved Nuxt 2 → 3, Vuex → Pinia and ExoPlayer2 → Media3.
 
+## Try it from Google Play (closed beta)
+
+Podshelf is in **closed testing on Google Play**, and testers are very welcome — especially people who
+already run an Audiobookshelf server and listen to podcasts on it.
+
+1. On your Android phone, signed in to the Google account you use with Play, open the
+   **[opt-in link](https://play.google.com/apps/testing/com.podshelf.app)** and tap **Become a tester**.
+2. Install **Podshelf** from the Play Store page that link leads to. Updates then arrive like any other app.
+3. Open it and connect to your server — or to the demo below if you do not have one.
+4. Please **stay opted in for at least 14 days** (Google's closed-testing requirement), and use it as you
+   would any podcast player: catch-up, minimal mode, downloads, Android Auto if you have it.
+
+**No server of your own?** Try the public Audiobookshelf demo:
+
+| | |
+|---|---|
+| Server | `https://audiobooks.dev` |
+| Username / password | `demo` / `demo` (a regular user account) |
+
+It is a shared server hosted by [@Vito0912](https://github.com/Vito0912) — thank you — so treat it as a
+sandbox: anyone else may be using it at the same time, and anything you change there is visible to them.
+
+**Tell us what you find** with the [beta feedback form](https://github.com/yougotborked/podshelf-app/issues/new?template=tester_feedback.yml).
+Rough edges are as useful as crashes, and a one-line report is fine.
+
+The Play build is a different app from the APKs on the releases page (`com.podshelf.app` against
+`com.podshelf.app.debug`), so it starts fresh and installs alongside them.
+
 ## Installing
 
 Download the `podshelf-*.apk` from the [latest release](https://github.com/yougotborked/podshelf-app/releases/latest),
