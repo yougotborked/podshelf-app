@@ -57,6 +57,9 @@ const socketDisconnectedTime = ref(0)
 const connectionRetryTimeout = ref<ReturnType<typeof setTimeout> | null>(null)
 // Reset the moment the server answers; see useReconnectBackoff for why it backs off at all.
 const reconnectAttempts = ref(0)
+// True while a refresh of the server's progress is owed (see progressRefreshOwedAfter): set when one
+// could not happen or failed, cleared only by a refresh that succeeded.
+const serverProgressRefreshOwed = ref(false)
 
 const streamContainer = ref<{ audioPlayerReady: boolean; streamOpen: (stream: unknown) => void } | null>(null)
 
@@ -101,6 +104,13 @@ watch(() => appStore.socketConnected, (newVal) => {
       bus.emit('socket-reconnected')
     } else {
       console.log(`[default] socket reconnected after ${timeSinceDisconnect}ms`)
+    }
+    // The check above is only about the item in the player. The list the user is looking at (Catch
+    // up, the auto playlist) reads the whole set of server progress, and the updates the socket
+    // missed are missing from it whether or not a player is open.
+    if (shouldRefreshProgressOnReconnect(socketDisconnectedTime.value ? timeSinceDisconnect : 0, appStore.offlineModeEnabled)) {
+      serverProgressRefreshOwed.value = progressRefreshOwedAfter('socket-down-long')
+      void refreshUserMediaProgress()
     }
   } else {
     console.log('[default] socket disconnected')
@@ -327,9 +337,14 @@ async function refreshUserMediaProgress() {
     })) as Record<string, unknown> | null
 
   const mediaProgress = me?.mediaProgress as Record<string, unknown>[] | undefined
-  if (!Array.isArray(mediaProgress)) return
+  if (!Array.isArray(mediaProgress)) {
+    // Still owed: the next time the server is reachable this is tried again.
+    serverProgressRefreshOwed.value = progressRefreshOwedAfter('refresh-failed')
+    return
+  }
 
   userStore.setUserMediaProgress(mediaProgress)
+  serverProgressRefreshOwed.value = progressRefreshOwedAfter('refreshed')
   await AbsLogger.info({
     tag: 'default',
     message: `resume: refreshed user media progress (${mediaProgress.length} entries)`
@@ -358,8 +373,12 @@ async function visibilityChanged() {
     ) {
       const reachable = await appStore.probeServerReachable()
       console.log(`✅ [default] resume probe: server ${reachable ? 'reachable' : 'unreachable'}`)
-      if (!reachable) scheduleConnectionRetry()
-      else await refreshUserMediaProgress()
+      if (!reachable) {
+        serverProgressRefreshOwed.value = progressRefreshOwedAfter('server-unreachable')
+        scheduleConnectionRetry()
+      } else {
+        await refreshUserMediaProgress()
+      }
     }
   } else {
     console.log('⛔️ [default] device visibility: does NOT have focus')
@@ -433,6 +452,11 @@ async function retryConnectionIfNeeded() {
     console.log('[default] server still unreachable, staying offline')
     return
   }
+
+  // The server answered. If a refresh of its progress was due while it could not, it is due now:
+  // this retry used to reconnect the socket and sync local progress and stop there, leaving the
+  // webview's copy of the server's progress as it was before the screen went off.
+  if (serverProgressRefreshOwed.value) await refreshUserMediaProgress()
 
   const socket = useSocket()
   const socketIsConnected = (socket as unknown as Record<string, unknown> | null | undefined)?.socket
